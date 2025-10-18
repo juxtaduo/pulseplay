@@ -21,3 +21,19 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.local
+.env.*.local
+
+# Backend build artifacts
+backend/dist
+backend/node_modules
+
+# Testing
+coverage
+*.lcov
+
+# OS
+Thumbs.db
+*.swp
+*.swo
+*~
