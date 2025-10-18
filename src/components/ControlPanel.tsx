@@ -3,7 +3,7 @@ import type { Mood } from '../../backend/src/types';
 import type { InstrumentType } from '../lib/instruments';
 
 /**
- * Control panel for ambient focus music player
+ * Control panel for ambient music player
  * Provides mood selection, play/pause, volume control, and instrument selection
  * @module components/ControlPanel
  */
@@ -21,7 +21,7 @@ interface ControlPanelProps {
 }
 
 const MOOD_OPTIONS: { value: Mood; label: string; description: string }[] = [
-	{ value: 'deep-focus', label: 'Deep Focus', description: 'Lofi beats: 160Hz, 60 BPM' },
+	{ value: 'deep-focus', label: 'Deep Flow', description: 'Lofi beats: 160Hz, 60 BPM' },
 	{ value: 'melodic-flow', label: 'Melodic Flow', description: 'Piano ballad, keystroke melody' },
 	{ value: 'jazz-harmony', label: 'Jazz Harmony', description: 'Jazz chords, harmonized keystrokes' },
 	{ value: 'rivers-flow', label: 'Rivers Flow (Yiruma)', description: 'MIDI piano: Rivers Flow In You, 65 BPM' },
@@ -80,7 +80,7 @@ export const ControlPanel = ({
 	return (
 		<div className="bg-slate-800 rounded-xl p-6 space-y-6">
 			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-semibold text-white">Focus Music</h2>
+				<h2 className="text-xl font-semibold text-white">Music Selection</h2>
 				<button
 					onClick={handlePlayPause}
 					disabled={!currentMood && !isPlaying}
@@ -158,11 +158,6 @@ export const ControlPanel = ({
 							);
 						})}
 					</div>
-					{selectedInstruments.length === 0 && (
-						<p className="text-xs text-slate-500 mt-2 italic">
-							No instruments selected. Only ambient music will play.
-						</p>
-					)}
 					{selectedInstruments.length >= 3 && (
 						<p className="text-xs text-yellow-400 mt-2">
 							⚠ 3+ instruments may blend harmonics during fast typing
