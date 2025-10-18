@@ -2,25 +2,28 @@
 
 **Turn your typing rhythm into personalized focus music**
 
-An AI-powered focus music generator that creates adaptive, real-time ambient soundscapes based on your typing rhythm and mouse movements. Built for developers and knowledge workers who want dynamic background music that responds to their work patterns.
+An AI-powered focus music generator that creates adaptive, real-time ambient soundscapes based on your typing rhythm and mouse movements. Built for developers, writers, and knowledge workers who want dynamic background music that responds to their work patterns.
 
 [![Built with React](https://img.shields.io/badge/React-18.3-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
-[![Powered by Supabase](https://img.shields.io/badge/Supabase-Powered-green.svg)](https://supabase.com/)
-[![Web Audio API](https://img.shields.io/badge/Web%20Audio%20API-Native-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+[![MongoDB Atlas](https://img.shields.io/badge/MongoDB-Atlas-green.svg)](https://www.mongodb.com/atlas)
+[![Auth0](https://img.shields.io/badge/Auth0-Secure-orange.svg)](https://auth0.com/)
+[![Web Audio API](https://img.shields.io/badge/Web%20Audio%20API-Native-purple.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+[![Gemini AI](https://img.shields.io/badge/Gemini-AI--Powered-yellow.svg)](https://ai.google.dev/)
 
 ---
 
 ## ✨ Features
 
-- 🎹 **Real-time Audio Generation** - Dynamic music synthesis using Web Audio API
-- 🎯 **Rhythm Detection** - Tracks keyboard and mouse activity to calculate tempo
-- 🧠 **AI Mood Analysis** - Intelligent insights about your work patterns via Supabase Edge Functions
-- 🎨 **Visual Feedback** - Beautiful canvas-based visualizer that pulses with your rhythm
-- 🔐 **User Authentication** - Secure login with Supabase Auth
-- 💾 **Session Tracking** - Automatic persistence of focus sessions
-- ♿ **Accessibility Mode** - Lower frequency ranges for sensory-friendly experience
-- 🎚️ **Multiple Moods** - Choose between Calm, Focus, or Energy modes
+- 🎹 **Real-time Audio Synthesis** - Pure Web Audio API synthesis (no pre-recorded samples)
+- 🎯 **Rhythm Detection** - Tracks keyboard and mouse activity to calculate BPM and tempo
+- 🧠 **AI Mood Recommendations** - Intelligent insights via Gemini API based on your focus patterns
+- 🎨 **Live Waveform Visualization** - 60fps Canvas animation synced with your typing
+- � **Adaptive Instruments** - Piano, violin, electric piano, and bass that respond to your rhythm
+- 🔐 **Secure Authentication** - OAuth2 PKCE flow with Auth0
+- 💾 **Session History** - Automatic tracking with 90-day data retention
+- ♿ **Accessibility Mode** - WCAG 2.1 AA compliant with sensory-friendly options
+- 🎚️ **Three Moods** - Choose between Calm (60-80 BPM), Focus (85-110 BPM), or Energy (110-130 BPM)
 
 ---
 
@@ -28,14 +31,16 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- Supabase account ([sign up free](https://supabase.com))
+- **Node.js 18+** and npm
+- **MongoDB Atlas** account ([sign up free](https://www.mongodb.com/cloud/atlas/register))
+- **Auth0** account ([sign up free](https://auth0.com/signup))
+- **Gemini API** key ([get key](https://ai.google.dev/))
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pulseplay-ai.git
+git clone https://github.com/retiarylime/pulseplay-ai.git
 cd pulseplay-ai
 
 # Install dependencies
@@ -43,9 +48,14 @@ npm install
 
 # Configure environment variables
 cp .env.example .env
-# Edit .env with your Supabase credentials
+# Edit .env with your MongoDB, Auth0, and Gemini credentials
 
-# Start development server
+# Start development servers
+# Terminal 1: Frontend (Vite)
+npm run dev
+
+# Terminal 2: Backend (Express)
+cd backend
 npm run dev
 ```
 
