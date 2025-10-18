@@ -21,10 +21,14 @@ const weeklySummarySchema = new Schema<WeeklySummaryDocument>(
 				message: 'userIdHash must be a valid SHA-256 hash',
 			},
 		},
-		weekStartDate: {
+		weekStart: {
 			type: Date,
 			required: true,
 			index: true,
+		},
+		weekEnd: {
+			type: Date,
+			required: true,
 		},
 		totalSessions: {
 			type: Number,
@@ -38,35 +42,35 @@ const weeklySummarySchema = new Schema<WeeklySummaryDocument>(
 		},
 		dominantMood: {
 			type: String,
-			enum: ['deep-focus', 'creative-flow', 'calm-reading', 'energized-coding'],
+			enum: ['deep-focus', 'melodic-flow', 'jazz-harmony', 'rivers-flow'],
 			required: true,
 		},
-		averageKeysPerMinute: {
+		averageSessionMinutes: {
 			type: Number,
 			required: true,
 			min: 0,
 		},
-		summary: {
+		moodDistribution: {
+			type: Map,
+			of: Number,
+			required: true,
+		},
+		rhythmInsights: {
 			type: String,
 			required: true,
 			maxlength: 2000,
 		},
-		generatedAt: {
-			type: Date,
-			required: true,
-			default: Date.now,
-		},
 	},
 	{
-		timestamps: false,
+		timestamps: true,
 		collection: 'weekly_summaries',
 	},
 );
 
 // Compound index for unique weekly summaries per user
-weeklySummarySchema.index({ userIdHash: 1, weekStartDate: 1 }, { unique: true });
+weeklySummarySchema.index({ userIdHash: 1, weekStart: 1 }, { unique: true });
 // TTL index: Remove summaries after 180 days
-weeklySummarySchema.index({ generatedAt: 1 }, { expireAfterSeconds: 15552000 }); // 180 days
+weeklySummarySchema.index({ createdAt: 1 }, { expireAfterSeconds: 15552000 }); // 180 days
 
 // Ensure JSON output excludes internal fields
 weeklySummarySchema.set('toJSON', {

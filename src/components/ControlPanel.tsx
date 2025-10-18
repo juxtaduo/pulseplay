@@ -21,10 +21,10 @@ interface ControlPanelProps {
 }
 
 const MOOD_OPTIONS: { value: Mood; label: string; description: string }[] = [
-	{ value: 'deep-focus', label: 'Deep Focus', description: '160Hz, 60 BPM' },
-	{ value: 'creative-flow', label: 'Creative Flow', description: '200Hz, 80 BPM' },
-	{ value: 'calm-reading', label: 'Calm Reading', description: '150Hz, 50 BPM' },
-	{ value: 'energized-coding', label: 'Energized Coding', description: '220Hz, 100 BPM' },
+	{ value: 'deep-focus', label: 'Deep Focus', description: 'Lofi beats: 160Hz, 60 BPM' },
+	{ value: 'melodic-flow', label: 'Melodic Flow', description: 'Piano ballad, keystroke melody' },
+	{ value: 'jazz-harmony', label: 'Jazz Harmony', description: 'Jazz chords, harmonized keystrokes' },
+	{ value: 'rivers-flow', label: 'Rivers Flow (Yiruma)', description: 'MIDI piano: Rivers Flow In You, 65 BPM' },
 ];
 
 // Phase 6: Instrument options with Lucide icons
@@ -35,9 +35,9 @@ const INSTRUMENT_OPTIONS: {
 	description: string;
 }[] = [
 	{ value: 'grand-piano', label: 'Piano', icon: Piano, description: 'Classic grand piano' },
-	{ value: 'violin', label: 'Violin', icon: Music2, description: 'String harmonics' },
-	{ value: 'electric-piano', label: 'E-Piano', icon: Mic2, description: 'Electric bell tone' },
-	{ value: 'bass', label: 'Bass', icon: Radio, description: 'Deep bass notes' },
+	{ value: 'flute', label: 'Flute', icon: Music2, description: 'Soft, airy woodwind' },
+	{ value: 'electric-piano', label: 'Xylophone', icon: Mic2, description: 'Bright, percussive mallet' },
+	{ value: 'bass', label: 'Kalimba', icon: Radio, description: 'African thumb piano' },
 ];
 
 export const ControlPanel = ({
