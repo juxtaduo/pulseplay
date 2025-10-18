@@ -1,11 +1,35 @@
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Music, History } from 'lucide-react';
+import { Music, History, AlertTriangle } from 'lucide-react';
 import { AuthButton } from './components/AuthButton';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Home } from './pages/Home';
 import { SessionHistory } from './pages/SessionHistory';
+import {
+	checkBrowserCapabilities,
+	getUnsupportedFeatureMessages,
+	logBrowserCapabilities,
+	type BrowserCapabilities,
+} from './utils/browserCheck';
 
 function App() {
+	const [browserCheck, setBrowserCheck] = useState<BrowserCapabilities | null>(null);
+	const [showCompatWarning, setShowCompatWarning] = useState(false);
+
+	useEffect(() => {
+		// Check browser capabilities on mount
+		const capabilities = checkBrowserCapabilities();
+		setBrowserCheck(capabilities);
+		logBrowserCapabilities(capabilities);
+
+		// Show warning if browser is not fully supported
+		if (!capabilities.isSupported) {
+			setShowCompatWarning(true);
+		}
+	}, []);
+
 	return (
+		<ErrorBoundary>
 		<Router>
 			<div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
 				<header className="bg-slate-800 bg-opacity-50 backdrop-blur-sm border-b border-slate-700">
@@ -42,6 +66,48 @@ function App() {
 					</div>
 				</header>
 
+				{/* Browser Compatibility Warning */}
+				{showCompatWarning && browserCheck && !browserCheck.isSupported && (
+					<div className="max-w-7xl mx-auto px-4 py-4">
+						<div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
+							<div className="flex items-start gap-4">
+								<div className="flex-shrink-0">
+									<AlertTriangle size={24} className="text-yellow-400" />
+								</div>
+								<div className="flex-1">
+									<h3 className="text-lg font-semibold text-yellow-400 mb-2">
+										Browser Compatibility Warning
+									</h3>
+									<p className="text-slate-300 text-sm mb-3">
+										Your browser ({browserCheck.browserName} {browserCheck.browserVersion}) may not support all features of PulsePlay AI.
+									</p>
+									<ul className="list-disc list-inside space-y-1 text-sm text-slate-400 mb-4">
+										{getUnsupportedFeatureMessages(browserCheck).map((msg, i) => (
+											<li key={i}>{msg}</li>
+										))}
+									</ul>
+									<div className="flex gap-3">
+										<button
+											onClick={() => setShowCompatWarning(false)}
+											className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors"
+										>
+											Dismiss
+										</button>
+										<a
+											href="https://browsehappy.com/"
+											target="_blank"
+											rel="noopener noreferrer"
+											className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors"
+										>
+											Update Browser
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+
 				<Routes>
 					<Route path="/" element={<Home />} />
 					<Route path="/history" element={<SessionHistory />} />
@@ -52,6 +118,7 @@ function App() {
 				</footer>
 			</div>
 		</Router>
+		</ErrorBoundary>
 	);
 }
 
