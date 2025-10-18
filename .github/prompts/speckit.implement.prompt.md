@@ -4,7 +4,24 @@ description: Execute the implementation plan by processing and executing all tas
 
 ## User Input
 
-```text
+```textPort 5173 is in use, trying another one...
+
+  VITE v5.4.20  ready in 207 ms
+
+  ➜  Local:   http://localhost:5174/
+  ➜  Network: use --host to expose
+[2025-10-18 13:48:38.549 +0800] WARN: Skipping MongoDB connection. Using local/example URI or not configured.
+    env: "development"
+    mongodb: "skipped"
+    reason: "No production MongoDB URI configured"
+[2025-10-18 13:48:38.551 +0800] INFO: server_started
+    env: "development"
+    port: "3001"
+[nodemon] clean exit - waiting for changes before restart
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
 $ARGUMENTS
 ```
 

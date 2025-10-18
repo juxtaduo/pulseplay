@@ -34,8 +34,11 @@ app.get('/health', (_req, res) => {
 	res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// TODO: Import and mount API routes here
-// app.use('/api/sessions', sessionsRouter);
+// API routes
+import sessionsRouter from './routes/sessions.js';
+app.use('/api/sessions', sessionsRouter);
+
+// TODO: Import and mount remaining API routes here
 // app.use('/api/preferences', preferencesRouter);
 
 // 404 handler (must be after all routes)

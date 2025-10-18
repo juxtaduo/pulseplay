@@ -1,104 +1,155 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { RhythmData } from './useRhythmDetection';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import type { Mood } from '../../backend/src/types';
 
-export const useSessionPersistence = (
-  isPlaying: boolean,
-  rhythmData: RhythmData,
-  mood: string
-) => {
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+/**
+ * React hook for persisting focus sessions to backend API
+ * Handles session creation, updates, and cleanup
+ * Integrates with Auth0 for authenticated API calls
+ * @module hooks/useSessionPersistence
+ */
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+interface SessionState {
+	sessionId: string | null;
+	startTime: Date | null;
+	error: string | null;
+}
 
-    return () => subscription.unsubscribe();
-  }, []);
+export interface UseSessionPersistenceReturn {
+	sessionId: string | null;
+	startSession: (mood: Mood) => Promise<void>;
+	stopSession: () => Promise<void>;
+	error: string | null;
+}
 
-  useEffect(() => {
-    const startSession = async () => {
-      if (!isPlaying || !user) return;
+export function useSessionPersistence(): UseSessionPersistenceReturn {
+	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+	const [state, setState] = useState<SessionState>({
+		sessionId: null,
+		startTime: null,
+		error: null,
+	});
+	const abortControllerRef = useRef<AbortController | null>(null);
 
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', user.id)
-          .maybeSingle();
+	/**
+	 * Start a new focus session
+	 */
+	const startSession = useCallback(
+		async (mood: Mood) => {
+			if (!isAuthenticated) {
+				setState((prev) => ({ ...prev, error: 'Not authenticated' }));
+				console.warn('[useSessionPersistence] Cannot start session: not authenticated');
+				return;
+			}
 
-        if (!profile) {
-          await supabase.from('profiles').insert({
-            id: user.id,
-            email: user.email,
-            name: user.email?.split('@')[0],
-          });
-        }
+			try {
+				setState((prev) => ({ ...prev, error: null }));
+				const token = await getAccessTokenSilently();
 
-        const { data: session, error } = await supabase
-          .from('focus_sessions')
-          .insert({
-            user_id: user.id,
-            mood_generated: mood,
-            started_at: new Date().toISOString(),
-          })
-          .select()
-          .single();
+				abortControllerRef.current = new AbortController();
 
-        if (error) throw error;
+				const response = await fetch(`${API_BASE_URL}/api/sessions`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({ mood }),
+					signal: abortControllerRef.current.signal,
+				});
 
-        setCurrentSessionId(session.id);
-      } catch (error) {
-        console.error('Failed to start session:', error);
-      }
-    };
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+					throw new Error(errorData.error || `HTTP ${response.status}`);
+				}
 
-    const endSession = async () => {
-      if (!currentSessionId || isPlaying || !user) return;
+				const data = await response.json();
+				setState({
+					sessionId: data.session._id,
+					startTime: new Date(data.session.startTime),
+					error: null,
+				});
+				console.log('[useSessionPersistence] Session started:', data.session._id);
+			} catch (err) {
+				if (err instanceof Error && err.name === 'AbortError') {
+					// Request was cancelled, ignore
+					return;
+				}
+				const errorMessage = err instanceof Error ? err.message : 'Failed to start session';
+				setState((prev) => ({ ...prev, error: errorMessage }));
+				console.error('[useSessionPersistence] Start session error:', err);
+			}
+		},
+		[isAuthenticated, getAccessTokenSilently]
+	);
 
-      try {
-        const startTime = new Date();
-        startTime.setSeconds(startTime.getSeconds() - Math.floor(rhythmData.keystrokeCount / 2));
+	/**
+	 * Stop the current focus session
+	 */
+	const stopSession = useCallback(async () => {
+		if (!state.sessionId || !isAuthenticated) {
+			console.warn('[useSessionPersistence] Cannot stop session: no active session or not authenticated');
+			return;
+		}
 
-        const durationMinutes = Math.floor(
-          (new Date().getTime() - startTime.getTime()) / 60000
-        );
+		try {
+			setState((prev) => ({ ...prev, error: null }));
+			const token = await getAccessTokenSilently();
 
-        await supabase
-          .from('focus_sessions')
-          .update({
-            ended_at: new Date().toISOString(),
-            average_rhythm_score: rhythmData.rhythmScore,
-            average_bpm: rhythmData.bpm,
-            duration_minutes: durationMinutes,
-            keystroke_count: rhythmData.keystrokeCount,
-            session_data: {
-              intensity: rhythmData.intensity,
-              averageInterval: rhythmData.averageInterval,
-            },
-          })
-          .eq('id', currentSessionId);
+			abortControllerRef.current = new AbortController();
 
-        setCurrentSessionId(null);
-      } catch (error) {
-        console.error('Failed to end session:', error);
-      }
-    };
+			const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					state: 'completed',
+					endTime: new Date().toISOString(),
+				}),
+				signal: abortControllerRef.current.signal,
+			});
 
-    if (isPlaying && !currentSessionId) {
-      startSession();
-    } else if (!isPlaying && currentSessionId) {
-      endSession();
-    }
-  }, [isPlaying, currentSessionId, user, rhythmData, mood]);
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+				throw new Error(errorData.error || `HTTP ${response.status}`);
+			}
 
-  return { currentSessionId };
-};
+			const data = await response.json();
+			console.log('[useSessionPersistence] Session stopped:', data.session._id);
+
+			setState({
+				sessionId: null,
+				startTime: null,
+				error: null,
+			});
+		} catch (err) {
+			if (err instanceof Error && err.name === 'AbortError') {
+				// Request was cancelled, ignore
+				return;
+			}
+			const errorMessage = err instanceof Error ? err.message : 'Failed to stop session';
+			setState((prev) => ({ ...prev, error: errorMessage }));
+			console.error('[useSessionPersistence] Stop session error:', err);
+		}
+	}, [state.sessionId, isAuthenticated, getAccessTokenSilently]);
+
+	// Cleanup: Stop session on unmount
+	useEffect(() => {
+		return () => {
+			if (abortControllerRef.current) {
+				abortControllerRef.current.abort();
+			}
+		};
+	}, []);
+
+	return {
+		sessionId: state.sessionId,
+		startSession,
+		stopSession,
+		error: state.error,
+	};
+}

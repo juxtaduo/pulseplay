@@ -77,19 +77,19 @@
 
 ### Implementation for User Story 1
 
-- [ ] T030 [P] [US1] Create FocusSession Mongoose model in backend/src/models/FocusSession.ts (schema with TTL index, SHA-256 hashing)
-- [ ] T031 [P] [US1] Create UserPreferences Mongoose model in backend/src/models/UserPreferences.ts
-- [ ] T032 [P] [US1] Implement session service in backend/src/services/sessionService.ts (create, retrieve, update, delete)
-- [ ] T033 [P] [US1] Implement POST /api/sessions endpoint in backend/src/routes/sessions.ts (create session)
-- [ ] T034 [P] [US1] Implement GET /api/sessions/:id endpoint in backend/src/routes/sessions.ts (retrieve session)
-- [ ] T035 [P] [US1] Implement PUT /api/sessions/:id endpoint in backend/src/routes/sessions.ts (update session)
-- [ ] T036 [US1] Create useAudioEngine React hook in src/hooks/useAudioEngine.ts (Web Audio API oscillators, filters, gain nodes)
-- [ ] T037 [US1] Implement ambient music generator in src/services/audioService.ts (OscillatorNode setup for calm/focus/energy moods per research.md)
-- [ ] T038 [US1] Create ControlPanel component in src/components/ControlPanel.tsx (mood selector, start/stop buttons, volume slider)
-- [ ] T039 [US1] Implement session start/stop logic in src/hooks/useSessionPersistence.ts (API calls, session state management)
-- [ ] T040 [US1] Integrate Auth0 login button in src/components/AuthButton.tsx (redirect to Auth0, handle callback)
-- [ ] T041 [US1] Add volume control functionality to useAudioEngine hook (master gain node, 0-100% range)
-- [ ] T042 [US1] Implement graceful audio fadeout on session stop (2-second fade using exponentialRampToValueAtTime)
+- [X] T030 [P] [US1] Create FocusSession Mongoose model in backend/src/models/FocusSession.ts (schema with TTL index, SHA-256 hashing)
+- [X] T031 [P] [US1] Create UserPreferences Mongoose model in backend/src/models/UserPreferences.ts
+- [X] T032 [P] [US1] Implement session service in backend/src/services/sessionService.ts (create, retrieve, update, delete)
+- [X] T033 [P] [US1] Implement POST /api/sessions endpoint in backend/src/routes/sessions.ts (create session)
+- [X] T034 [P] [US1] Implement GET /api/sessions/:id endpoint in backend/src/routes/sessions.ts (retrieve session)
+- [X] T035 [P] [US1] Implement PUT /api/sessions/:id endpoint in backend/src/routes/sessions.ts (update session)
+- [X] T036 [US1] Create useAudioEngine React hook in src/hooks/useAudioEngine.ts (Web Audio API oscillators, filters, gain nodes)
+- [X] T037 [US1] Implement ambient music generator in src/services/audioService.ts (OscillatorNode setup for calm/focus/energy moods per research.md)
+- [X] T038 [US1] Create ControlPanel component in src/components/ControlPanel.tsx (mood selector, start/stop buttons, volume slider)
+- [X] T039 [US1] Implement session start/stop logic in src/hooks/useSessionPersistence.ts (API calls, session state management)
+- [X] T040 [US1] Integrate Auth0 login button in src/components/AuthButton.tsx (redirect to Auth0, handle callback)
+- [X] T041 [US1] Add volume control functionality to useAudioEngine hook (master gain node, 0-100% range)
+- [X] T042 [US1] Implement graceful audio fadeout on session stop (2-second fade using exponentialRampToValueAtTime)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - users can start/stop sessions with ambient music
 
@@ -103,15 +103,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T050 [P] [US2] Create useRhythmDetection React hook in src/hooks/useRhythmDetection.ts (keyboard/mouse event listeners, BPM calculation)
-- [ ] T051 [P] [US2] Implement RhythmMetrics calculator in src/services/rhythmService.ts (rolling 30-second window, tempo trends)
-- [ ] T052 [US2] Create RhythmVisualizer component in src/components/RhythmVisualizer.tsx (Canvas with requestAnimationFrame loop)
-- [ ] T053 [US2] Implement waveform rendering logic in RhythmVisualizer (AnalyserNode FFT data, gradient fills, pulse effect)
-- [ ] T054 [US2] Connect rhythm detection to waveform visualization (keystroke events trigger waveform spikes <50ms latency)
-- [ ] T055 [US2] Implement mouse click detection and waveform response (subtle bass-range pulses)
-- [ ] T056 [US2] Add baseline waveform animation for idle state (gentle sine wave motion)
-- [ ] T057 [US2] Implement accessibility mode waveform (respect prefers-reduced-motion, simplified animations)
-- [ ] T058 [US2] Optimize Canvas performance for 60fps (requestAnimationFrame throttling, efficient rendering)
+- [X] T050 [P] [US2] Create useRhythmDetection React hook in src/hooks/useRhythmDetection.ts (keyboard/mouse event listeners, BPM calculation)
+- [X] T051 [P] [US2] Implement RhythmMetrics calculator in src/services/rhythmService.ts (rolling 30-second window, tempo trends)
+- [X] T052 [US2] Create RhythmVisualizer component in src/components/RhythmVisualizer.tsx (Canvas with requestAnimationFrame loop)
+- [X] T053 [US2] Implement waveform rendering logic in RhythmVisualizer (AnalyserNode FFT data, gradient fills, pulse effect)
+- [X] T054 [US2] Connect rhythm detection to waveform visualization (keystroke events trigger waveform spikes <50ms latency)
+- [X] T055 [US2] Implement mouse click detection and waveform response (subtle bass-range pulses)
+- [X] T056 [US2] Add baseline waveform animation for idle state (gentle sine wave motion)
+- [X] T057 [US2] Implement accessibility mode waveform (respect prefers-reduced-motion, simplified animations)
+- [X] T058 [US2] Optimize Canvas performance for 60fps (requestAnimationFrame throttling, efficient rendering)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - ambient music + waveform visualization
 
@@ -125,14 +125,14 @@
 
 ### Implementation for User Story 3
 
-- [ ] T070 [P] [US3] Implement instrumental sound generator in src/services/audioService.ts (OscillatorNode with ADSR envelopes per research.md)
-- [ ] T071 [P] [US3] Create instrument sound library (piano, violin, electric piano, bass) in src/lib/instruments.ts (frequency mappings, envelope parameters)
-- [ ] T072 [US3] Extend useRhythmDetection hook to trigger instrumental sounds on keystrokes (call playInstrumentNote function)
-- [ ] T073 [US3] Implement tempo-based pitch adaptation (typing speed 40-80 keys/min → lower pitch, 80-120 → higher pitch)
-- [ ] T074 [US3] Add mouse click sound generation (bass-range, lower volume than keyboard notes)
-- [ ] T075 [US3] Implement instrument sound throttling for rapid typing (>200 keys/min, blend notes smoothly)
-- [ ] T076 [US3] Add 5-second inactivity detection (stop instrumental sounds, keep ambient playing)
-- [ ] T077 [US3] Implement accessibility mode lower frequency range (200-800 Hz per research.md)
+- [X] T070 [P] [US3] Implement instrumental sound generator in src/services/audioService.ts (OscillatorNode with ADSR envelopes per research.md)
+- [X] T071 [P] [US3] Create instrument sound library (piano, violin, electric piano, bass) in src/lib/instruments.ts (frequency mappings, envelope parameters)
+- [X] T072 [US3] Extend useRhythmDetection hook to trigger instrumental sounds on keystrokes (call playInstrumentNote function)
+- [X] T073 [US3] Implement tempo-based pitch adaptation (typing speed 40-80 keys/min → lower pitch, 80-120 → higher pitch)
+- [X] T074 [US3] Add mouse click sound generation (bass-range, lower volume than keyboard notes)
+- [X] T075 [US3] Implement instrument sound throttling for rapid typing (>200 keys/min, blend notes smoothly)
+- [X] T076 [US3] Add 5-second inactivity detection (stop instrumental sounds, keep ambient playing)
+- [X] T077 [US3] Implement accessibility mode lower frequency range (200-800 Hz per research.md)
 
 **Checkpoint**: At this point, User Stories 1, 2, AND 3 should all work independently
 
@@ -146,13 +146,13 @@
 
 ### Implementation for User Story 4
 
-- [ ] T090 [P] [US4] Add instrument selection state to ControlPanel component in src/components/ControlPanel.tsx (multi-select UI with icons)
-- [ ] T091 [US4] Implement instrument toggle logic (add/remove from selected instruments array)
-- [ ] T092 [US4] Extend useAudioEngine hook to support multiple instruments (round-robin or pattern-based distribution)
-- [ ] T093 [US4] Implement smooth instrument switching (fade out previous notes, fade in new instrument)
-- [ ] T094 [US4] Add visual indicators for selected instruments (active state styling, Lucide icons)
-- [ ] T095 [US4] Handle edge case: no instruments selected (only ambient plays, no per-keystroke sounds)
-- [ ] T096 [US4] Handle edge case: 3+ instruments with fast typing (intelligent distribution to maintain harmonic balance)
+- [X] T090 [P] [US4] Add instrument selection state to ControlPanel component in src/components/ControlPanel.tsx (multi-select UI with icons)
+- [X] T091 [US4] Implement instrument toggle logic (add/remove from selected instruments array)
+- [X] T092 [US4] Extend useAudioEngine hook to support multiple instruments (round-robin or pattern-based distribution)
+- [X] T093 [US4] Implement smooth instrument switching (fade out previous notes, fade in new instrument)
+- [X] T094 [US4] Add visual indicators for selected instruments (active state styling, Lucide icons)
+- [X] T095 [US4] Handle edge case: no instruments selected (only ambient plays, no per-keystroke sounds)
+- [X] T096 [US4] Handle edge case: 3+ instruments with fast typing (intelligent distribution to maintain harmonic balance)
 
 **Checkpoint**: User Stories 1-4 should all be functional and independently testable
 
