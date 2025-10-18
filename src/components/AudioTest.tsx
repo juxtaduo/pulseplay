@@ -177,7 +177,7 @@ export function AudioTest() {
 				<ul className="list-disc list-inside space-y-1 ml-4">
 					<li>System volume not muted</li>
 					<li>Correct audio output device selected</li>
-					<li>Browser tab not muted (check tab icon)</li>
+					<li>Browser tab not muted (check tab icon)</li>6
 					<li>Browser audio permissions granted</li>
 				</ul>
 			</div>
