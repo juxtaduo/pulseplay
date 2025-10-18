@@ -1,73 +1,147 @@
+import { Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Brain, Sparkles } from 'lucide-react';
-import { RhythmData } from '../hooks/useRhythmDetection';
-import { generateMood, MoodResponse } from '../services/moodService';
+
+/**
+ * MoodInsights component displays AI-generated mood recommendations after session completion
+ * Only shown for sessions ≥10 minutes per FR-016 and T117
+ * @module components/MoodInsights
+ */
 
 interface MoodInsightsProps {
-  rhythmData: RhythmData;
-  isPlaying: boolean;
+	sessionId: string | null;
+	sessionDuration: number; // seconds
+	onClose?: () => void;
 }
 
-export const MoodInsights = ({ rhythmData, isPlaying }: MoodInsightsProps) => {
-  const [insights, setInsights] = useState<MoodResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+interface AIRecommendation {
+	recommendationId: string;
+	suggestedMood: string;
+	rationale: string;
+	confidence: number;
+	generatedAt: string;
+}
 
-  useEffect(() => {
-    if (!isPlaying || rhythmData.keystrokeCount < 10) {
-      setInsights(null);
-      return;
-    }
+export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsightsProps) => {
+	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-    const fetchInsights = async () => {
-      setLoading(true);
-      try {
-        const moodData = await generateMood(rhythmData);
-        setInsights(moodData);
-      } catch (error) {
-        console.error('Failed to fetch insights:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+	useEffect(() => {
+		// Only fetch recommendation if session is ≥10 minutes (T117)
+		if (sessionId && sessionDuration >= 600) {
+			fetchRecommendation();
+		}
+	}, [sessionId, sessionDuration]);
 
-    const timeoutId = setTimeout(fetchInsights, 5000);
+	const fetchRecommendation = async () => {
+		setLoading(true);
+		setError(null);
 
-    return () => clearTimeout(timeoutId);
-  }, [rhythmData.keystrokeCount, isPlaying]);
+		try {
+			const response = await fetch('http://localhost:3001/api/ai/mood-recommendation', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ sessionId }),
+			});
 
-  if (!isPlaying || rhythmData.keystrokeCount < 10) {
-    return null;
-  }
+			if (response.status === 400) {
+				const errorData = await response.json();
+				setError(errorData.message || 'Session too short for AI insights');
+				return;
+			}
 
-  return (
-    <div className="bg-slate-800 rounded-xl p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Brain size={24} className="text-blue-400" />
-        <h2 className="text-xl font-semibold text-white">AI Insights</h2>
-      </div>
+			if (!response.ok) {
+				throw new Error('Failed to fetch AI recommendation');
+			}
 
-      {loading ? (
-        <div className="flex items-center gap-3 text-slate-400">
-          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span>Analyzing your rhythm...</span>
-        </div>
-      ) : insights ? (
-        <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-slate-900 rounded-lg">
-            <Sparkles size={20} className="text-yellow-400 mt-1 flex-shrink-0" />
-            <div>
-              <div className="text-white font-semibold mb-1">{insights.mood}</div>
-              <div className="text-slate-400 text-sm mb-2">{insights.description}</div>
-              <div className="text-blue-400 text-sm italic">{insights.suggestion}</div>
-            </div>
-          </div>
+			const data: AIRecommendation = await response.json();
+			setRecommendation(data);
+		} catch (err) {
+			console.error('[MoodInsights] Failed to fetch recommendation:', err);
+			setError('AI insights temporarily unavailable. Try again later.');
+		} finally {
+			setLoading(false);
+		}
+	};
 
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Recommended Tempo:</span>
-            <span className="text-white font-medium">{insights.tempo}</span>
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
+	// Don't render if session is too short (T117)
+	if (sessionDuration < 600) {
+		return null;
+	}
+
+	// Don't render if no sessionId
+	if (!sessionId) {
+		return null;
+	}
+
+	return (
+		<div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-6 backdrop-blur-sm">
+			<div className="flex items-start justify-between mb-4">
+				<div className="flex items-center gap-2">
+					<div className="p-2 bg-purple-500/20 rounded-lg">
+						<Sparkles size={20} className="text-purple-400" />
+					</div>
+					<div>
+						<h3 className="text-lg font-semibold text-white">AI Mood Insights</h3>
+						<p className="text-xs text-slate-400">Powered by Gemini</p>
+					</div>
+				</div>
+				{onClose && (
+					<button
+						onClick={onClose}
+						className="text-slate-400 hover:text-white transition-colors"
+						aria-label="Close insights"
+					>
+						×
+					</button>
+				)}
+			</div>
+
+			{loading && (
+				<div className="flex items-center gap-3 text-slate-300">
+					<div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+					<span className="text-sm">Analyzing your session rhythm...</span>
+				</div>
+			)}
+
+			{error && (
+				<div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+					<p className="text-sm text-yellow-400">{error}</p>
+				</div>
+			)}
+
+			{recommendation && !loading && !error && (
+				<div className="space-y-4">
+					{/* Suggested Mood */}
+					<div className="flex items-center gap-3">
+						<TrendingUp size={18} className="text-purple-400 flex-shrink-0" />
+						<div>
+							<div className="text-xs text-slate-400 mb-1">Suggested for next session:</div>
+							<div className="text-lg font-semibold text-white capitalize">
+								{recommendation.suggestedMood.replace(/-/g, ' ')}
+							</div>
+						</div>
+					</div>
+
+					{/* AI Rationale */}
+					<div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+						<p className="text-sm text-slate-300 leading-relaxed">{recommendation.rationale}</p>
+					</div>
+
+					{/* Confidence Score */}
+					<div className="flex items-center justify-between text-xs text-slate-400">
+						<div className="flex items-center gap-2">
+							<Clock size={14} />
+							<span>Generated just now</span>
+						</div>
+						<div>
+							Confidence: {Math.round(recommendation.confidence * 100)}%
+						</div>
+					</div>
+				</div>
+			)}
+		</div>
+	);
 };
