@@ -1,0 +1,415 @@
+openapi: 3.0.3
+info:
+  title: PulsePlay AI - Sessions API
+  description: REST API for managing focus sessions (create, retrieve, update, delete, history)
+  version: 1.0.0
+  contact:
+    name: PulsePlay AI
+    url: https://github.com/retiarylime/pulseplay-ai
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+  - url: https://api.pulseplay.ai/api
+    description: Production server
+
+security:
+  - auth0: []
+
+paths:
+  /sessions:
+    post:
+      summary: Create new focus session
+      description: Starts a new focus session with user-selected mood and instruments
+      operationId: createSession
+      tags:
+        - Sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - selectedMood
+              properties:
+                selectedMood:
+                  type: string
+                  enum: [calm, focus, energy]
+                  description: User-selected mood for ambient music
+                selectedInstruments:
+                  type: array
+                  items:
+                    type: string
+                    enum: [grandPiano, electricPiano, violin, bass]
+                  description: Active instruments for keystroke sounds (optional)
+              example:
+                selectedMood: focus
+                selectedInstruments: [grandPiano, violin]
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    format: uuid
+                    description: Unique session identifier
+                  startTime:
+                    type: string
+                    format: date-time
+                    description: Session start timestamp (ISO 8601)
+                example:
+                  sessionId: 550e8400-e29b-41d4-a716-446655440000
+                  startTime: '2025-10-18T14:30:00Z'
+        '400':
+          description: Invalid request (missing mood, invalid instruments)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized (missing or invalid Auth0 token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded (100 requests/15 minutes)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+
+  /sessions/{sessionId}:
+    get:
+      summary: Retrieve session details
+      description: Get details of a specific focus session by ID
+      operationId: getSession
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique session identifier
+      responses:
+        '200':
+          description: Session retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FocusSession'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update session (pause/resume/stop)
+      description: Update session status, metrics, and end time
+      operationId: updateSession
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [active, paused, completed]
+                  description: Session status transition
+                endTime:
+                  type: string
+                  format: date-time
+                  description: Session end timestamp (ISO 8601, for completed status)
+                totalKeystrokes:
+                  type: integer
+                  minimum: 0
+                  description: Updated keystroke count
+                totalClicks:
+                  type: integer
+                  minimum: 0
+                  description: Updated mouse click count
+                averageTempo:
+                  type: number
+                  minimum: 0
+                  description: Updated average typing tempo (keys/min)
+              example:
+                status: completed
+                endTime: '2025-10-18T15:00:00Z'
+                totalKeystrokes: 1250
+                totalClicks: 80
+                averageTempo: 85.5
+      responses:
+        '200':
+          description: Session updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FocusSession'
+        '400':
+          description: Invalid request (invalid status transition, negative metrics)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete session (right to be forgotten)
+      description: Permanently delete a session and associated AI recommendations
+      operationId: deleteSession
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                    example: true
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sessions/history:
+    get:
+      summary: List user's past sessions (paginated)
+      description: Retrieve session history with optional filtering by mood
+      operationId: getSessionHistory
+      tags:
+        - Sessions
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number (1-indexed)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Results per page
+        - name: mood
+          in: query
+          schema:
+            type: string
+            enum: [calm, focus, energy]
+          description: Filter by mood (optional)
+      responses:
+        '200':
+          description: Session history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FocusSession'
+                  total:
+                    type: integer
+                    description: Total number of sessions
+                  page:
+                    type: integer
+                    description: Current page number
+                  limit:
+                    type: integer
+                    description: Results per page
+                example:
+                  sessions:
+                    - sessionId: 550e8400-e29b-41d4-a716-446655440000
+                      startTime: '2025-10-18T14:30:00Z'
+                      endTime: '2025-10-18T15:00:00Z'
+                      duration: 1800
+                      totalKeystrokes: 1250
+                      totalClicks: 80
+                      averageTempo: 85.5
+                      selectedMood: focus
+                      selectedInstruments: [grandPiano, violin]
+                      aiInsight: Your consistent rhythm suggests strong focus momentum.
+                  total: 42
+                  page: 1
+                  limit: 20
+
+  /sessions/export:
+    get:
+      summary: Export all user session data as JSON
+      description: Download all session data for user (right to data portability)
+      operationId: exportSessions
+      tags:
+        - Sessions
+      responses:
+        '200':
+          description: Session data exported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    description: Hashed user ID (SHA-256)
+                  sessions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FocusSession'
+                  exportedAt:
+                    type: string
+                    format: date-time
+                    description: Export timestamp
+
+  /sessions/all:
+    delete:
+      summary: Delete all user sessions (right to be forgotten)
+      description: Permanently delete all sessions and associated data for authenticated user
+      operationId: deleteAllSessions
+      tags:
+        - Sessions
+      responses:
+        '200':
+          description: All sessions deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    description: Number of sessions deleted
+                    example: 42
+
+components:
+  securitySchemes:
+    auth0:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Auth0 JWT token (OAuth2 PKCE flow)
+
+  schemas:
+    FocusSession:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          description: SHA-256 hashed Auth0 user ID (anonymized)
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        duration:
+          type: integer
+          minimum: 0
+          description: Total session duration in seconds
+        totalKeystrokes:
+          type: integer
+          minimum: 0
+        totalClicks:
+          type: integer
+          minimum: 0
+        averageTempo:
+          type: number
+          minimum: 0
+          description: Average typing speed (keys/min)
+        selectedMood:
+          type: string
+          enum: [calm, focus, energy]
+        selectedInstruments:
+          type: array
+          items:
+            type: string
+            enum: [grandPiano, electricPiano, violin, bass]
+        aiInsight:
+          type: string
+          nullable: true
+          description: Gemini-generated mood recommendation
+        createdAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+      example:
+        error: ValidationError
+        message: selectedMood must be one of [calm, focus, energy]
+
+    RateLimitError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: RateLimitExceeded
+        message:
+          type: string
+          example: Too many requests, please try again later
+        retryAfter:
+          type: integer
+          description: Seconds until rate limit resets
+          example: 900
