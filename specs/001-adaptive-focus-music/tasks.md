@@ -166,15 +166,15 @@
 
 ### Implementation for User Story 5
 
-- [ ] T110 [P] [US5] Create AIMoodRecommendation Mongoose model in backend/src/models/AIMoodRecommendation.ts
-- [ ] T111 [P] [US5] Implement Gemini API prompt template in backend/src/services/geminiService.ts (few-shot examples, JSON structured output)
-- [ ] T112 [US5] Create POST /api/ai/mood-recommendation endpoint in backend/src/routes/ai.ts (analyze session, call Gemini)
-- [ ] T113 [US5] Implement session pattern analyzer in backend/src/services/sessionAnalyzer.ts (steady vs erratic, fast vs slow classification)
-- [ ] T114 [US5] Add prompt logging to Gemini service (log prompts/responses to pino for observability)
-- [ ] T115 [US5] Implement graceful fallback for Gemini API failures (return generic productivity tip)
-- [ ] T116 [US5] Create MoodInsights component in src/components/MoodInsights.tsx (display AI recommendation after session)
-- [ ] T117 [US5] Add 10-minute session duration check (only show AI insights for sessions ≥10 minutes)
-- [ ] T118 [US5] Implement weekly focus pattern summary (aggregate 5+ sessions, generate summary via Gemini)
+- [X] T110 [P] [US5] Create AIMoodRecommendation Mongoose model in backend/src/models/AIMoodRecommendation.ts
+- [X] T111 [P] [US5] Implement Gemini API prompt template in backend/src/services/geminiService.ts (few-shot examples, JSON structured output)
+- [X] T112 [US5] Create POST /api/ai/mood-recommendation endpoint in backend/src/routes/ai.ts (analyze session, call Gemini)
+- [X] T113 [US5] Implement session pattern analyzer in backend/src/services/sessionAnalyzer.ts (steady vs erratic, fast vs slow classification)
+- [X] T114 [US5] Add prompt logging to Gemini service (log prompts/responses to pino for observability)
+- [X] T115 [US5] Implement graceful fallback for Gemini API failures (return generic productivity tip)
+- [X] T116 [US5] Create MoodInsights component in src/components/MoodInsights.tsx (display AI recommendation after session)
+- [X] T117 [US5] Add 10-minute session duration check (only show AI insights for sessions ≥10 minutes)
+- [X] T118 [US5] Implement weekly focus pattern summary (aggregate 5+ sessions, generate summary via Gemini)
 
 **Checkpoint**: User Stories 1-5 should all be functional and independently testable
 
@@ -188,16 +188,18 @@
 
 ### Implementation for User Story 6
 
-- [ ] T130 [P] [US6] Create SessionStats component in src/components/SessionStats.tsx (display duration, keystrokes, clicks, tempo)
-- [ ] T131 [P] [US6] Implement real-time stats updates (update every 5 seconds during session)
-- [ ] T132 [P] [US6] Create GET /api/sessions/history endpoint in backend/src/routes/sessions.ts (paginated list, mood filter)
-- [ ] T133 [P] [US6] Create GET /api/sessions/export endpoint in backend/src/routes/sessions.ts (return JSON with all user sessions)
-- [ ] T134 [P] [US6] Create DELETE /api/sessions/all endpoint in backend/src/routes/sessions.ts (delete all user sessions)
-- [ ] T135 [US6] Create session history UI page in src/pages/SessionHistory.tsx (list past sessions, sort by date)
-- [ ] T136 [US6] Implement session filtering by mood type (calm/focus/energy dropdown filter)
-- [ ] T137 [US6] Add data export button in SessionHistory component (trigger JSON download)
-- [ ] T138 [US6] Implement rolling average tempo calculation (30-second window, update every 5 seconds)
-- [ ] T139 [US6] Add session duration formatter utility in src/utils/timeFormatter.ts (convert seconds to HH:MM:SS)
+- [X] T130 [P] [US6] Create SessionStats component in src/components/SessionStats.tsx (display duration, keystrokes, clicks, tempo)
+- [X] T131 [P] [US6] Implement real-time stats updates (update every 5 seconds during session)
+- [X] T132 [P] [US6] Create GET /api/sessions/history endpoint in backend/src/routes/sessions.ts (paginated list, mood filter)
+- [X] T133 [P] [US6] Create GET /api/sessions/export endpoint in backend/src/routes/sessions.ts (return JSON with all user sessions)
+- [X] T134 [P] [US6] Create DELETE /api/sessions/all endpoint in backend/src/routes/sessions.ts (delete all user sessions)
+- [X] T135 [US6] Create session history UI page in src/pages/SessionHistory.tsx (list past sessions, sort by date)
+- [X] T136 [US6] Implement session filtering by mood type (calm/focus/energy dropdown filter)
+- [X] T137 [US6] Add data export button in SessionHistory component (trigger JSON download)
+- [X] T138 [US6] Implement rolling average tempo calculation (30-second window, update every 5 seconds)
+- [X] T139 [US6] Add session duration formatter utility in src/utils/timeFormatter.ts (convert seconds to HH:MM:SS)
+
+**Checkpoint**: All 6 user stories should now be independently functional
 
 **Checkpoint**: All 6 user stories should now be independently functional
 

@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getAudioEngine } from '../services/audioService';
 import {
 	INSTRUMENTS,
-	getFrequencyForTempo,
 	getVelocityForRhythm,
-	applyAccessibilityFrequency,
 	type InstrumentType,
 } from '../lib/instruments';
 
@@ -13,6 +11,7 @@ export interface RhythmData {
 	bpm: number;
 	intensity: 'low' | 'medium' | 'high';
 	keystrokeCount: number;
+	clickCount: number; // Mouse clicks count (added for T130)
 	averageInterval: number;
 	keysPerMinute: number; // Added for tempo calculation
 }
@@ -39,11 +38,13 @@ export const useRhythmDetection = (
 		bpm: 0,
 		intensity: 'low',
 		keystrokeCount: 0,
+		clickCount: 0,
 		averageInterval: 0,
 		keysPerMinute: 0,
 	});
 
 	const keystrokeTimestamps = useRef<number[]>([]);
+	const clickTimestamps = useRef<number[]>([]); // Track mouse clicks (T130)
 	const mouseMovements = useRef<number[]>([]);
 	const lastUpdateTime = useRef<number>(Date.now());
 	const audioEngineRef = useRef(getAudioEngine());
@@ -83,15 +84,18 @@ export const useRhythmDetection = (
 		);
 		const keysPerMinute = recentMinuteKeystrokes.length;
 
+		// Adjust intensity based on keys per minute (50 keys/min = medium)
 		let intensity: 'low' | 'medium' | 'high' = 'low';
-		if (rhythmScore > 70) intensity = 'high';
-		else if (rhythmScore > 40) intensity = 'medium';
+		if (keysPerMinute >= 80) intensity = 'high';    // 80+ keys/min = high
+		else if (keysPerMinute >= 50) intensity = 'medium'; // 50-79 keys/min = medium
+		// else: <50 keys/min = low
 
 		setRhythmData({
 			rhythmScore: Math.round(rhythmScore),
 			bpm: Math.min(bpm, 180),
 			intensity,
 			keystrokeCount: keystrokeTimestamps.current.length,
+			clickCount: clickTimestamps.current.length,
 			averageInterval: Math.round(averageInterval),
 			keysPerMinute,
 		});
@@ -102,6 +106,7 @@ export const useRhythmDetection = (
 
 		const now = Date.now();
 		keystrokeTimestamps.current.push(now);
+		console.log('[useRhythmDetection] Keystroke detected, total:', keystrokeTimestamps.current.length);
 
 		if (keystrokeTimestamps.current.length > 50) {
 			keystrokeTimestamps.current.shift();
@@ -109,6 +114,8 @@ export const useRhythmDetection = (
 
 		// Trigger instrumental sound on keystroke (T072)
 		if (enableInstrumentalSounds && selectedInstruments.length > 0) {
+			console.log('[useRhythmDetection] Instrumental sounds enabled, instruments:', selectedInstruments);
+			
 			// Throttle rapid typing if enabled (T075)
 			const timeSinceLastKeystroke = now - lastKeystrokeTime.current;
 			const shouldPlaySound = !throttleRapidTyping || timeSinceLastKeystroke > 50; // Min 50ms between notes
@@ -121,17 +128,6 @@ export const useRhythmDetection = (
 					INSTRUMENTS[selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]];
 				instrumentIndexRef.current++;
 
-				// Calculate frequency based on tempo (T073)
-				const keysPerMinute = Math.round(
-					keystrokeTimestamps.current.filter((ts) => now - ts < 60000).length
-				);
-				let frequency = getFrequencyForTempo(instrument, keysPerMinute);
-
-				// Apply accessibility mode frequency limits (T077)
-				if (accessibilityMode) {
-					frequency = applyAccessibilityFrequency(frequency);
-				}
-
 				// Calculate velocity based on rhythm intensity
 				const recentKeystrokes = keystrokeTimestamps.current.filter((ts) => now - ts < 5000);
 				let rhythmScore = 50; // Default
@@ -143,10 +139,20 @@ export const useRhythmDetection = (
 					const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
 					rhythmScore = Math.min(100, 1000 / Math.max(avgInterval, 50));
 				}
-				const velocity = getVelocityForRhythm(rhythmScore);
+			const velocity = getVelocityForRhythm(rhythmScore);
 
-				// Play the instrumental note
-				audioEngineRef.current.playInstrumentNote(instrument, frequency, velocity);
+			// Play the instrumental note (frequency now from pentatonic scale)
+			console.log(`[useRhythmDetection] Playing instrument: ${selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]}, vel=${velocity}`);
+			audioEngineRef.current.playInstrumentNote(instrument, velocity);
+			} else {
+				console.log('[useRhythmDetection] Skipped note (throttled)');
+			}
+		} else {
+			if (!enableInstrumentalSounds) {
+				console.log('[useRhythmDetection] Instrumental sounds DISABLED');
+			}
+			if (selectedInstruments.length === 0) {
+				console.log('[useRhythmDetection] No instruments selected');
 			}
 		}
 
@@ -175,26 +181,26 @@ export const useRhythmDetection = (
 	}, [isActive]);
 
 	const handleMouseClick = useCallback(() => {
-		if (!isActive || !enableInstrumentalSounds || selectedInstruments.length === 0) return;
+		if (!isActive) return;
 
-		// Play bass-range sound for mouse clicks (T074)
-		const bassInstrument = INSTRUMENTS['bass'];
-		let frequency = 110; // A2 bass note
+		// Track click timestamp (T130 - session stats)
+		const now = Date.now();
+		clickTimestamps.current.push(now);
 
-		// Apply accessibility mode if enabled
-		if (accessibilityMode) {
-			frequency = applyAccessibilityFrequency(frequency);
+		// Play bass-range sound for mouse clicks (T074) if enabled
+		if (enableInstrumentalSounds && selectedInstruments.length > 0) {
+			const bassInstrument = INSTRUMENTS['bass'];
+			// Lower volume for mouse clicks (subtle)
+			const velocity = 0.4;
+
+			audioEngineRef.current.playInstrumentNote(bassInstrument, velocity, 0.8);
 		}
-
-		// Lower volume for mouse clicks (subtle)
-		const velocity = 0.4;
-
-		audioEngineRef.current.playInstrumentNote(bassInstrument, frequency, velocity, 0.8);
 	}, [isActive, enableInstrumentalSounds, selectedInstruments, accessibilityMode]);
 
 	useEffect(() => {
 		if (!isActive) {
 			keystrokeTimestamps.current = [];
+			clickTimestamps.current = [];
 			mouseMovements.current = [];
 			lastKeystrokeTime.current = 0;
 			instrumentIndexRef.current = 0;
@@ -203,6 +209,7 @@ export const useRhythmDetection = (
 				bpm: 0,
 				intensity: 'low',
 				keystrokeCount: 0,
+				clickCount: 0,
 				averageInterval: 0,
 				keysPerMinute: 0,
 			});
@@ -247,6 +254,7 @@ export const useRhythmDetection = (
 
 	const resetRhythm = useCallback(() => {
 		keystrokeTimestamps.current = [];
+		clickTimestamps.current = [];
 		mouseMovements.current = [];
 		lastKeystrokeTime.current = 0;
 		instrumentIndexRef.current = 0;
@@ -255,6 +263,7 @@ export const useRhythmDetection = (
 			bpm: 0,
 			intensity: 'low',
 			keystrokeCount: 0,
+			clickCount: 0,
 			averageInterval: 0,
 			keysPerMinute: 0,
 		});

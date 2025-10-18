@@ -36,7 +36,9 @@ app.get('/health', (_req, res) => {
 
 // API routes
 import sessionsRouter from './routes/sessions.js';
+import aiRouter from './routes/ai.js';
 app.use('/api/sessions', sessionsRouter);
+app.use('/api/ai', aiRouter);
 
 // TODO: Import and mount remaining API routes here
 // app.use('/api/preferences', preferencesRouter);
