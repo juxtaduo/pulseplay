@@ -17,7 +17,7 @@ export function AudioTest() {
 
 	const testDirectAudio = async () => {
 		try {
-			addLog('🔊 Starting direct audio test...');
+			addLog('🔊 Starting audio test with ascending triad...');
 			
 			// Create AudioContext
 			const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -31,42 +31,59 @@ export function AudioTest() {
 				addLog(`Resumed! New state: ${ctx.state}`);
 			}
 
-			// Create oscillator and gain
-			const osc = ctx.createOscillator();
-			const gain = ctx.createGain();
-			addLog('Created oscillator and gain nodes');
+			// Create three ascending tones: C-E-G (C major triad)
+			const notes = [
+				{ name: 'C5', freq: 523 },  // Do
+				{ name: 'E5', freq: 659 },  // Mi
+				{ name: 'G5', freq: 784 },  // Sol
+			];
+			
+			addLog('🎵 Playing C Major Triad (Do-Mi-Sol)...');
+			
+			// Play each note in sequence
+			notes.forEach((note, index) => {
+				const startTime = ctx.currentTime + (index * 0.5); // 0.5s apart
+				
+				const osc = ctx.createOscillator();
+				const gain = ctx.createGain();
+				
+				// Connect audio graph
+				osc.connect(gain);
+				gain.connect(ctx.destination);
+				
+				// Set parameters
+				osc.type = 'sine';
+				osc.frequency.setValueAtTime(note.freq, startTime);
+				
+				// Envelope: fade in and out
+				gain.gain.setValueAtTime(0, startTime);
+				gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05); // Quick attack
+				gain.gain.setValueAtTime(0.3, startTime + 0.4); // Sustain
+				gain.gain.linearRampToValueAtTime(0, startTime + 0.5); // Fade out
+				
+				// Start and stop
+				osc.start(startTime);
+				osc.stop(startTime + 0.5);
+				
+				addLog(`  ${index + 1}. ${note.name} (${note.freq}Hz)`);
+			});
 
-			// Connect audio graph
-			osc.connect(gain);
-			gain.connect(ctx.destination);
-			addLog('Connected: Oscillator → Gain → Destination');
-
-			// Set parameters
-			osc.type = 'sine';
-			osc.frequency.setValueAtTime(440, ctx.currentTime); // A4 note
-			gain.gain.setValueAtTime(0.5, ctx.currentTime); // 50% volume
-			addLog('Set frequency: 440Hz (A4), volume: 50%');
-
-			// Start oscillator
-			osc.start();
 			setIsPlaying(true);
-			addLog('✅ Oscillator started! You should hear a tone.');
-			addLog('🎵 Playing 440Hz sine wave for 3 seconds...');
+			addLog('✅ Started! Listen for three ascending tones...');
 
-			// Stop after 3 seconds
+			// Complete after 2 seconds (all notes finished)
 			setTimeout(() => {
-				osc.stop();
 				setIsPlaying(false);
-				addLog('⏹️ Stopped. Test complete!');
+				addLog('⏹️ Test complete!');
 				
 				if (ctx.state === 'running') {
 					addLog('✅ SUCCESS: AudioContext is running!');
-					addLog('If you heard the tone, Web Audio API works.');
+					addLog('If you heard the three tones, Web Audio API works.');
 					addLog('If not, check system audio settings.');
 				} else {
 					addLog('❌ WARNING: AudioContext state is: ' + ctx.state);
 				}
-			}, 3000);
+			}, 2000);
 
 		} catch (error) {
 			addLog('❌ ERROR: ' + (error as Error).message);
@@ -83,10 +100,10 @@ export function AudioTest() {
 			<div className="flex items-center gap-3 mb-4">
 				<Volume2 className="text-yellow-400" size={24} />
 				<div>
-					<h3 className="text-lg font-semibold text-white">🔧 Audio Diagnostic Test</h3>
-					<p className="text-sm text-yellow-300">
-						Can't hear PulsePlay audio? Test your browser's Web Audio API directly.
-					</p>
+				<h3 className="text-lg font-semibold text-white">🔧 Audio Diagnostic Test</h3>
+				<p className="text-sm text-yellow-300">
+					Test your browser's Web Audio API with three ascending tones (Do-Mi-Sol).
+				</p>
 				</div>
 			</div>
 
@@ -101,7 +118,7 @@ export function AudioTest() {
 					}`}
 				>
 					<Play size={20} />
-					{isPlaying ? 'Playing 440Hz Test Tone...' : 'Play Test Tone (3 sec)'}
+					{isPlaying ? 'Playing C Major Triad...' : 'Play Test Tones (Do-Mi-Sol)'}
 				</button>
 
 				{logs.length > 0 && (
@@ -150,12 +167,12 @@ export function AudioTest() {
 					<li>Browser autoplay policy handling</li>
 				</ul>
 				<p className="mt-3">
-					<strong className="text-white">If you hear the 440Hz tone:</strong> Web Audio API works!
-					The issue is in PulsePlay's code.
+					<strong className="text-white">If you hear three ascending tones (Do-Mi-Sol):</strong>{' '}
+					Web Audio API works! PulsePlay audio should also work.
 				</p>
 				<p className="mt-1">
-					<strong className="text-white">If you don't hear the tone:</strong> Browser or system audio
-					issue. Check:
+					<strong className="text-white">If you don't hear the tones:</strong> Browser or system
+					audio issue. Check:
 				</p>
 				<ul className="list-disc list-inside space-y-1 ml-4">
 					<li>System volume not muted</li>
