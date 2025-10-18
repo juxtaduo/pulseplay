@@ -123,7 +123,7 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
  */
 export function suggestMoodFromPattern(
 	analysis: SessionAnalysisResult
-): 'deep-focus' | 'creative-flow' | 'calm-reading' | 'energized-coding' {
+): 'deep-focus' | 'creative-flow' | 'calm-reading' | 'energized-coding' | 'melodic-flow' | 'jazz-harmony' {
 	const { rhythmPattern, tempoCategory, activityLevel } = analysis;
 
 	// Rule-based mood mapping
@@ -136,11 +136,13 @@ export function suggestMoodFromPattern(
 	}
 
 	if (activityLevel === 'medium' && rhythmPattern === 'steady') {
-		return 'creative-flow'; // Moderate, steady = balanced creativity
+		// Could suggest jazz-harmony for creative, moderate work
+		return 'jazz-harmony'; // Moderate, steady = creative jazz vibes
 	}
 
 	if (rhythmPattern === 'erratic' && tempoCategory === 'slow') {
-		return 'calm-reading'; // Erratic slow = need calmness
+		// Could suggest melodic-flow for contemplative, varied work
+		return 'melodic-flow'; // Erratic slow = need melodic guidance
 	}
 
 	if (rhythmPattern === 'erratic' && tempoCategory === 'fast') {

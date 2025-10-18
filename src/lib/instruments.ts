@@ -4,7 +4,7 @@
  * @module lib/instruments
  */
 
-export type InstrumentType = 'grand-piano' | 'violin' | 'electric-piano' | 'bass';
+export type InstrumentType = 'grand-piano' | 'flute' | 'electric-piano' | 'bass';
 
 /**
  * ADSR (Attack, Decay, Sustain, Release) envelope parameters
@@ -49,49 +49,49 @@ export const INSTRUMENTS: Record<InstrumentType, InstrumentConfig> = {
 		harmonics: [2], // Octave harmonic for richness
 	},
 
-	violin: {
-		name: 'Violin',
-		waveform: 'sawtooth', // Rich harmonics for string timbre
+	flute: {
+		name: 'Flute',
+		waveform: 'sine', // Pure, soft tone for flute
 		envelope: {
-			attack: 0.15, // Slower attack for bow feel
-			decay: 0.1, // Quick decay
-			sustain: 0.8, // Long sustain (bowed strings)
-			release: 0.4, // Longer release for natural fade
+			attack: 0.08, // Gentle breath attack
+			decay: 0.15, // Soft decay
+			sustain: 0.75, // Sustained breath
+			release: 0.3, // Gentle release for airy fade
 		},
-		baseFrequency: 659.25, // E5 (violin's G string open)
-		frequencyRange: [329.63, 1318.51], // E4 to E6
-		baseVolume: 0.6,
-		harmonics: [1.5, 2], // Fifth and octave for string character
+		baseFrequency: 523.25, // C5 (middle range for flute)
+		frequencyRange: [261.63, 1046.5], // C4 to C6 (flute's comfortable range)
+		baseVolume: 0.5, // Softer than violin
+		harmonics: [2], // Single octave harmonic for subtle richness
 	},
 
 	'electric-piano': {
-		name: 'Electric Piano',
-		waveform: 'sine', // Clean electric tone
+		name: 'Xylophone',
+		waveform: 'triangle', // Bright, percussive tone
 		envelope: {
-			attack: 0.05, // Very fast attack
-			decay: 0.3, // Medium decay
-			sustain: 0.5, // Lower sustain
-			release: 0.5, // Medium release
+			attack: 0.01, // Very fast attack for percussive hit
+			decay: 0.15, // Quick decay
+			sustain: 0.2, // Very low sustain for wooden mallet sound
+			release: 0.2, // Short release for staccato effect
 		},
-		baseFrequency: 523.25, // C5
-		frequencyRange: [261.63, 1046.5], // C4 to C6
-		baseVolume: 0.7,
-		harmonics: [2, 3], // Octave and twelfth for bell-like quality
+		baseFrequency: 784, // G5 (higher range for xylophone brightness)
+		frequencyRange: [523.25, 1568], // C5 to G6 (xylophone's typical range)
+		baseVolume: 0.6,
+		harmonics: [2, 3, 4], // Multiple harmonics for metallic/wooden timbre
 	},
 
 	bass: {
-		name: 'Bass',
-		waveform: 'sine', // Deep, fundamental tone
+		name: 'Kalimba',
+		waveform: 'sine', // Pure, resonant tone
 		envelope: {
-			attack: 0.08, // Quick attack
-			decay: 0.2, // Quick decay
-			sustain: 0.6, // Moderate sustain
-			release: 0.25, // Short release
+			attack: 0.02, // Quick pluck attack
+			decay: 0.4, // Medium decay for resonance
+			sustain: 0.3, // Low sustain (notes fade naturally)
+			release: 0.6, // Long release for bell-like ring
 		},
-		baseFrequency: 110, // A2 (bass range)
-		frequencyRange: [82.41, 220], // E2 to A3
-		baseVolume: 0.9,
-		harmonics: [0.5], // Sub-octave for deep bass
+		baseFrequency: 523.25, // C5 (higher range for kalimba)
+		frequencyRange: [261.63, 1046.5], // C4 to C6 (kalimba's sweet range)
+		baseVolume: 0.7, // Moderate volume for gentle presence
+		harmonics: [2, 3, 4], // Multiple harmonics for metallic, bell-like timbre
 	},
 };
 
@@ -144,8 +144,8 @@ export function getFrequencyForTempo(
 export function getVelocityForRhythm(rhythmScore: number): number {
 	// Map rhythm score to velocity with some dynamic range
 	const normalized = Math.max(0, Math.min(100, rhythmScore)) / 100;
-	// Apply curve for more musical dynamics (softer at low scores)
-	return 0.3 + normalized * 0.7; // Range: 0.3-1.0
+	// Apply curve for more musical dynamics (softer overall for gentle experience)
+	return 0.2 + normalized * 0.4; // Range: 0.2-0.6 (reduced from 0.3-1.0)
 }
 
 /**

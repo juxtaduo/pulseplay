@@ -26,23 +26,23 @@ const MOOD_CONFIGS: Record<Mood, AudioConfig> = {
 		volume: 0.5, // 50% volume
 		waveform: 'sine',
 	},
-	'creative-flow': {
-		baseFrequency: 200, // Hz - Slightly higher, more energetic
-		tempo: 80, // BPM - moderate, flowing
+	'melodic-flow': {
+		baseFrequency: 262, // Hz - C4 (piano ballad key)
+		tempo: 60, // BPM - slow, emotional
 		volume: 0.5, // 50% volume
-		waveform: 'triangle',
-	},
-	'calm-reading': {
-		baseFrequency: 150, // Hz - Very low, soothing
-		tempo: 50, // BPM - very slow
-		volume: 0.4, // 40% volume - quieter for reading
 		waveform: 'sine',
 	},
-	'energized-coding': {
-		baseFrequency: 220, // Hz - Higher, more alert
-		tempo: 100, // BPM - faster, driving
-		volume: 0.6, // 60% volume - more energetic
-		waveform: 'sawtooth',
+	'jazz-harmony': {
+		baseFrequency: 220, // Hz - A3 (jazz key center)
+		tempo: 90, // BPM - medium swing feel
+		volume: 0.5, // 50% volume
+		waveform: 'sine',
+	},
+	'rivers-flow': {
+		baseFrequency: 440, // Hz - A4 (Yiruma key center)
+		tempo: 65, // BPM - slow, emotional (from MIDI)
+		volume: 0.45, // 45% volume - gentle piano
+		waveform: 'sine',
 	},
 };
 
@@ -56,10 +56,24 @@ export class AudioEngine {
 	private drumLoopInterval: NodeJS.Timeout | null = null;
 	private vinylNoiseNode: AudioBufferSourceNode | null = null;
 	private currentScaleIndex = 0; // Track position in scale for melodic progression
+	private melodyIndex = 0; // Track position in melody sequence
+	private jazzChordIndex = 0; // Track current jazz chord in progression
+	private jazzChordOscillators: OscillatorNode[] = []; // Active jazz chord oscillators
+	private jazzProgressionInterval: NodeJS.Timeout | null = null; // Jazz chord change timer
+	
+	// Rivers Flow (Yiruma) - MIDI-based melody
+	private riversFlowBassIndex = 0; // Track position in bass sequence
+	private riversFlowMelodyIndex = 0; // Track position in treble melody
+	private riversFlowBassInterval: NodeJS.Timeout | null = null; // Bass note timer
 
-	// C Minor Pentatonic Scale (fits lofi jazz chords)
+	// C Minor Pentatonic Scale - Extended across 2.5 octaves (15 notes)
 	// Scale degrees: C, Eb, F, G, Bb (1, b3, 4, 5, b7)
 	private readonly pentatonicScale = [
+		131, // C3
+		156, // Eb3
+		175, // F3
+		196, // G3
+		233, // Bb3
 		262, // C4
 		311, // Eb4
 		349, // F4
@@ -70,6 +84,79 @@ export class AudioEngine {
 		698, // F5
 		784, // G5
 		932, // Bb5
+	];
+
+	// Original melodic piano ballad (inspired by emotional piano pieces)
+	// 32-note melody in C minor, slow and expressive
+	private readonly melodySequence = [
+		523, // C5
+		622, // Eb5
+		698, // F5
+		784, // G5
+		698, // F5
+		622, // Eb5
+		523, // C5
+		466, // Bb4
+		
+		392, // G4
+		466, // Bb4
+		523, // C5
+		622, // Eb5
+		523, // C5
+		466, // Bb4
+		392, // G4
+		349, // F4
+		
+		523, // C5
+		622, // Eb5
+		698, // F5
+		784, // G5
+		932, // Bb5
+		784, // G5
+		698, // F5
+		622, // Eb5
+		
+		523, // C5
+		466, // Bb4
+		392, // G4
+		349, // F4
+		392, // G4
+		466, // Bb4
+		523, // C5
+		523, // C5 (resolution)
+	];
+
+	// Jazz chord progression (ii-V-I in Bb major, classic jazz turnaround)
+	// Each chord represented as [root, third, fifth, seventh]
+	private readonly jazzChordProgression = [
+		{ name: 'Cm7', notes: [262, 311, 392, 466] },      // Cm7 (ii)
+		{ name: 'F7', notes: [175, 220, 262, 311] },       // F7 (V)
+		{ name: 'BbMaj7', notes: [233, 294, 349, 440] },   // BbMaj7 (I)
+		{ name: 'Gm7', notes: [196, 233, 294, 349] },      // Gm7 (vi) - adds movement
+	];
+
+	// Scale notes that fit each jazz chord (for keystroke harmonization)
+	// Extended to 2 octaves for more variety
+	private readonly jazzChordScales = {
+		'Cm7': [131, 147, 156, 175, 196, 220, 233, 262, 294, 311, 349, 392, 440, 466, 523],     // C Dorian (2 octaves)
+		'F7': [87, 98, 110, 123, 131, 147, 156, 175, 196, 220, 247, 262, 294, 311, 349],        // F Mixolydian (2 octaves)
+		'BbMaj7': [117, 131, 147, 156, 175, 196, 220, 233, 262, 294, 311, 349, 392, 440, 466],  // Bb Major (2 octaves)
+		'Gm7': [98, 110, 117, 131, 147, 165, 175, 196, 220, 233, 262, 294, 330, 349, 392],      // G Dorian (2 octaves)
+	};
+
+	// Rivers Flow (Yiruma) - MIDI-extracted notes
+	// Bass notes (< C3 / 130.81Hz) - background layer, played continuously
+	private readonly riversFlowBass = [110, 110, 110, 110, 110, 110, 110]; // All A2 pedal tones
+	
+	// Treble notes (>= C3 / 130.81Hz) - keystroke-triggered melody
+	private readonly riversFlowMelody = [
+		880, 185, 830.61, 277.18, 880, 369.99, 830.61, 880, 146.83, 659.26, 220, 880, 329.63, 587.33, 440,
+		554.37, 880, 185, 830.61, 277.18, 880, 369.99, 830.61, 880, 146.83, 659.26, 220, 880, 329.63, 587.33, 
+		440, 554.37, 880, 185, 830.61, 277.18, 880, 369.99, 440, 830.61, 880, 146.83, 440, 659.26, 220, 880, 
+		329.63, 440, 587.33, 146.83, 440, 554.37, 587.33, 164.81, 440, 659.26, 277.18, 554.37, 415.3, 493.88, 
+		207.65, 246.94, 329.63, 440, 415.3, 440, 185, 277.18, 369.99, 329.63, 440, 493.88, 554.37, 146.83, 220, 
+		329.63, 554.37, 587.33, 659.26, 164.81, 277.18, 587.33, 554.37, 493.88, 164.81, 246.94, 415.3, 880, 185, 
+		830.61, 277.18, 880, 369.99, 440, 830.61, 880, 146.83, 440, 659.26, 220
 	];
 
 	constructor() {
@@ -113,11 +200,26 @@ export class AudioEngine {
 		
 		console.log('[AudioEngine] Config for mood:', mood, config);
 
-		// Create lofi hip-hop beat elements
-		this.createLofiBeat(config);
-		
-		// Start vinyl crackle noise
-		this.startVinylNoise();
+		// For melodic-flow mood, skip the lofi beat and vinyl noise
+		// Only play melody notes triggered by keystrokes
+		if (mood === 'melodic-flow') {
+			console.log('[AudioEngine] Melodic-flow mode: No background beats, melody-only');
+		} else if (mood === 'jazz-harmony') {
+			// For jazz-harmony mood, play jazz chord progression (no drums)
+			console.log('[AudioEngine] Jazz-harmony mode: Chord progression with harmonized keystrokes');
+			this.startJazzProgression(config.tempo);
+		} else if (mood === 'rivers-flow') {
+			// For rivers-flow mood, play bass notes as background layer
+			// Treble notes triggered by keystrokes
+			console.log('[AudioEngine] Rivers Flow mode: MIDI bass background + keystroke melody');
+			this.startRiversFlowBass(config.tempo);
+		} else {
+			// Create lofi hip-hop beat elements for other moods
+			this.createLofiBeat(config);
+			
+			// Start vinyl crackle noise
+			this.startVinylNoise();
+		}
 
 		// Fade in master gain
 		const now = this.ctx.currentTime;
@@ -133,18 +235,15 @@ export class AudioEngine {
 	}
 
 	/**
-	 * Create lofi hip-hop beat with drums, chords, and bass
+	 * Create lofi hip-hop beat with drums only (no continuous chords/bass)
 	 * @private
 	 */
 	private createLofiBeat(config: AudioConfig): void {
 		// Start the drum loop
 		this.startDrumLoop(config.tempo);
 		
-		// Create jazz chord progression
-		this.createJazzChords(config);
-		
-		// Create walking bass line
-		this.createBassLine(config);
+		// NOTE: Removed continuous jazz chords and bass line per user request
+		// Only keeping drums + vinyl crackle for clean lofi vibe
 	}
 
 	/**
@@ -285,106 +384,138 @@ export class AudioEngine {
 		noise.stop(startTime + 0.05);
 	}
 
+	// REMOVED: createJazzChords() - continuous chord progression removed per user request
+	// REMOVED: createBassLine() - continuous bass line removed per user request
+	// These created the constant drone sound that was distracting
+	// Now only using drums + vinyl crackle for clean lofi vibe
+
 	/**
-	 * Create jazzy chord progression (continuous)
+	 * Start jazz chord progression with smooth voice leading
+	 * Changes chords every 4 beats (measures)
 	 * @private
 	 */
-	private createJazzChords(config: AudioConfig): void {
-		// Jazz chord progression in C minor (common lofi key)
-		// Cm7 - Fm7 - Bbmaj7 - Ebmaj7
-		const chordProgression = [
-			[262, 311, 392, 466], // Cm7 (C, Eb, G, Bb)
-			[349, 415, 523, 622], // Fm7 (F, Ab, C, Eb)
-			[233, 294, 370, 440], // Bbmaj7 (Bb, D, F, A)
-			[311, 392, 494, 587], // Ebmaj7 (Eb, G, Bb, D)
-		];
+	private startJazzProgression(tempo: number): void {
+		const beatsPerMeasure = 4;
+		const measureDuration = (60 / tempo) * beatsPerMeasure; // seconds per measure
 		
-		const chordDuration = (60 / config.tempo) * 4; // 4 beats per chord
-		let chordIndex = 0;
-
-		const playChord = () => {
-			const chord = chordProgression[chordIndex];
-			const now = this.ctx.currentTime;
+		const playNextChord = () => {
+			// Stop previous chord
+			this.stopJazzChord();
 			
-			chord.forEach((frequency) => {
-				const osc = this.ctx.createOscillator();
-				const gain = this.ctx.createGain();
-				const filter = this.ctx.createBiquadFilter();
-				
-				osc.type = 'triangle'; // Warm, mellow tone
-				osc.frequency.value = frequency;
-				
-				filter.type = 'lowpass';
-				filter.frequency.value = 800; // Lofi warmth
-				filter.Q.value = 1;
-				
-				gain.gain.setValueAtTime(0, now);
-				gain.gain.linearRampToValueAtTime(0.08, now + 0.1); // Soft attack
-				gain.gain.setValueAtTime(0.08, now + chordDuration - 0.5);
-				gain.gain.linearRampToValueAtTime(0, now + chordDuration); // Fade out
-				
-				osc.connect(filter);
-				filter.connect(gain);
-				gain.connect(this.masterGain);
-				this.filters.push(filter);
-				
-				osc.start(now);
-				osc.stop(now + chordDuration);
-				this.oscillators.push(osc);
-			});
+			// Get current chord from progression
+			const chord = this.jazzChordProgression[this.jazzChordIndex];
+			console.log(`[AudioEngine] Jazz chord: ${chord.name}`);
 			
-			chordIndex = (chordIndex + 1) % chordProgression.length;
+			// Play the chord
+			this.playJazzChord(chord.notes);
 			
-			// Schedule next chord
-			if (this.isPlaying) {
-				setTimeout(playChord, chordDuration * 1000);
-			}
+			// Advance to next chord
+			this.jazzChordIndex = (this.jazzChordIndex + 1) % this.jazzChordProgression.length;
 		};
-
-		playChord();
+		
+		// Start immediately with first chord
+		playNextChord();
+		
+		// Schedule chord changes
+		this.jazzProgressionInterval = setInterval(playNextChord, measureDuration * 1000);
 	}
 
 	/**
-	 * Create walking bass line
+	 * Play a jazz chord (4-note voicing)
 	 * @private
 	 */
-	private createBassLine(config: AudioConfig): void {
-		// Bass notes following the chord progression
-		const bassNotes = [131, 175, 117, 156]; // C2, F2, Bb1, Eb2
-		const noteDuration = (60 / config.tempo) * 2; // 2 beats per note
-		let noteIndex = 0;
-
-		const playBassNote = () => {
-			const frequency = bassNotes[noteIndex];
-			const now = this.ctx.currentTime;
-			
+	private playJazzChord(notes: number[]): void {
+		const now = this.ctx.currentTime;
+		
+		// Create oscillator for each note in the chord
+		for (const freq of notes) {
 			const osc = this.ctx.createOscillator();
 			const gain = this.ctx.createGain();
 			
-			osc.type = 'sine'; // Deep, round bass
-			osc.frequency.value = frequency;
+			// Use sine wave for warm jazz tone
+			osc.type = 'sine';
+			osc.frequency.setValueAtTime(freq, now);
 			
-			// Plucky envelope
-			gain.gain.setValueAtTime(0.15, now);
-			gain.gain.exponentialRampToValueAtTime(0.05, now + noteDuration * 0.8);
-			gain.gain.exponentialRampToValueAtTime(0.01, now + noteDuration);
+			// Soft volume per note, overall chord is balanced
+			gain.gain.setValueAtTime(0, now);
+			gain.gain.linearRampToValueAtTime(0.08, now + 0.05); // Gentle attack
+			
+			osc.connect(gain);
+			gain.connect(this.masterGain);
+			
+			osc.start(now);
+			this.jazzChordOscillators.push(osc);
+		}
+	}
+
+	/**
+	 * Stop current jazz chord with fadeout
+	 * @private
+	 */
+	private stopJazzChord(): void {
+		const now = this.ctx.currentTime;
+		const fadeOutDuration = 0.1; // Quick fade for chord changes
+		
+		for (const osc of this.jazzChordOscillators) {
+			try {
+				// Fade out
+				const gainNode = osc.context.createGain();
+				gainNode.gain.linearRampToValueAtTime(0, now + fadeOutDuration);
+				osc.stop(now + fadeOutDuration);
+			} catch (e) {
+				// Already stopped
+			}
+		}
+		
+		this.jazzChordOscillators = [];
+	}
+
+	/**
+	 * Start Rivers Flow bass layer - plays bass notes (< C3) as continuous background
+	 * @private
+	 */
+	private startRiversFlowBass(tempo: number): void {
+		// Bass notes are A2 pedal tones that play throughout
+		// They create a foundation for the treble melody
+		const beatDuration = 60 / tempo; // seconds per beat
+		const noteDuration = beatDuration * 8; // Each bass note lasts 8 beats (2 measures at 4/4)
+		
+		const playNextBassNote = () => {
+			const freq = this.riversFlowBass[this.riversFlowBassIndex];
+			const now = this.ctx.currentTime;
+			
+			// Create bass oscillator
+			const osc = this.ctx.createOscillator();
+			const gain = this.ctx.createGain();
+			
+			// Warm bass tone using sine wave with sub-octave
+			osc.type = 'sine';
+			osc.frequency.setValueAtTime(freq, now);
+			
+			// ADSR envelope for bass
+			gain.gain.setValueAtTime(0, now);
+			gain.gain.linearRampToValueAtTime(0.12, now + 0.1); // Gentle attack
+			gain.gain.linearRampToValueAtTime(0.10, now + noteDuration - 0.2); // Sustain
+			gain.gain.linearRampToValueAtTime(0, now + noteDuration); // Release
 			
 			osc.connect(gain);
 			gain.connect(this.masterGain);
 			
 			osc.start(now);
 			osc.stop(now + noteDuration);
+			
+			// Track oscillator for cleanup
 			this.oscillators.push(osc);
 			
-			noteIndex = (noteIndex + 1) % bassNotes.length;
-			
-			// Schedule next note
-			if (this.isPlaying) {
-				setTimeout(playBassNote, noteDuration * 1000);
-			}
+			// Advance to next bass note
+			this.riversFlowBassIndex = (this.riversFlowBassIndex + 1) % this.riversFlowBass.length;
 		};
-
-		playBassNote();
+		
+		// Start immediately with first bass note
+		playNextBassNote();
+		
+		// Schedule bass note changes (every 8 beats)
+		this.riversFlowBassInterval = setInterval(playNextBassNote, noteDuration * 1000);
 	}
 
 	/**
@@ -441,6 +572,19 @@ export class AudioEngine {
 		if (this.drumLoopInterval) {
 			clearInterval(this.drumLoopInterval);
 			this.drumLoopInterval = null;
+		}
+		
+		// Stop jazz progression
+		if (this.jazzProgressionInterval) {
+			clearInterval(this.jazzProgressionInterval);
+			this.jazzProgressionInterval = null;
+		}
+		this.stopJazzChord();
+		
+		// Stop Rivers Flow bass
+		if (this.riversFlowBassInterval) {
+			clearInterval(this.riversFlowBassInterval);
+			this.riversFlowBassInterval = null;
 		}
 		
 		// Stop vinyl noise
@@ -517,21 +661,72 @@ export class AudioEngine {
 	}
 
 	/**
+	 * Get next note from melody sequence (for melodic-flow mood)
+	 * Loops back to start when reaching the end
+	 * @private
+	 */
+	private getNextMelodyNote(): number {
+		const note = this.melodySequence[this.melodyIndex];
+		this.melodyIndex = (this.melodyIndex + 1) % this.melodySequence.length;
+		console.log(`[AudioEngine] Melody note ${this.melodyIndex}/${this.melodySequence.length}: ${note}Hz`);
+		return note;
+	}
+
+	/**
+	 * Get next harmonized note for jazz-harmony mood
+	 * Returns a note from the current chord's scale
+	 * @private
+	 */
+	private getNextJazzNote(): number {
+		const currentChord = this.jazzChordProgression[this.jazzChordIndex];
+		const scale = this.jazzChordScales[currentChord.name as keyof typeof this.jazzChordScales];
+		
+		// Pick a note from the scale that harmonizes with current chord
+		const note = scale[this.currentScaleIndex % scale.length];
+		this.currentScaleIndex = (this.currentScaleIndex + 1) % scale.length;
+		
+		console.log(`[AudioEngine] Jazz note from ${currentChord.name}: ${note}Hz`);
+		return note;
+	}
+
+	/**
+	 * Get next note from Rivers Flow treble melody (for rivers-flow mood)
+	 * Returns notes >= C3 from Yiruma's "Rivers Flow In You" MIDI
+	 * @private
+	 */
+	private getNextRiversFlowNote(): number {
+		const note = this.riversFlowMelody[this.riversFlowMelodyIndex];
+		this.riversFlowMelodyIndex = (this.riversFlowMelodyIndex + 1) % this.riversFlowMelody.length;
+		console.log(`[AudioEngine] Rivers Flow melody note ${this.riversFlowMelodyIndex}/${this.riversFlowMelody.length}: ${note}Hz`);
+		return note;
+	}
+
+	/**
 	 * Play an instrumental note with ADSR envelope
 	 * Uses pentatonic scale for melodic progression instead of random frequencies
 	 * @param instrument - Instrument configuration
 	 * @param velocity - Note velocity (0-1)
-	 * @param duration - Note duration in seconds (default 1.1)
+	 * @param duration - Note duration in seconds (default 0.6 - shorter for snappier feel)
 	 */
 	playInstrumentNote(
 		instrument: InstrumentConfig,
 		velocity: number,
-		duration: number = 1.1,
+		duration: number = 0.6,
 	): void {
-		// Get next note from pentatonic scale
-		const frequency = this.getNextScaleNote();
+		// Select note based on current mood
+		let frequency: number;
+		if (this.currentMood === 'melodic-flow') {
+			frequency = this.getNextMelodyNote();
+		} else if (this.currentMood === 'jazz-harmony') {
+			frequency = this.getNextJazzNote();
+		} else if (this.currentMood === 'rivers-flow') {
+			frequency = this.getNextRiversFlowNote();
+		} else {
+			// Get next note from pentatonic scale for other moods
+			frequency = this.getNextScaleNote();
+		}
 		
-		console.log(`[AudioEngine] playInstrumentNote: ${instrument.name}, ${frequency}Hz (scale note), vel=${velocity}`);
+		console.log(`[AudioEngine] playInstrumentNote: ${instrument.name}, ${frequency}Hz, vel=${velocity}`);
 		
 		const now = this.ctx.currentTime;
 		const { envelope, waveform, harmonics = [] } = instrument;
