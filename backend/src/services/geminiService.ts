@@ -34,7 +34,7 @@ export async function generateMoodInsight(
 		averageTempo: number;
 		selectedMood: string;
 	},
-	userContext: string
+	_userContext: string // Prefix with underscore to indicate intentionally unused
 ): Promise<string> {
 	try {
 		const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -172,5 +172,86 @@ Provide a 2-3 sentence summary highlighting patterns and suggesting improvements
 		return `You completed ${sessions.length} focus sessions this week, totaling ${Math.floor(
 			sessions.reduce((sum, s) => sum + s.duration / 60, 0)
 		)} minutes of focused work. Keep building this habit!`;
+	}
+}
+
+/**
+ * Generates structured mood recommendation with JSON output (T111)
+ * @param sessionData - Session rhythm pattern data
+ * @returns Promise resolving to mood recommendation with rationale and confidence
+ */
+export async function generateMoodRecommendation(sessionData: {
+	duration: number;
+	avgTempo: number;
+	rhythmPattern: 'steady' | 'erratic';
+}): Promise<{ mood: string; rationale: string; confidence: number }> {
+	try {
+		const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+		// Few-shot prompt with structured JSON output
+		const prompt = `You are a focus productivity coach analyzing typing rhythm patterns. Based on the session data below, suggest a mood for the next focus session and explain why.
+
+Mood options: deep-focus, creative-flow, calm-reading, energized-coding
+
+Examples:
+Input: 20 min, 100 keys/min, steady
+Output: {"mood": "energized-coding", "rationale": "Your consistent high-speed rhythm indicates strong focus momentum. Energized coding mode will maintain this flow state.", "confidence": 0.85}
+
+Input: 15 min, 40 keys/min, erratic
+Output: {"mood": "calm-reading", "rationale": "Your slower, thoughtful rhythm suggests deep contemplation. Calm reading mode will support sustained concentration.", "confidence": 0.78}
+
+Input: 12 min, 75 keys/min, steady
+Output: {"mood": "creative-flow", "rationale": "Your moderate, steady rhythm suggests balanced productivity. Creative flow mode will nurture sustained inspiration.", "confidence": 0.82}
+
+Now analyze this session:
+- Duration: ${sessionData.duration} minutes
+- Average Typing Speed: ${sessionData.avgTempo} keystrokes/min
+- Rhythm Pattern: ${sessionData.rhythmPattern}
+
+Respond ONLY with valid JSON: {"mood": "deep-focus|creative-flow|calm-reading|energized-coding", "rationale": "string", "confidence": 0.0-1.0}`;
+
+		const startTime = Date.now();
+		const result = await model.generateContent(prompt);
+		const latency = Date.now() - startTime;
+
+		const response = result.response.text();
+
+		// Extract JSON from response (Gemini sometimes adds markdown formatting)
+		const jsonMatch = response.match(/\{[^}]+\}/);
+		if (!jsonMatch) {
+			throw new Error('No JSON in Gemini response');
+		}
+
+		const insight = JSON.parse(jsonMatch[0]);
+
+		// Validate response structure
+		if (!insight.mood || !insight.rationale || typeof insight.confidence !== 'number') {
+			throw new Error('Invalid Gemini response structure');
+		}
+
+		// Log prompt/response for transparency (Constitution principle II)
+		logger.info({
+			prompt_hash: hashString(prompt),
+			suggested_mood: insight.mood,
+			confidence: insight.confidence,
+			latency_ms: latency,
+			model: 'gemini-1.5-flash',
+			session_duration_min: sessionData.duration,
+			rhythm_pattern: sessionData.rhythmPattern,
+		}, 'gemini_mood_recommendation');
+
+		return insight;
+	} catch (error) {
+		logger.error({
+			error: error instanceof Error ? error.message : 'Unknown error',
+			session_data: sessionData,
+		}, 'gemini_mood_recommendation_error');
+
+		// Graceful fallback (Constitution principle II: fail-safe)
+		return {
+			mood: 'deep-focus',
+			rationale: 'AI insights temporarily unavailable. Try deep focus mode for balanced concentration.',
+			confidence: 0.5,
+		};
 	}
 }
