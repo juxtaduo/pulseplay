@@ -95,7 +95,7 @@ export const RhythmVisualizer = ({ rhythmData, isPlaying }: RhythmVisualizerProp
         ref={canvasRef}
         width={300}
         height={300}
-        className="rounded-lg bg-slate-900"
+        className="rounded-lg"
       />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center">

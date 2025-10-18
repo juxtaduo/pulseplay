@@ -51,7 +51,9 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive }: SessionS
 				)}
 			</div>
 
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+				{/* Row 1: Keyboard & General Stats */}
+				
 				{/* Duration */}
 				<div className="bg-slate-900 rounded-lg p-4">
 					<div className="flex items-center gap-2 mb-2">
@@ -79,6 +81,8 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive }: SessionS
 					<div className="text-2xl font-bold text-white">{keysPerMinute}</div>
 				</div>
 
+				{/* Row 2: Mouse Stats */}
+
 				{/* Mouse Clicks */}
 				<div className="bg-slate-900 rounded-lg p-4">
 					<div className="flex items-center gap-2 mb-2">
@@ -86,6 +90,24 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive }: SessionS
 						<span className="text-xs text-slate-400">Clicks</span>
 					</div>
 					<div className="text-2xl font-bold text-white">{rhythmData.clickCount}</div>
+				</div>
+
+				{/* Mouse Moves */}
+				<div className="bg-slate-900 rounded-lg p-4">
+					<div className="flex items-center gap-2 mb-2">
+						<Mouse size={18} className="text-slate-400" />
+						<span className="text-xs text-slate-400">Mouse Moves</span>
+					</div>
+					<div className="text-2xl font-bold text-white">{rhythmData.mouseMoveCount}</div>
+				</div>
+
+				{/* Scrolls */}
+				<div className="bg-slate-900 rounded-lg p-4">
+					<div className="flex items-center gap-2 mb-2">
+						<Mouse size={18} className="text-slate-400" />
+						<span className="text-xs text-slate-400">Scrolls</span>
+					</div>
+					<div className="text-2xl font-bold text-white">{rhythmData.scrollCount}</div>
 				</div>
 			</div>
 

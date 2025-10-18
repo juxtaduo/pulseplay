@@ -52,7 +52,7 @@ const focusSessionSchema = new Schema<FocusSessionDocument>(
 		},
 		mood: {
 			type: String,
-			enum: ['deep-focus', 'creative-flow', 'calm-reading', 'energized-coding'],
+			enum: ['deep-focus', 'melodic-flow', 'jazz-harmony', 'rivers-flow'],
 			required: true,
 		},
 		startTime: { type: Date, required: true, default: Date.now },

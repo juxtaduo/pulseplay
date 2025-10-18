@@ -1,33 +1,56 @@
 /**
- * Shared TypeScript types for PulsePlay AI
+ * Shared type definitions for PulsePlay AI backend
  * @module types
  */
 
 /**
- * User mood categories
+ * Available mood types for focus sessions
  */
-export type Mood = 'deep-focus' | 'creative-flow' | 'calm-reading' | 'energized-coding';
+export type Mood = 
+	| 'deep-focus'
+	| 'melodic-flow'
+	| 'jazz-harmony'
+	| 'rivers-flow';
 
 /**
- * Typing rhythm classifications
+ * Rhythm types based on typing pattern analysis
  */
 export type RhythmType = 'energetic' | 'steady' | 'thoughtful';
 
 /**
- * Focus session state
+ * Session state
  */
 export type SessionState = 'active' | 'paused' | 'completed';
+
+/**
+ * Rhythm sample data point
+ */
+export interface RhythmSample {
+	timestamp: Date;
+	keysPerMinute: number;
+	intensity: number;
+}
+
+/**
+ * Aggregated rhythm data for a session
+ */
+export interface RhythmData {
+	averageKeysPerMinute: number;
+	rhythmType: RhythmType;
+	peakIntensity: number;
+	samples: RhythmSample[];
+}
 
 /**
  * Focus session data structure
  */
 export interface FocusSession {
 	sessionId: string;
-	userIdHash: string; // SHA-256 hash of Auth0 user ID
+	userIdHash: string;
 	mood: Mood;
 	startTime: Date;
-	endTime?: Date;
-	totalDurationMinutes?: number;
+	endTime: Date | null;
+	totalDurationMinutes: number | null;
 	rhythmData: RhythmData;
 	state: SessionState;
 	createdAt: Date;
@@ -35,115 +58,28 @@ export interface FocusSession {
 }
 
 /**
- * Rhythm metrics captured during a session
+ * AI mood recommendation
  */
-export interface RhythmData {
-	averageKeysPerMinute: number;
-	rhythmType: RhythmType;
-	peakIntensity: number; // 0-1 scale
-	samples: RhythmSample[];
-}
-
-/**
- * Individual rhythm measurement
- */
-export interface RhythmSample {
-	timestamp: Date;
-	keysPerMinute: number;
-	intensity: number; // 0-1 scale
-}
-
-/**
- * User preferences for music generation
- */
-export interface UserPreferences {
-	userIdHash: string;
-	favoriteTempos: number[];
-	preferredInstruments: string[];
-	volumeLevel: number; // 0-1 scale
-	enableVisualizations: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-/**
- * AI-generated mood insight
- */
-export interface MoodInsight {
+export interface AIMoodRecommendation {
 	sessionId: string;
-	insight: string;
-	generatedAt: Date;
-	promptHash: string;
-	modelUsed: string;
+	suggestedMood: Mood;
+	reasoning: string;
+	confidence: number;
+	createdAt: Date;
 }
 
 /**
- * Weekly summary data
+ * Weekly summary statistics
  */
 export interface WeeklySummary {
 	userIdHash: string;
-	weekStartDate: Date;
+	weekStart: Date;
+	weekEnd: Date;
 	totalSessions: number;
 	totalMinutes: number;
+	averageSessionMinutes: number;
 	dominantMood: Mood;
-	averageKeysPerMinute: number;
-	summary: string;
-	generatedAt: Date;
-}
-
-/**
- * WebSocket message types
- */
-export enum WSMessageType {
-	RHYTHM_UPDATE = 'rhythm_update',
-	SESSION_START = 'session_start',
-	SESSION_PAUSE = 'session_pause',
-	SESSION_RESUME = 'session_resume',
-	SESSION_END = 'session_end',
-	ERROR = 'error',
-	PING = 'ping',
-	PONG = 'pong',
-}
-
-/**
- * WebSocket message structure
- */
-export interface WSMessage {
-	type: WSMessageType;
-	payload?: any;
-	timestamp: Date;
-}
-
-/**
- * API error response
- */
-export interface APIError {
-	error: string;
-	message: string;
-	details?: any;
-}
-
-/**
- * Audio synthesis parameters
- */
-export interface AudioParams {
-	baseFrequency: number; // Hz
-	tempo: number; // BPM
-	volume: number; // 0-1
-	waveform: 'sine' | 'square' | 'sawtooth' | 'triangle';
-}
-
-/**
- * Session creation request
- */
-export interface CreateSessionRequest {
-	mood: Mood;
-}
-
-/**
- * Session update request
- */
-export interface UpdateSessionRequest {
-	state?: SessionState;
-	rhythmData?: Partial<RhythmData>;
+	moodDistribution: Record<Mood, number>;
+	rhythmInsights: string;
+	createdAt: Date;
 }

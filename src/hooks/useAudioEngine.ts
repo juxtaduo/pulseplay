@@ -22,7 +22,7 @@ export interface UseAudioEngineReturn {
 export function useAudioEngine(): UseAudioEngineReturn {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [currentMood, setCurrentMood] = useState<Mood | null>(null);
-	const [volume, setVolumeState] = useState(1.0); // 100% MAX VOLUME FOR TESTING (was 0.5)
+	const [volume, setVolumeState] = useState(0.3); // 30% baseline volume
 	const [error, setError] = useState<string | null>(null);
 	const engineRef = useRef<AudioEngine | null>(null);
 
