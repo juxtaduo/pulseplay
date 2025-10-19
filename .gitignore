@@ -39,3 +39,7 @@ Thumbs.db
 *~
 console.log
 console.log
+
+# MIDI files and archives
+src/assets/midi
+docs/archive
