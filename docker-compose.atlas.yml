@@ -37,16 +37,15 @@ services:
       retries: 3
       start_period: 40s
 
-  # Frontend (Nginx serving static files)
+  # Frontend (Nginx serving static files with built-in frontend)
   frontend:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     container_name: pulseplay-frontend
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-5173}:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - frontend_dist:/usr/share/nginx/html:ro
     depends_on:
       - backend
     networks:
@@ -56,10 +55,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
-volumes:
-  frontend_dist:
-    driver: local
 
 networks:
   pulseplay-network:
