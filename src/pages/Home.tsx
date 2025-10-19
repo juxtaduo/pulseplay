@@ -150,15 +150,6 @@ export function Home() {
 					</div>
 				)}
 
-				{isPlaying && (
-					<div className="mt-8 bg-slate-800 rounded-xl p-6">
-						<h3 className="text-lg font-semibold text-white mb-2">How It Works</h3>
-						<p className="text-slate-400 text-sm leading-relaxed">
-							Select a mood that matches your workflow, then start your session. The ambient Lofi music will play continuously to help you concentrate. Adjust the volume to your preference, and when you're done, click stop for a graceful 2-second fadeout.
-						</p>
-					</div>
-				)}
-
 				{sessionId && (
 					<div className="mt-6 text-center text-slate-500 text-sm">
 						Session ID: {sessionId.slice(0, 8)}...
