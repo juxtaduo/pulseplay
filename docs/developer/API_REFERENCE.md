@@ -286,7 +286,7 @@ function MyComponent() {
 **Parameters**:
 - `isPlaying: boolean` - Whether session is active
 - `rhythmData: RhythmData` - Current rhythm metrics
-- `mood: string` - Current mood setting
+- `mood: string` - Current song setting
 
 **Returns**:
 ```typescript

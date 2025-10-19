@@ -19,7 +19,7 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 - 🎯 **Rhythm Detection** - Tracks keyboard and mouse activity to calculate BPM and tempo
 - 🧠 **AI Mood Recommendations** - Intelligent insights via Gemini API based on your focus patterns
 - 🎨 **Live Waveform Visualization** - 60fps Canvas animation synced with your typing
-- 🎼 **Multiple Moods** - Deep Flow (Lofi), Melodic Flow, Jazz Harmony, Rivers Flow (Yiruma MIDI)
+- 🎼 **Multiple Moods** - Deep Flow (Lofi), Melodic Flow, Jazz Harmony, A Thousand Years, Kiss The Rain, River Flows In You, Gurenge
 - 🎵 **Adaptive Instruments** - Piano, Flute, Xylophone, and Kalimba that respond to your rhythm
 - 🔐 **Secure Authentication** - OAuth2 PKCE flow with Auth0
 - 💾 **Session History** - Automatic tracking with 90-day data retention
@@ -120,7 +120,7 @@ Visit `http://localhost:5173` in your browser.
 
 ## 🎮 How to Use
 
-1. **Select a Mood** - Choose from Deep Flow, Melodic Flow, Jazz Harmony, or Rivers Flow
+1. **Select a Mood** - Choose from Deep Flow, Melodic Flow, Jazz Harmony, A Thousand Years, Kiss The Rain, River Flows In You, or Gurenge
 2. **Pick Instruments** - Select up to 4 instruments (Piano, Flute, Xylophone, Kalimba)
 3. **Start Your Session** - Click play and start typing/working
 4. **Adjust Volume** - Use the slider to set your preferred volume level

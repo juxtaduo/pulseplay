@@ -35,18 +35,18 @@ export interface InstrumentConfig {
  */
 export const INSTRUMENTS: Record<InstrumentType, InstrumentConfig> = {
 	'grand-piano': {
-		name: 'Grand Piano',
-		waveform: 'triangle', // Piano-like timbre per research.md
+		name: 'Electric Piano',
+		waveform: 'sine', // Sine wave for electric piano's pure, bell-like tone
 		envelope: {
-			attack: 0.1, // Fast attack for percussive feel
-			decay: 0.2, // Quick decay
-			sustain: 0.7, // Moderate sustain
-			release: 0.3, // Short release
+			attack: 0.01, // Fast attack for immediate electric piano response (10ms)
+			decay: 0.3, // Medium decay for characteristic EP fade
+			sustain: 0.6, // Higher sustain - EPs hold notes well
+			release: 0.4, // Medium release for smooth fade
 		},
 		baseFrequency: 440, // A4
 		frequencyRange: [261.63, 880], // C4 to A5
-		baseVolume: 0.8,
-		harmonics: [2], // Octave harmonic for richness
+		baseVolume: 0.3, // Balanced volume for electric piano
+		harmonics: [2, 3, 4], // Limited harmonics for cleaner EP sound
 	},
 
 	flute: {

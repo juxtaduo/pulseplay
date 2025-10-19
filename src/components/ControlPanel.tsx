@@ -21,10 +21,10 @@ interface ControlPanelProps {
 }
 
 const MOOD_OPTIONS: { value: Mood; label: string; description: string }[] = [
-	{ value: 'deep-focus', label: 'Deep Flow', description: 'Lofi beats: 160Hz, 60 BPM' },
-	{ value: 'melodic-flow', label: 'Melodic Flow', description: 'Piano ballad, keystroke melody' },
-	{ value: 'jazz-harmony', label: 'Jazz Harmony', description: 'Jazz chords, harmonized keystrokes' },
-	{ value: 'rivers-flow', label: 'Rivers Flow (Yiruma)', description: 'MIDI piano: Rivers Flow In You, 65 BPM' },
+	{ value: 'thousand-years', label: 'A Thousand Years', description: 'Christina Perri romantic ballad, 75 BPM' },
+	{ value: 'kiss-the-rain', label: 'Kiss The Rain', description: 'Yiruma emotional piano, 58 BPM' },
+	{ value: 'river-flows', label: 'River Flows In You', description: 'Yiruma classic piano, 65 BPM' },
+	{ value: 'gurenge', label: 'Gurenge', description: 'Demon Slayer opening, 135 BPM' },
 ];
 
 // Phase 6: Instrument options with Lucide icons
@@ -34,7 +34,7 @@ const INSTRUMENT_OPTIONS: {
 	icon: typeof Piano;
 	description: string;
 }[] = [
-	{ value: 'grand-piano', label: 'Piano', icon: Piano, description: 'Classic grand piano' },
+	{ value: 'grand-piano', label: 'Electric Piano', icon: Piano, description: 'Rhodes/Wurlitzer EP' },
 	{ value: 'flute', label: 'Flute', icon: Music2, description: 'Soft, airy woodwind' },
 	{ value: 'electric-piano', label: 'Xylophone', icon: Mic2, description: 'Bright, percussive mallet' },
 	{ value: 'bass', label: 'Kalimba', icon: Radio, description: 'African thumb piano' },
@@ -103,7 +103,7 @@ export const ControlPanel = ({
 
 			<div>
 				<label className="block text-sm font-medium text-slate-300 mb-3">
-					Select Mood {!currentMood && !isPlaying && (
+					Select Song {!currentMood && !isPlaying && (
 						<span className="text-xs text-blue-400 font-normal">(click to start music)</span>
 					)}
 				</label>
@@ -131,7 +131,6 @@ export const ControlPanel = ({
 				<div>
 					<label className="block text-sm font-medium text-slate-300 mb-3">
 						Instruments{' '}
-						<span className="text-xs opacity-75">(optional - adds per-keystroke sounds)</span>
 					</label>
 					<div className="grid grid-cols-2 gap-2">
 						{INSTRUMENT_OPTIONS.map((instrument) => {
