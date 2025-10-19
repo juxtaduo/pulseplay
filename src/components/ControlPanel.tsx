@@ -78,9 +78,9 @@ export const ControlPanel = ({
 	const displayVolume = Math.round(volume * 100);
 
 	return (
-		<div className="bg-slate-800 rounded-xl p-6 space-y-6">
+		<div className="bg-white dark:bg-slate-800 rounded-xl p-6 space-y-6 border border-slate-200 dark:border-slate-700 transition-colors duration-200">
 			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-semibold text-white">Music Selection</h2>
+				<h2 className="text-xl font-semibold text-slate-900 dark:text-white">Music Selection</h2>
 				<button
 					onClick={handlePlayPause}
 					disabled={!currentMood && !isPlaying}
@@ -97,14 +97,14 @@ export const ControlPanel = ({
 
 			{error && (
 				<div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-					<p className="text-sm text-red-400">{error}</p>
+					<p className="text-sm text-red-400 dark:text-red-400">{error}</p>
 				</div>
 			)}
 
 			<div>
-				<label className="block text-sm font-medium text-slate-300 mb-3">
+				<label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
 					Select Song {!currentMood && !isPlaying && (
-						<span className="text-xs text-blue-400 font-normal">(click to start music)</span>
+						<span className="text-xs text-blue-500 dark:text-blue-400 font-normal">(click to start music)</span>
 					)}
 				</label>
 				<div className="grid grid-cols-2 gap-2">
@@ -115,7 +115,7 @@ export const ControlPanel = ({
 							className={`py-3 px-4 rounded-lg font-medium transition-all text-left ${
 								currentMood === moodOption.value
 									? 'bg-blue-500 text-white ring-2 ring-blue-400'
-									: 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+									: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
 							}`}
 							aria-pressed={currentMood === moodOption.value}
 						>
@@ -129,7 +129,7 @@ export const ControlPanel = ({
 			{/* Phase 6: Instrument Selection (T090-T091) */}
 			{onInstrumentToggle && (
 				<div>
-					<label className="block text-sm font-medium text-slate-300 mb-3">
+					<label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
 						Instruments{' '}
 					</label>
 					<div className="grid grid-cols-2 gap-2">
@@ -143,7 +143,7 @@ export const ControlPanel = ({
 									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 ${
 										isSelected
 											? 'bg-purple-500 text-white ring-2 ring-purple-400'
-											: 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+											: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
 									}`}
 									aria-pressed={isSelected}
 									aria-label={`${isSelected ? 'Deselect' : 'Select'} ${instrument.label}`}
@@ -158,7 +158,7 @@ export const ControlPanel = ({
 						})}
 					</div>
 					{selectedInstruments.length >= 3 && (
-						<p className="text-xs text-yellow-400 mt-2">
+						<p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
 							⚠ 3+ instruments may blend harmonics during fast typing
 						</p>
 					)}
@@ -166,19 +166,19 @@ export const ControlPanel = ({
 			)}
 
 			<div>
-				<label className="flex items-center justify-between text-sm font-medium text-slate-300 mb-3">
+				<label className="flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
 					<span>Volume</span>
-					<span className="text-slate-400">{displayVolume}%</span>
+					<span className="text-slate-600 dark:text-slate-400">{displayVolume}%</span>
 				</label>
 				<div className="flex items-center gap-3">
-					<Volume2 size={20} className="text-slate-400" />
+					<Volume2 size={20} className="text-slate-600 dark:text-slate-400" />
 					<input
 						type="range"
 						min="0"
 						max="100"
 						value={displayVolume}
 						onChange={(e) => onVolumeChange(Number(e.target.value) / 100)}
-						className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+						className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
 						aria-label="Volume slider"
 					/>
 				</div>

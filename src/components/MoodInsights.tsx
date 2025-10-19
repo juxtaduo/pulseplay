@@ -84,14 +84,14 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 						<Sparkles size={20} className="text-purple-400" />
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold text-white">AI Mood Insights</h3>
-						<p className="text-xs text-slate-400">Powered by Gemini</p>
+						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Mood Insights</h3>
+						<p className="text-xs text-slate-600 dark:text-slate-400">Powered by Gemini</p>
 					</div>
 				</div>
 				{onClose && (
 					<button
 						onClick={onClose}
-						className="text-slate-400 hover:text-white transition-colors"
+						className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors"
 						aria-label="Close insights"
 					>
 						×
@@ -100,7 +100,7 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 			</div>
 
 			{loading && (
-				<div className="flex items-center gap-3 text-slate-300">
+				<div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
 					<div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
 					<span className="text-sm">Analyzing your session rhythm...</span>
 				</div>
@@ -118,20 +118,20 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 					<div className="flex items-center gap-3">
 						<TrendingUp size={18} className="text-purple-400 flex-shrink-0" />
 						<div>
-							<div className="text-xs text-slate-400 mb-1">Suggested for next session:</div>
-							<div className="text-lg font-semibold text-white capitalize">
+							<div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Suggested for next session:</div>
+							<div className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
 								{recommendation.suggestedMood.replace(/-/g, ' ')}
 							</div>
 						</div>
 					</div>
 
 					{/* AI Rationale */}
-					<div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-						<p className="text-sm text-slate-300 leading-relaxed">{recommendation.rationale}</p>
+					<div className="bg-white dark:bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+						<p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{recommendation.rationale}</p>
 					</div>
 
 					{/* Confidence Score */}
-					<div className="flex items-center justify-between text-xs text-slate-400">
+					<div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
 						<div className="flex items-center gap-2">
 							<Clock size={14} />
 							<span>Generated just now</span>

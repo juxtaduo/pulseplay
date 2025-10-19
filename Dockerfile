@@ -1,0 +1,80 @@
+# Multi-stage build for PulsePlay AI
+
+# Stage 1: Build Frontend
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /app/frontend
+
+# Copy frontend package files
+COPY package*.json ./
+COPY tsconfig*.json ./
+COPY vite.config.ts ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
+COPY eslint.config.js ./
+COPY index.html ./
+
+# Install frontend dependencies
+RUN npm ci
+
+# Copy frontend source code
+COPY src ./src
+COPY public ./public
+
+# Build frontend
+RUN npm run build
+
+# Stage 2: Build Backend
+FROM node:20-alpine AS backend-builder
+
+WORKDIR /app/backend
+
+# Copy backend package files
+COPY backend/package*.json ./
+COPY backend/tsconfig.json ./
+
+# Install backend dependencies
+RUN npm ci
+
+# Copy backend source code
+COPY backend/src ./src
+
+# Build backend
+RUN npm run build
+
+# Stage 3: Production Image
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Install production dependencies for backend
+COPY backend/package*.json ./backend/
+WORKDIR /app/backend
+RUN npm ci --only=production
+
+# Copy built backend from builder
+COPY --from=backend-builder /app/backend/dist ./dist
+
+# Copy built frontend from builder
+WORKDIR /app
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
+
+# Copy public assets if any
+COPY --from=frontend-builder /app/frontend/public ./frontend/public 2>/dev/null || true
+
+# Expose ports
+# Backend API
+EXPOSE 3000
+# Frontend (if serving static files from backend)
+EXPOSE 5173
+
+# Set environment
+ENV NODE_ENV=production
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Start the backend server
+WORKDIR /app/backend
+CMD ["node", "dist/server.js"]
