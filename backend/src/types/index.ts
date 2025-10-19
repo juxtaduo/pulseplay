@@ -72,6 +72,40 @@ export interface AIMoodRecommendation {
 }
 
 /**
+ * Mood insight data structure
+ */
+export interface MoodInsight {
+	sessionId: string;
+	userIdHash: string;
+	mood: Mood;
+	insight: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+/**
+ * User preferences data structure
+ */
+export interface UserPreferences {
+	userIdHash: string;
+	preferredMoods: Mood[];
+	rhythmPreferences: RhythmType[];
+	sessionGoalMinutes: number;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+/**
+ * API Error structure
+ */
+export interface APIError {
+	code: string;
+	message: string;
+	details?: unknown;
+	statusCode: number;
+}
+
+/**
  * Weekly summary statistics
  */
 export interface WeeklySummary {
