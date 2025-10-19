@@ -4,9 +4,9 @@
  */
 
 /**
- * Valid mood types for focus sessions
+ * Valid song types for focus sessions
  */
-export type Mood =
+export type Song =
 	| 'thousand-years'
 	| 'kiss-the-rain'
 	| 'river-flows'
@@ -47,7 +47,7 @@ export interface RhythmData {
 export interface FocusSession {
 	sessionId: string;
 	userIdHash: string;
-	mood: Mood;
+	song: Song;
 	startTime: Date;
 	endTime: Date | null;
 	totalDurationMinutes: number | null;
@@ -60,23 +60,23 @@ export interface FocusSession {
 }
 
 /**
- * AI mood recommendation
+ * AI song recommendation
  */
-export interface AIMoodRecommendation {
+export interface AISongRecommendation {
 	sessionId: string;
-	suggestedMood: Mood;
+	suggestedSong: Song;
 	reasoning: string;
 	confidence: number;
 	createdAt: Date;
 }
 
 /**
- * Mood insight data structure
+ * Song insight data structure
  */
-export interface MoodInsight {
+export interface SongInsight {
 	sessionId: string;
 	userIdHash: string;
-	mood: Mood;
+	song: Song;
 	insight: string;
 	generatedAt: Date;
 	promptHash: string;
@@ -90,7 +90,7 @@ export interface MoodInsight {
  */
 export interface UserPreferences {
 	userIdHash: string;
-	preferredMoods: Mood[];
+	preferredSongs: Song[];
 	rhythmPreferences: RhythmType[];
 	favoriteTempos: number[];
 	preferredInstruments: string[];
@@ -122,8 +122,8 @@ export interface WeeklySummary {
 	totalSessions: number;
 	totalMinutes: number;
 	averageSessionMinutes: number;
-	dominantMood: Mood;
-	moodDistribution: Record<Mood, number>;
+	dominantSong: Song;
+	songDistribution: Record<Song, number>;
 	rhythmInsights: string;
 	createdAt: Date;
 }

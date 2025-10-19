@@ -1,6 +1,6 @@
 import { FocusSessionModel, type FocusSessionDocument } from '../models/FocusSession.js';
 import { logger } from '../config/logger.js';
-import type { Mood, SessionState, RhythmData } from '../types/index.js';
+import type { Song, SessionState, RhythmData } from '../types/index.js';
 
 /**
  * Session service for managing focus sessions
@@ -9,7 +9,7 @@ import type { Mood, SessionState, RhythmData } from '../types/index.js';
 
 export interface CreateSessionInput {
 	userIdHash: string;
-	mood: Mood;
+	song: Song;
 }
 
 export interface UpdateSessionInput {
@@ -25,7 +25,7 @@ export async function createSession(input: CreateSessionInput): Promise<FocusSes
 	try {
 		const session = await FocusSessionModel.create({
 			userIdHash: input.userIdHash,
-			mood: input.mood,
+			song: input.song,
 			startTime: new Date(),
 			state: 'active',
 			rhythmData: {
@@ -39,7 +39,7 @@ export async function createSession(input: CreateSessionInput): Promise<FocusSes
 		logger.info(
 			{
 				sessionId: session._id.toString(),
-				mood: input.mood,
+				song: input.song,
 				userIdHash: input.userIdHash,
 			},
 			'session_created',

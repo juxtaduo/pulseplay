@@ -1,27 +1,27 @@
 /**
- * AI routes for mood recommendations via Gemini API
+ * AI routes for song recommendations via Gemini API
  * @module routes/ai
  */
 
 import { Router, type Request, type Response } from 'express';
 import { logger } from '../config/logger.js';
 import { FocusSessionModel } from '../models/FocusSession.js';
-import { AIMoodRecommendation } from '../models/AIMoodRecommendation.js';
-import { generateMoodRecommendation, generateWeeklySummary } from '../services/geminiService.js';
+import { AISongRecommendation } from '../models/AISongRecommendation.js';
+import { generateSongRecommendation, generateWeeklySummary } from '../services/geminiService.js';
 import { analyzeSessionPattern } from '../services/sessionAnalyzer.js';
 
 const router = Router();
 
 /**
- * POST /api/ai/mood-recommendation
- * Generate AI-driven mood recommendation based on completed session
+ * POST /api/ai/song-recommendation
+ * Generate AI-driven song recommendation based on completed session
  * 
- * @route POST /api/ai/mood-recommendation
+ * @route POST /api/ai/song-recommendation
  * @body {sessionId: string} - ID of completed session
- * @returns {AIMoodRecommendation} - AI-generated mood recommendation
+ * @returns {AISongRecommendation} - AI-generated song recommendation
  * @access Requires Auth0 authentication
  */
-router.post('/mood-recommendation', async (req: Request, res: Response) => {
+router.post('/song-recommendation', async (req: Request, res: Response) => {
 	try {
 		const { sessionId } = req.body;
 
@@ -46,7 +46,7 @@ router.post('/mood-recommendation', async (req: Request, res: Response) => {
 		}
 
 		// Check if recommendation already exists for this session
-		const existingRecommendation = await AIMoodRecommendation.findOne({ sessionId });
+		const existingRecommendation = await AISongRecommendation.findOne({ sessionId });
 
 		if (existingRecommendation) {
 			logger.info({ session_id: sessionId }, 'returning_existing_recommendation');
@@ -65,16 +65,16 @@ router.post('/mood-recommendation', async (req: Request, res: Response) => {
 		});
 
 		// Generate Gemini AI recommendation (T111)
-		const recommendation = await generateMoodRecommendation({
+		const recommendation = await generateSongRecommendation({
 			duration: analysis.duration,
 			avgTempo: analysis.avgTempo,
 			rhythmPattern: analysis.rhythmPattern,
 		});
 
 		// Save recommendation to database
-		const aiRecommendation = new AIMoodRecommendation({
+		const aiRecommendation = new AISongRecommendation({
 			sessionId,
-			suggestedMood: recommendation.mood,
+			suggestedSong: recommendation.song,
 			rationale: recommendation.rationale,
 			confidence: recommendation.confidence,
 			geminiModel: 'gemini-2.5-flash',
@@ -84,19 +84,19 @@ router.post('/mood-recommendation', async (req: Request, res: Response) => {
 
 		logger.info({
 			session_id: sessionId,
-			suggested_mood: recommendation.mood,
+			suggested_song: recommendation.song,
 			confidence: recommendation.confidence,
-		}, 'ai_mood_recommendation_created');
+		}, 'ai_song_recommendation_created');
 
 		return res.status(201).json(aiRecommendation);
 	} catch (error) {
 		logger.error({
 			error: error instanceof Error ? error.message : 'Unknown error',
 			stack: error instanceof Error ? error.stack : undefined,
-		}, 'ai_mood_recommendation_error');
+		}, 'ai_song_recommendation_error');
 
 		return res.status(500).json({
-			error: 'Failed to generate mood recommendation',
+			error: 'Failed to generate song recommendation',
 			message: error instanceof Error ? error.message : 'Unknown error',
 		});
 	}
@@ -138,7 +138,7 @@ router.get('/weekly-summary', async (_req: Request, res: Response) => {
 				duration: (s.totalDurationMinutes || 0) * 60,
 				totalKeystrokes: s.keystrokeCount || 0,
 				averageTempo: s.averageTempo || 0,
-				selectedMood: s.mood || 'thousand-years',
+				selectedSong: s.song || 'thousand-years',
 			};
 		});
 

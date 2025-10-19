@@ -40,7 +40,7 @@ const weeklySummarySchema = new Schema<WeeklySummaryDocument>(
 			required: true,
 			min: 0,
 		},
-		dominantMood: {
+		dominantSong: {
 			type: String,
 			enum: ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'],
 			required: true,
@@ -50,7 +50,7 @@ const weeklySummarySchema = new Schema<WeeklySummaryDocument>(
 			required: true,
 			min: 0,
 		},
-		moodDistribution: {
+		songDistribution: {
 			type: Map,
 			of: Number,
 			required: true,

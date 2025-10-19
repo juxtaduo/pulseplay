@@ -50,7 +50,7 @@ const focusSessionSchema = new Schema<FocusSessionDocument>(
 				message: 'userIdHash must be a valid SHA-256 hash (64 hex characters)',
 			},
 		},
-		mood: {
+		song: {
 			type: String,
 			enum: ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'],
 			required: true,

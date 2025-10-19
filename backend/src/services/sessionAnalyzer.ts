@@ -1,5 +1,5 @@
 /**
- * Session pattern analyzer for mood recommendations
+ * Session pattern analyzer for song recommendations
  * Classifies session rhythm patterns as steady/erratic and tempo as slow/medium/fast
  * @module services/sessionAnalyzer
  */
@@ -8,7 +8,7 @@ import { logger } from '../config/logger.js';
 
 /**
  * Session Pattern Analyzer
- * Analyzes typing patterns and suggests optimal moods
+ * Analyzes typing patterns and suggests optimal songs
  * @module services/sessionAnalyzer
  */
 
@@ -59,7 +59,7 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 		tempoCategory = 'fast';
 	}
 
-	// Classify activity level (used for mood suggestions)
+	// Classify activity level (used for song suggestions)
 	let activityLevel: 'low' | 'medium' | 'high';
 	if (avgTempo < 40) {
 		activityLevel = 'low';
@@ -130,18 +130,18 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 }
 
 /**
- * Generates mood suggestion based on session pattern (rule-based fallback)
+ * Generates song suggestion based on session pattern (rule-based fallback)
  * @param analysis - Session analysis result
- * @returns Suggested mood
+ * @returns Suggested song
  */
 export /**
- * Maps rhythm patterns to suggested moods
+ * Maps rhythm patterns to suggested songs
  */
-function mapRhythmToMood(
+function mapRhythmToSong(
 	rhythmType: RhythmType,
 	variance: number,
 ): 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge' {
-	// Map rhythm patterns to mood suggestions
+	// Map rhythm patterns to song suggestions
 	if (rhythmType === 'steady' && variance < 0.2) {
 		// Consistent, focused typing → thousand years (calm, focused)
 		return 'thousand-years';
