@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development nodemon --exec tsx src/server.ts",
+    "dev": "nodemon --exec tsx src/server.ts",
     "build": "tsc",
-    "start": "NODE_ENV=production node dist/server.js",
+    "start": "node dist/server.js",
+    "test:db": "tsx src/test-db-connection.ts",
+    "view-users": "tsx src/view-users.ts",
     "lint": "npx @biomejs/biome check ./src",
     "lint:fix": "npx @biomejs/biome check --write ./src"
   },
