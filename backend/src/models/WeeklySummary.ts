@@ -42,7 +42,7 @@ const weeklySummarySchema = new Schema<WeeklySummaryDocument>(
 		},
 		dominantMood: {
 			type: String,
-			enum: ['deep-focus', 'melodic-flow', 'jazz-harmony', 'thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'],
+			enum: ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'],
 			required: true,
 		},
 		averageSessionMinutes: {

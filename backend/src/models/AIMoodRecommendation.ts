@@ -13,32 +13,34 @@ import crypto from 'crypto';
 export interface IAIMoodRecommendation extends Document {
 	recommendationId: string;
 	sessionId: string;
-	suggestedMood: 'deep-focus' | 'creative-flow' | 'calm-reading' | 'energized-coding';
+	suggestedMood: 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge';
 	rationale: string;
-	confidence: number;
+	confidence: number; // 0.0 - 1.0
 	generatedAt: Date;
-	geminiModel: string;
 }
 
 /**
  * AIMoodRecommendation schema
- * TTL index inherits from associated FocusSession (90 days)
+ * Stores AI-generated mood recommendations for completed sessions
  */
 const aiMoodRecommendationSchema = new Schema<IAIMoodRecommendation>({
 	recommendationId: {
 		type: String,
 		required: true,
 		unique: true,
-		default: () => crypto.randomUUID(),
+		validate: {
+			validator: (v: string) => /^[a-zA-Z0-9_-]{10,30}$/.test(v),
+			message: 'recommendationId must be alphanumeric (10-30 chars)',
+		},
 	},
 	sessionId: {
 		type: String,
 		required: true,
-		ref: 'FocusSession', // Foreign key reference
+		index: true,
 	},
 	suggestedMood: {
 		type: String,
-		enum: ['deep-focus', 'creative-flow', 'calm-reading', 'energized-coding'],
+		enum: ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'],
 		required: true,
 	},
 	rationale: {
@@ -53,11 +55,6 @@ const aiMoodRecommendationSchema = new Schema<IAIMoodRecommendation>({
 		required: true,
 	},
 	generatedAt: { type: Date, default: Date.now },
-	geminiModel: {
-		type: String,
-		required: true,
-		match: /^gemini-1\.5-(flash|pro)$/, // Validate model name format
-	},
 });
 
 // Indexes

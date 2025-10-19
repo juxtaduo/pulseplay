@@ -36,12 +36,12 @@ router.post('/mood-recommendation', async (req: Request, res: Response) => {
 			return res.status(404).json({ error: 'Session not found' });
 		}
 
-		// Check if session is at least 10 minutes (T117)
+		// Check if session is at least 1 minute (T117 - reduced threshold)
 		const sessionDuration = session.totalDurationMinutes || 0;
-		if (sessionDuration < 10) {
+		if (sessionDuration < 1) {
 			return res.status(400).json({
 				error: 'Session too short for AI insights',
-				message: 'AI recommendations require sessions of at least 10 minutes',
+				message: 'AI recommendations require sessions of at least 1 minute',
 			});
 		}
 
@@ -131,6 +131,17 @@ router.get('/weekly-summary', async (_req: Request, res: Response) => {
 				message: 'Weekly summary requires at least 5 completed sessions',
 			});
 		}
+
+		// Map sessions to metrics format expected by Gemini
+		const sessionMetrics = sessions.map((s) => {
+			const sessionMetrics = {
+				duration: s.totalDurationMinutes * 60,
+				totalKeystrokes: s.keystrokeCount || 0,
+				averageTempo: s.averageTempo || 0,
+				selectedMood: s.mood || 'thousand-years',
+			};
+			return sessionMetrics;
+		});
 
 		// Generate weekly summary via Gemini
 		const summary = await generateWeeklySummary(

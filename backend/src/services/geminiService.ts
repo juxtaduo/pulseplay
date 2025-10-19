@@ -64,25 +64,33 @@ Provide a 1-2 sentence mood recommendation for the next session. Be specific and
 		const result = await model.generateContent(prompt);
 		const latency = Date.now() - startTime;
 
-		const response = result.response;
-		const insight = response.text();
+		const response = result.response.text();
+		logger.info({ latency_ms: latency, response_length: response.length }, 'gemini_mood_recommendation_request');
 
-		// Log Gemini API call for observability
-		logger.info({
-			prompt_hash: hashString(prompt),
-			response_length: insight.length,
-			latency_ms: latency,
-			model: 'gemini-1.5-flash',
-			session_duration_min: sessionMinutes,
-			rhythm_type: rhythmType,
-		}, 'gemini_api_call');
+		// Parse Gemini response
+		const jsonMatch = response.match(/\{[\s\S]*"mood"[\s\S]*"rationale"[\s\S]*"confidence"[\s\S]*\}/);
+		if (!jsonMatch) {
+			throw new Error('Invalid Gemini response format');
+		}
 
-		return insight.trim();
+		const parsed = JSON.parse(jsonMatch[0]);
+
+		// Validate parsed response
+		const validMoods = ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
+		if (!validMoods.includes(parsed.mood)) {
+			logger.warn({ suggested_mood: parsed.mood }, 'gemini_invalid_mood_suggestion');
+			parsed.mood = 'thousand-years'; // Fallback
+		}
+
+		return parsed.rationale || parsed.insight || 'Continue with your current focus rhythm.';
 	} catch (error) {
-		logger.error({
-			error: error instanceof Error ? error.message : 'Unknown error',
-			session_metrics: sessionMetrics,
-		}, 'gemini_api_error');
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : 'Unknown error',
+				session_metrics: sessionMetrics,
+			},
+			'gemini_api_error',
+		);
 
 		// Graceful fallback
 		return getFallbackInsight(sessionMetrics.averageTempo);

@@ -24,11 +24,11 @@ router.post('/', checkJwt, async (req: Request, res: Response) => {
 		const { mood } = req.body as { mood: Mood };
 
 		// Validate mood
-		const validMoods: Mood[] = ['deep-focus', 'melodic-flow', 'jazz-harmony', 'thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
+		const validMoods: Mood[] = ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
 		if (!mood || !validMoods.includes(mood)) {
 			return res.status(400).json({
 				error: 'Invalid mood',
-				message: 'Mood must be one of: deep-focus, melodic-flow, jazz-harmony, thousand-years, kiss-the-rain, river-flows, gurenge',
+				message: `Mood must be one of: ${validMoods.join(', ')}`,
 			});
 		}
 
@@ -283,8 +283,8 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 		const order = (req.query.order as string) === 'asc' ? 1 : -1;
 
 		// Validate mood filter if provided
-		const validMoods: Mood[] = ['deep-focus', 'melodic-flow', 'jazz-harmony', 'thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
-		if (mood && !validMoods.includes(mood)) {
+		const validMoods: Mood[] = ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
+		if (mood && !validMoods.includes(mood as Mood)) {
 			return res.status(400).json({
 				error: 'Invalid mood filter',
 				message: `Mood must be one of: ${validMoods.join(', ')}`,

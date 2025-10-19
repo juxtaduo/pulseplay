@@ -7,7 +7,20 @@
 import { logger } from '../config/logger.js';
 
 /**
- * Session data for analysis
+ * Session Pattern Analyzer
+ * Analyzes typing patterns and suggests optimal moods
+ * @module services/sessionAnalyzer
+ */
+
+import type { Mood } from '../types/index.js';
+
+/**
+ * Rhythm type based on typing pattern
+ */
+type RhythmType = 'steady' | 'burst' | 'pause-heavy';
+
+/**
+ * Session analysis result
  */
 export interface SessionAnalysisInput {
 	duration: number; // seconds
@@ -121,34 +134,38 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
  * @param analysis - Session analysis result
  * @returns Suggested mood
  */
-export function suggestMoodFromPattern(
-	analysis: SessionAnalysisResult
-): 'deep-focus' | 'creative-flow' | 'calm-reading' | 'energized-coding' | 'melodic-flow' | 'jazz-harmony' {
-	const { rhythmPattern, tempoCategory, activityLevel } = analysis;
-
-	// Rule-based mood mapping
-	if (activityLevel === 'high' && rhythmPattern === 'steady') {
-		return 'energized-coding'; // Fast, steady = high productivity flow
+export /**
+ * Maps rhythm patterns to suggested moods
+ */
+function mapRhythmToMood(
+	rhythmType: RhythmType,
+	variance: number,
+): 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge' {
+	// Map rhythm patterns to mood suggestions
+	if (rhythmType === 'steady' && variance < 0.2) {
+		// Consistent, focused typing → thousand years (calm, focused)
+		return 'thousand-years';
 	}
 
-	if (activityLevel === 'low' && rhythmPattern === 'steady') {
-		return 'calm-reading'; // Slow, steady = deep contemplation
+	if (rhythmType === 'burst' && variance < 0.3) {
+		// Intense bursts of activity → gurenge (energetic)
+		return 'gurenge';
 	}
 
-	if (activityLevel === 'medium' && rhythmPattern === 'steady') {
-		// Could suggest jazz-harmony for creative, moderate work
-		return 'jazz-harmony'; // Moderate, steady = creative jazz vibes
+	if (rhythmType === 'steady' && variance >= 0.2 && variance < 0.4) {
+		// Moderate, steady work → river flows
+		return 'river-flows';
 	}
 
-	if (rhythmPattern === 'erratic' && tempoCategory === 'slow') {
-		// Could suggest melodic-flow for contemplative, varied work
-		return 'melodic-flow'; // Erratic slow = need melodic guidance
+	if (rhythmType === 'burst' && variance >= 0.3) {
+		// Varied, contemplative work → kiss the rain
+		return 'kiss-the-rain';
 	}
 
-	if (rhythmPattern === 'erratic' && tempoCategory === 'fast') {
-		return 'deep-focus'; // Erratic fast = need grounding
+	if (rhythmType === 'pause-heavy') {
+		return 'thousand-years'; // Thoughtful, grounding
 	}
 
-	// Default: deep focus (most balanced option)
-	return 'deep-focus';
+	// Default fallback
+	return 'thousand-years';
 }

@@ -4,12 +4,9 @@
  */
 
 /**
- * Available mood types for focus sessions
+ * Valid mood types for focus sessions
  */
-export type Mood = 
-	| 'deep-focus'
-	| 'melodic-flow'
-	| 'jazz-harmony'
+export type Mood =
 	| 'thousand-years'
 	| 'kiss-the-rain'
 	| 'river-flows'
