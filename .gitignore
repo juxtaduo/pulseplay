@@ -21,6 +21,24 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.local
+.env.*.local
+
+# Backend build artifacts
+backend/dist
+backend/node_modules
+
+# Testing
+coverage
+*.lcov
+
+# OS
+Thumbs.db
+*.swp
+*.swo
+*~
+console.log
+console.log
 
 # MIDI files and archives
 src/assets/midi

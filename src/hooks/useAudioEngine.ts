@@ -1,196 +1,133 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { RhythmData } from './useRhythmDetection';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { getAudioEngine, type AudioEngine } from '../services/audioService';
+import type { Mood } from '../../backend/src/types';
 
-export type MoodType = 'Calm' | 'Focus' | 'Energy';
+/**
+ * React hook for managing Web Audio API audio engine
+ * Provides controls for starting/stopping ambient music and adjusting volume
+ * Integrates with audioService.ts singleton for consistent audio state
+ * @module hooks/useAudioEngine
+ */
 
-export const useAudioEngine = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [mood, setMood] = useState<MoodType>('Focus');
-  const [volume, setVolume] = useState(70);
-  const [accessibilityMode, setAccessibilityMode] = useState(false);
+export interface UseAudioEngineReturn {
+	isPlaying: boolean;
+	currentMood: Mood | null;
+	volume: number;
+	startAudio: (mood: Mood) => Promise<void>;
+	stopAudio: () => void;
+	setVolume: (volume: number) => void;
+	error: string | null;
+}
 
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const oscillatorsRef = useRef<OscillatorNode[]>([]);
-  const gainNodesRef = useRef<GainNode[]>([]);
-  const masterGainRef = useRef<GainNode | null>(null);
-  const reverbRef = useRef<ConvolverNode | null>(null);
-  const filterRef = useRef<BiquadFilterNode | null>(null);
+export function useAudioEngine(): UseAudioEngineReturn {
+	const [isPlaying, setIsPlaying] = useState(false);
+	const [currentMood, setCurrentMood] = useState<Mood | null>(null);
+	const [volume, setVolumeState] = useState(0.3); // 30% baseline volume
+	const [error, setError] = useState<string | null>(null);
+	const engineRef = useRef<AudioEngine | null>(null);
 
-  const initAudioContext = useCallback(() => {
-    if (audioContextRef.current) return;
+	// Initialize audio engine singleton on mount
+	useEffect(() => {
+		try {
+			engineRef.current = getAudioEngine();
+			console.log('[useAudioEngine] Audio engine initialized');
+		} catch (err) {
+			setError('Failed to initialize audio engine');
+			console.error('[useAudioEngine] Initialization error:', err);
+		}
 
-    const ctx = new AudioContext();
-    audioContextRef.current = ctx;
+		// Cleanup: Dispose engine on unmount
+		return () => {
+			if (engineRef.current) {
+				try {
+					engineRef.current.dispose();
+					console.log('[useAudioEngine] Audio engine disposed');
+				} catch (err) {
+					console.error('[useAudioEngine] Disposal error:', err);
+				}
+			}
+		};
+	}, []);
 
-    const masterGain = ctx.createGain();
-    masterGain.gain.value = volume / 100;
-    masterGainRef.current = masterGain;
+	/**
+	 * Start playing ambient music for selected mood
+	 * Handles AudioContext resume for user gesture requirements
+	 */
+	const startAudio = useCallback(async (mood: Mood) => {
+		if (!engineRef.current) {
+			setError('Audio engine not initialized');
+			console.error('[useAudioEngine] Engine not initialized');
+			return;
+		}
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 2000;
-    filterRef.current = filter;
+		try {
+			setError(null);
+			console.log('[useAudioEngine] Starting audio for mood:', mood);
+			console.log('[useAudioEngine] Current volume state:', volume);
+			
+			await engineRef.current.start(mood);
+			
+			// Ensure volume is set after starting
+			console.log('[useAudioEngine] Setting volume after start:', volume);
+			engineRef.current.setVolume(volume);
+			
+			setIsPlaying(true);
+			setCurrentMood(mood);
+			console.log('[useAudioEngine] ✅ Started audio for mood:', mood);
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Failed to start audio';
+			setError(errorMessage);
+			console.error('[useAudioEngine] Start error:', err);
+		}
+	}, [volume]);
 
-    const reverb = ctx.createConvolver();
-    const reverbLength = ctx.sampleRate * 2;
-    const reverbBuffer = ctx.createBuffer(2, reverbLength, ctx.sampleRate);
-    for (let channel = 0; channel < 2; channel++) {
-      const channelData = reverbBuffer.getChannelData(channel);
-      for (let i = 0; i < reverbLength; i++) {
-        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / reverbLength, 2);
-      }
-    }
-    reverb.buffer = reverbBuffer;
-    reverbRef.current = reverb;
+	/**
+	 * Stop audio playback with 2-second exponential fadeout
+	 */
+	const stopAudio = useCallback(() => {
+		if (!engineRef.current) {
+			console.warn('[useAudioEngine] Engine not available for stop');
+			return;
+		}
 
-    masterGain.connect(filter);
-    filter.connect(reverb);
-    reverb.connect(ctx.destination);
-  }, [volume]);
+		try {
+			engineRef.current.stop();
+			setIsPlaying(false);
+			setCurrentMood(null);
+			console.log('[useAudioEngine] Stopped audio');
+		} catch (err) {
+			setError('Failed to stop audio');
+			console.error('[useAudioEngine] Stop error:', err);
+		}
+	}, []);
 
-  const getMoodFrequencies = useCallback((moodType: MoodType, accessMode: boolean) => {
-    const baseSets = {
-      Calm: accessMode ? [130, 165, 196] : [261.63, 329.63, 392.0],
-      Focus: accessMode ? [145, 175, 220] : [293.66, 349.23, 440.0],
-      Energy: accessMode ? [165, 196, 247] : [329.63, 392.0, 493.88],
-    };
-    return baseSets[moodType];
-  }, []);
+	/**
+	 * Set volume with smooth ramping (0-1 range)
+	 */
+	const setVolume = useCallback((newVolume: number) => {
+		if (!engineRef.current) {
+			console.warn('[useAudioEngine] Engine not available for volume change');
+			return;
+		}
 
-  const createOscillators = useCallback((frequencies: number[], ctx: AudioContext) => {
-    oscillatorsRef.current.forEach((osc) => {
-      try {
-        osc.stop();
-        osc.disconnect();
-      } catch (e) {
-        // ignore
-      }
-    });
-    gainNodesRef.current.forEach((gain) => gain.disconnect());
+		try {
+			// Clamp volume to 0-1 range
+			const clampedVolume = Math.max(0, Math.min(1, newVolume));
+			engineRef.current.setVolume(clampedVolume);
+			setVolumeState(clampedVolume);
+		} catch (err) {
+			setError('Failed to set volume');
+			console.error('[useAudioEngine] Volume error:', err);
+		}
+	}, []);
 
-    oscillatorsRef.current = [];
-    gainNodesRef.current = [];
-
-    frequencies.forEach((freq, index) => {
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-
-      oscillator.type = index === 0 ? 'sine' : index === 1 ? 'triangle' : 'square';
-      oscillator.frequency.value = freq;
-      gainNode.gain.value = index === 0 ? 0.3 : index === 1 ? 0.2 : 0.15;
-
-      oscillator.connect(gainNode);
-      gainNode.connect(masterGainRef.current!);
-
-      oscillator.start();
-
-      oscillatorsRef.current.push(oscillator);
-      gainNodesRef.current.push(gainNode);
-    });
-  }, []);
-
-  const updateAudioParameters = useCallback((rhythmData: RhythmData) => {
-    if (!isPlaying || !audioContextRef.current) return;
-
-    const { rhythmScore, bpm } = rhythmData;
-    const normalizedScore = Math.min(rhythmScore / 100, 1);
-
-    oscillatorsRef.current.forEach((osc, index) => {
-      const baseFreq = osc.frequency.value;
-      const modulation = 1 + (normalizedScore * 0.3);
-      const targetFreq = baseFreq * modulation;
-
-      osc.frequency.linearRampToValueAtTime(
-        targetFreq,
-        audioContextRef.current!.currentTime + 0.5
-      );
-    });
-
-    if (filterRef.current) {
-      const filterFreq = accessibilityMode
-        ? 1000 + (normalizedScore * 500)
-        : 1500 + (normalizedScore * 1500);
-      filterRef.current.frequency.linearRampToValueAtTime(
-        filterFreq,
-        audioContextRef.current.currentTime + 0.5
-      );
-    }
-
-    gainNodesRef.current.forEach((gain, index) => {
-      const baseGain = index === 0 ? 0.3 : index === 1 ? 0.2 : 0.15;
-      const modulatedGain = baseGain * (0.7 + normalizedScore * 0.3);
-      gain.gain.linearRampToValueAtTime(
-        modulatedGain,
-        audioContextRef.current!.currentTime + 0.5
-      );
-    });
-  }, [isPlaying, accessibilityMode]);
-
-  const startAudio = useCallback(() => {
-    initAudioContext();
-    if (!audioContextRef.current) return;
-
-    if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
-    }
-
-    const frequencies = getMoodFrequencies(mood, accessibilityMode);
-    createOscillators(frequencies, audioContextRef.current);
-    setIsPlaying(true);
-  }, [mood, accessibilityMode, initAudioContext, getMoodFrequencies, createOscillators]);
-
-  const stopAudio = useCallback(() => {
-    oscillatorsRef.current.forEach((osc) => {
-      try {
-        osc.stop();
-        osc.disconnect();
-      } catch (e) {
-        // ignore
-      }
-    });
-    gainNodesRef.current.forEach((gain) => gain.disconnect());
-
-    oscillatorsRef.current = [];
-    gainNodesRef.current = [];
-    setIsPlaying(false);
-  }, []);
-
-  const changeMood = useCallback((newMood: MoodType) => {
-    setMood(newMood);
-    if (isPlaying && audioContextRef.current) {
-      const frequencies = getMoodFrequencies(newMood, accessibilityMode);
-      createOscillators(frequencies, audioContextRef.current);
-    }
-  }, [isPlaying, accessibilityMode, getMoodFrequencies, createOscillators]);
-
-  useEffect(() => {
-    if (masterGainRef.current) {
-      masterGainRef.current.gain.linearRampToValueAtTime(
-        volume / 100,
-        audioContextRef.current?.currentTime ?? 0 + 0.1
-      );
-    }
-  }, [volume]);
-
-  useEffect(() => {
-    return () => {
-      stopAudio();
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-    };
-  }, [stopAudio]);
-
-  return {
-    isPlaying,
-    mood,
-    volume,
-    accessibilityMode,
-    startAudio,
-    stopAudio,
-    changeMood,
-    setVolume,
-    setAccessibilityMode,
-    updateAudioParameters,
-  };
-};
+	return {
+		isPlaying,
+		currentMood,
+		volume,
+		startAudio,
+		stopAudio,
+		setVolume,
+		error,
+	};
+}
