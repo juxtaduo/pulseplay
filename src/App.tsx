@@ -41,7 +41,7 @@ function App() {
 								</div>
 								<div>
 									<h1 className="text-2xl font-bold text-white">PulsePlay</h1>
-									<p className="text-sm text-slate-400">AI Music Generator</p>
+									<p className="text-sm text-slate-400">Moves with rhythm</p>
 								</div>
 							</Link>
 							
@@ -114,7 +114,7 @@ function App() {
 				</Routes>
 
 				<footer className="max-w-7xl mx-auto px-4 py-6 text-center text-slate-500 text-sm">
-					Adaptive music powered by your rhythm
+					- Rhythm that moves with you -
 				</footer>
 			</div>
 		</Router>
