@@ -29,9 +29,13 @@ app.use((req, _res, next) => {
 	next();
 });
 
-// Health check endpoint
+// Health check endpoints
 app.get('/health', (_req, res) => {
 	res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/health', (_req, res) => {
+	res.json({ status: 'ok', timestamp: new Date().toISOString(), service: 'pulseplay-backend' });
 });
 
 // API routes

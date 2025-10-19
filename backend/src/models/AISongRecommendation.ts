@@ -26,7 +26,6 @@ const aiSongRecommendationSchema = new Schema<IAISongRecommendation>({
 	recommendationId: {
 		type: String,
 		required: true,
-		unique: true,
 		validate: {
 			validator: (v: string) => /^[a-zA-Z0-9_-]{10,30}$/.test(v),
 			message: 'recommendationId must be alphanumeric (10-30 chars)',
@@ -35,7 +34,6 @@ const aiSongRecommendationSchema = new Schema<IAISongRecommendation>({
 	sessionId: {
 		type: String,
 		required: true,
-		index: true,
 	},
 	suggestedSong: {
 		type: String,
