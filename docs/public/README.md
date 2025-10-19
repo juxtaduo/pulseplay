@@ -19,11 +19,12 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 - 🎯 **Rhythm Detection** - Tracks keyboard and mouse activity to calculate BPM and tempo
 - 🧠 **AI Mood Recommendations** - Intelligent insights via Gemini API based on your focus patterns
 - 🎨 **Live Waveform Visualization** - 60fps Canvas animation synced with your typing
-- � **Adaptive Instruments** - Piano, violin, electric piano, and bass that respond to your rhythm
+- 🎹 **MIDI-Based Piano Songs** - Real piano pieces that adapt to your typing rhythm
+- 🎵 **Adaptive Instruments** - Piano, Flute, Xylophone, and Kalimba that respond to your rhythm
 - 🔐 **Secure Authentication** - OAuth2 PKCE flow with Auth0
 - 💾 **Session History** - Automatic tracking with 90-day data retention
 - ♿ **Accessibility Mode** - WCAG 2.1 AA compliant with sensory-friendly options
-- 🎚️ **Three Moods** - Choose between Calm (60-80 BPM), Focus (85-110 BPM), or Energy (110-130 BPM)
+- � **Four Piano Songs** - Choose from A Thousand Years, Kiss The Rain, River Flows In You, or Gurenge
 
 ---
 
@@ -118,18 +119,18 @@ pulseplay-ai/
 ## 🎮 How to Use
 
 1. **Sign Up/Sign In** - Create an account with Auth0
-2. **Select Mood** - Choose from Deep Flow, Melodic Flow, Jazz Harmony, or Rivers Flow
+2. **Select Piano Song** - Choose from 4 beautiful piano pieces
 3. **Pick Instruments** - Select instruments (Piano, Flute, Xylophone, Kalimba)
 4. **Click Play** - Start the audio engine
 5. **Start Working** - Your typing rhythm will create music
-6. **View Insights** - See AI-generated analysis of your work rhythm
+6. **View Insights** - See AI-generated analysis of your work rhythm (shown after 1+ minute sessions)
 
-### Mood Modes
+### Piano Songs
 
-- **🌊 Deep Flow** - Lofi beats (160Hz, 60 BPM) for relaxed concentration
-- **🎹 Melodic Flow** - Piano ballad with keystroke melody
-- **🎺 Jazz Harmony** - Jazz chords with harmonized keystrokes
-- **🎼 Rivers Flow** - Yiruma's "River Flows In You" MIDI (65 BPM)
+- **� A Thousand Years** - Christina Perri's romantic ballad (75 BPM, C4 key)
+- **💧 Kiss The Rain** - Yiruma's gentle meditation (58 BPM, C4 key)
+- **� River Flows In You** - Yiruma's flowing melody (65 BPM, C4 key)
+- **⚔️ Gurenge** - LiSA's energetic anime theme (95 BPM, C4 key)
 
 ---
 
@@ -190,19 +191,25 @@ PORT=3001
 
 ---
 
-## 🎮 How to Use
+## 🎮 How It Works
 
-1. **Sign Up/Sign In** - Create an account or log in
-2. **Click Play** - Start the audio engine
-3. **Start Typing** - Your typing rhythm will modulate the music
-4. **Adjust Settings** - Change mood, volume, and accessibility mode
-5. **View Insights** - See AI-generated analysis of your work rhythm
+1. **Start a Session** - Click play to begin
+2. **Select Piano Song** - Choose from 4 beautiful piano pieces:
+   - **🎹 A Thousand Years** - Christina Perri's calm, romantic piano ballad (75 BPM)
+   - **💧 Kiss The Rain** - Yiruma's gentle, contemplative melody (58 BPM)
+   - **🌊 River Flows In You** - Yiruma's smooth, flowing piece (65 BPM)
+   - **⚔️ Gurenge** - LiSA's energetic anime theme from Demon Slayer (95 BPM)
+3. **Pick Instruments** - Select up to 4 instruments (Piano, Flute, Xylophone, Kalimba)
+4. **Type Naturally** - Your typing triggers the melody notes
+5. **Watch the Rhythm** - Real-time BPM and waveform visualization
 
-### Mood Modes
+### How Piano Songs Work
 
-- **🌊 Calm** - Lower frequencies (130-392 Hz) for relaxed focus
-- **🎯 Focus** - Mid frequencies (145-440 Hz) for productive work
-- **⚡ Energy** - Higher frequencies (165-494 Hz) for high-intensity tasks
+- **MIDI-Based Melodies** - Each song uses actual MIDI note sequences from the original piece
+- **Rhythm-Adaptive** - Your typing speed modulates the piano note timing
+- **Background Bass** - Low notes (< C4) play automatically in the background
+- **Melody on Keystrokes** - High notes (>= C4) are triggered by your typing
+- **Pure Web Audio API** - All sounds synthesized in real-time using browser audio
 
 ---
 

@@ -318,7 +318,7 @@ You are an AI mood recommendation system for a focus music app.
 EXAMPLES:
 1. Fast steady typing → "energized-coding"
 2. Slow erratic typing → "calm-reading"
-3. Medium steady typing → "deep-focus"
+3. Medium steady typing → "thousand-years"
 
 CURRENT SESSION:
 - Duration: {minutes} minutes

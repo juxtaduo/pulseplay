@@ -207,7 +207,7 @@ npm run dev:all          # Start both servers
 6. Backend validates JWT on each API request
 
 ### Audio Synthesis Flow
-1. User selects mood (deep-focus, creative-flow, calm-reading, energized-coding)
+1. User selects piano song (thousand-years, kiss-the-rain, river-flows, gurenge)
 2. Mood maps to base frequency (160Hz, 200Hz, 150Hz, 220Hz)
 3. OscillatorNode generates sine/sawtooth waves
 4. GainNode controls volume with fadeIn/fadeOut
