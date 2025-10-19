@@ -1,0 +1,125 @@
+version: '3.8'
+
+# Development version of docker-compose with hot reloading
+
+services:
+  # MongoDB Database (same as production)
+  mongodb:
+    image: mongo:7.0
+    container_name: pulseplay-mongodb-dev
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-devpassword}
+      MONGO_INITDB_DATABASE: pulseplay
+    volumes:
+      - mongodb_data_dev:/data/db
+      - mongodb_config_dev:/data/configdb
+    ports:
+      - "27017:27017"
+    networks:
+      - pulseplay-network-dev
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend with hot reload
+  backend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: backend-dev
+    container_name: pulseplay-backend-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Node debugger port
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-devpassword}@mongodb:27017/pulseplay?authSource=admin
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH0_ISSUER_BASE_URL: ${AUTH0_ISSUER_BASE_URL}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      CONTEXT7_API_KEY: ${CONTEXT7_API_KEY}
+      FRONTEND_URL: http://localhost:5173
+    volumes:
+      # Mount source code for hot reload
+      - ./backend/src:/app/backend/src:ro
+      - ./backend/package.json:/app/backend/package.json:ro
+      - backend_node_modules:/app/backend/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - pulseplay-network-dev
+    command: npm run dev
+
+  # Frontend with hot reload
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: frontend-dev
+    container_name: pulseplay-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_AUTH0_DOMAIN: ${VITE_AUTH0_DOMAIN}
+      VITE_AUTH0_CLIENT_ID: ${VITE_AUTH0_CLIENT_ID}
+      VITE_AUTH0_AUDIENCE: ${VITE_AUTH0_AUDIENCE}
+      VITE_API_URL: http://localhost:3000
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src:ro
+      - ./public:/app/public:ro
+      - ./index.html:/app/index.html:ro
+      - ./package.json:/app/package.json:ro
+      - ./vite.config.ts:/app/vite.config.ts:ro
+      - ./tailwind.config.js:/app/tailwind.config.js:ro
+      - ./postcss.config.js:/app/postcss.config.js:ro
+      - ./tsconfig.json:/app/tsconfig.json:ro
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend-dev
+    networks:
+      - pulseplay-network-dev
+    command: npm run dev -- --host 0.0.0.0
+
+  # Mongo Express for database management
+  mongo-express:
+    image: mongo-express:latest
+    container_name: pulseplay-mongo-express-dev
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD:-devpassword}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-devpassword}@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: devpassword
+    depends_on:
+      - mongodb
+    networks:
+      - pulseplay-network-dev
+
+volumes:
+  mongodb_data_dev:
+    driver: local
+  mongodb_config_dev:
+    driver: local
+  backend_node_modules:
+    driver: local
+  frontend_node_modules:
+    driver: local
+
+networks:
+  pulseplay-network-dev:
+    driver: bridge

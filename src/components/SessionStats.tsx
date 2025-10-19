@@ -40,11 +40,11 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive }: SessionS
 	const keysPerMinute = sessionDuration > 0 ? Math.round((rhythmData.keystrokeCount / sessionDuration) * 60) : 0;
 
 	return (
-		<div className="bg-slate-800 rounded-xl p-6">
+		<div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 transition-colors duration-200">
 			<div className="flex items-center justify-between mb-4">
-				<h2 className="text-xl font-semibold text-white">Session Stats</h2>
+				<h2 className="text-xl font-semibold text-slate-900 dark:text-slate-900 dark:text-white">Session Stats</h2>
 				{isActive && (
-					<div className="flex items-center gap-2 text-xs text-slate-400">
+					<div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-600 dark:text-slate-400">
 						<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
 						<span>Live</span>
 					</div>
@@ -55,73 +55,73 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive }: SessionS
 				{/* Row 1: Keyboard & General Stats */}
 				
 				{/* Duration */}
-				<div className="bg-slate-900 rounded-lg p-4">
+				<div className="bg-slate-100 dark:bg-slate-100 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-800 transition-colors duration-200">
 					<div className="flex items-center gap-2 mb-2">
-						<Clock size={18} className="text-slate-400" />
-						<span className="text-xs text-slate-400">Duration</span>
+						<Clock size={18} className="text-slate-600 dark:text-slate-600 dark:text-slate-400" />
+						<span className="text-xs text-slate-600 dark:text-slate-400">Duration</span>
 					</div>
-					<div className="text-2xl font-bold text-white">{formatDuration(sessionDuration)}</div>
+					<div className="text-2xl font-bold text-slate-900 dark:text-white">{formatDuration(sessionDuration)}</div>
 				</div>
 
 				{/* Keystrokes */}
-				<div className="bg-slate-900 rounded-lg p-4">
+				<div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4">
 					<div className="flex items-center gap-2 mb-2">
-						<Activity size={18} className="text-slate-400" />
-						<span className="text-xs text-slate-400">Keystrokes</span>
+						<Activity size={18} className="text-slate-600 dark:text-slate-400" />
+						<span className="text-xs text-slate-600 dark:text-slate-400">Keystrokes</span>
 					</div>
-					<div className="text-2xl font-bold text-white">{rhythmData.keystrokeCount}</div>
+					<div className="text-2xl font-bold text-slate-900 dark:text-white">{rhythmData.keystrokeCount}</div>
 				</div>
 
 				{/* Keys Per Minute (T138) */}
-				<div className="bg-slate-900 rounded-lg p-4">
+				<div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4">
 					<div className="flex items-center gap-2 mb-2">
-						<TrendingUp size={18} className="text-slate-400" />
-						<span className="text-xs text-slate-400">Keys/Min</span>
+						<TrendingUp size={18} className="text-slate-600 dark:text-slate-400" />
+						<span className="text-xs text-slate-600 dark:text-slate-400">Keys/Min</span>
 					</div>
-					<div className="text-2xl font-bold text-white">{keysPerMinute}</div>
+					<div className="text-2xl font-bold text-slate-900 dark:text-white">{keysPerMinute}</div>
 				</div>
 
 				{/* Row 2: Mouse Stats */}
 
 				{/* Mouse Clicks */}
-				<div className="bg-slate-900 rounded-lg p-4">
+				<div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4">
 					<div className="flex items-center gap-2 mb-2">
-						<Mouse size={18} className="text-slate-400" />
-						<span className="text-xs text-slate-400">Clicks</span>
+						<Mouse size={18} className="text-slate-600 dark:text-slate-400" />
+						<span className="text-xs text-slate-600 dark:text-slate-400">Clicks</span>
 					</div>
-					<div className="text-2xl font-bold text-white">{rhythmData.clickCount}</div>
+					<div className="text-2xl font-bold text-slate-900 dark:text-white">{rhythmData.clickCount}</div>
 				</div>
 
 				{/* Mouse Moves */}
-				<div className="bg-slate-900 rounded-lg p-4">
+				<div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4">
 					<div className="flex items-center gap-2 mb-2">
-						<Mouse size={18} className="text-slate-400" />
-						<span className="text-xs text-slate-400">Mouse Moves</span>
+						<Mouse size={18} className="text-slate-600 dark:text-slate-400" />
+						<span className="text-xs text-slate-600 dark:text-slate-400">Mouse Moves</span>
 					</div>
-					<div className="text-2xl font-bold text-white">{rhythmData.mouseMoveCount}</div>
+					<div className="text-2xl font-bold text-slate-900 dark:text-white">{rhythmData.mouseMoveCount}</div>
 				</div>
 
 				{/* Scrolls */}
-				<div className="bg-slate-900 rounded-lg p-4">
+				<div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4">
 					<div className="flex items-center gap-2 mb-2">
-						<Mouse size={18} className="text-slate-400" />
-						<span className="text-xs text-slate-400">Scrolls</span>
+						<Mouse size={18} className="text-slate-600 dark:text-slate-400" />
+						<span className="text-xs text-slate-600 dark:text-slate-400">Scrolls</span>
 					</div>
-					<div className="text-2xl font-bold text-white">{rhythmData.scrollCount}</div>
+					<div className="text-2xl font-bold text-slate-900 dark:text-white">{rhythmData.scrollCount}</div>
 				</div>
 			</div>
 
 			{/* Rhythm Score */}
 			{isActive && rhythmData.rhythmScore > 0 && (
-				<div className="mt-4 p-4 bg-slate-900 rounded-lg">
+				<div className="mt-4 p-4 bg-slate-100 dark:bg-slate-900 rounded-lg">
 					<div className="flex items-center justify-between mb-2">
-						<span className="text-sm text-slate-400">Rhythm Score</span>
+						<span className="text-sm text-slate-600 dark:text-slate-400">Rhythm Score</span>
 						<span className={`text-sm font-semibold capitalize ${getIntensityColor(rhythmData.intensity)}`}>
 							{rhythmData.intensity}
 						</span>
 					</div>
 					<div className="flex items-center gap-3">
-						<div className="flex-1 h-3 bg-slate-700 rounded-full overflow-hidden">
+						<div className="flex-1 h-3 bg-slate-300 dark:bg-slate-700 rounded-full overflow-hidden">
 							<div
 								className={`h-full transition-all duration-500 ${
 									rhythmData.intensity === 'high'
@@ -133,7 +133,7 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive }: SessionS
 								style={{ width: `${rhythmData.rhythmScore}%` }}
 							/>
 						</div>
-						<span className="text-lg font-bold text-white min-w-[3rem] text-right">
+						<span className="text-lg font-bold text-slate-900 dark:text-white min-w-[3rem] text-right">
               {rhythmData.rhythmScore}
             </span>
           </div>

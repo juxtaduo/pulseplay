@@ -1,0 +1,32 @@
+# Development Dockerfile with hot reloading
+
+# Backend Development Stage
+FROM node:20-alpine AS backend-dev
+
+WORKDIR /app/backend
+
+# Install dependencies
+COPY backend/package*.json ./
+RUN npm ci
+
+# Expose ports
+EXPOSE 3000
+EXPOSE 9229
+
+# Development command with hot reload
+CMD ["npm", "run", "dev"]
+
+# Frontend Development Stage
+FROM node:20-alpine AS frontend-dev
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Development command with hot reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
