@@ -41,7 +41,7 @@ function App() {
 								</div>
 								<div>
 									<h1 className="text-2xl font-bold text-white">PulsePlay</h1>
-									<p className="text-sm text-slate-400">AI Focus Music Generator</p>
+									<p className="text-sm text-slate-400">Moves with rhythm</p>
 								</div>
 							</Link>
 							
@@ -51,7 +51,7 @@ function App() {
 									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-colors text-white text-sm font-medium"
 								>
 									<Music size={16} />
-									<span>Focus Session</span>
+									<span>Session</span>
 								</Link>
 								<Link
 									to="/history"
@@ -114,7 +114,7 @@ function App() {
 				</Routes>
 
 				<footer className="max-w-7xl mx-auto px-4 py-6 text-center text-slate-500 text-sm">
-					Built for open-source hackathon • Adaptive focus music powered by your rhythm
+					- Rhythm that moves with you -
 				</footer>
 			</div>
 		</Router>
