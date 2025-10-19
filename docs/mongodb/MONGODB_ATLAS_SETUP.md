@@ -110,7 +110,6 @@ This guide explains how to use MongoDB Atlas (cloud-hosted MongoDB) with your Do
    AUTH0_CLIENT_ID=your_client_id
    AUTH0_CLIENT_SECRET=your_client_secret
    GEMINI_API_KEY=your_gemini_api_key
-   CONTEXT7_API_KEY=ctx7sk_your_api_key
    ```
 
 4. **Start services with Atlas**
@@ -159,7 +158,6 @@ AUTH0_ISSUER_BASE_URL=https://pulseplay.auth0.com
 # AI/ML API Keys
 # ============================================
 GEMINI_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXX
-CONTEXT7_API_KEY=ctx7sk_XXXXXXXXXXXXXXXXXXXXXXXX
 
 # ============================================
 # Server Configuration

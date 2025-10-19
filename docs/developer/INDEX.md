@@ -13,7 +13,6 @@ This directory contains comprehensive technical documentation for developers wor
 ### Setup & Deployment
 - **[Quick Reference](QUICK_REFERENCE.md)** - Quick reference for common tasks
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
-- **[Context7 Setup](CONTEXT7_SETUP.md)** - Setting up Context7 MCP server for docs
 
 ### Technical Guides
 - **[Background Audio](BACKGROUND_AUDIO.md)** - How background audio functionality works

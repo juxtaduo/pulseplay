@@ -288,7 +288,7 @@ else intensity = 'low';
 │     - Current session context                               │
 │     - JSON output schema                                    │
 │                                                              │
-│  4. Call Gemini API (gemini-1.5-flash)                      │
+│  4. Call Gemini API (gemini-2.5-flash)                      │
 │     - Temperature: 0.7 (creative but focused)               │
 │     - Rate limit: 10 req/hour                               │
 │     - Timeout: 10 seconds                                   │
@@ -407,7 +407,7 @@ User Click "Stop" (≥10 min session) ──┐
                   (few-shot + session context)
                                        │
                                        ▼
-                Call Gemini API (gemini-1.5-flash)
+                Call Gemini API (gemini-2.5-flash)
                                        │
                                        ▼
                    Parse JSON response
@@ -445,7 +445,7 @@ User Click "Stop" (≥10 min session) ──┐
 | **Framework** | Express 4.18 | REST API server |
 | **Database** | MongoDB Atlas 7+ | Document storage |
 | **ODM** | Mongoose 8.0+ | MongoDB object modeling |
-| **AI** | Gemini API (gemini-1.5-flash) | Mood recommendations |
+| **AI** | Gemini API (gemini-2.5-flash) | Mood recommendations |
 | **Logging** | Pino 8.19+ | Structured JSON logging |
 | **Rate Limiting** | express-rate-limit 7.1+ | API protection |
 | **Auth** | express-oauth2-jwt-bearer | JWT validation |

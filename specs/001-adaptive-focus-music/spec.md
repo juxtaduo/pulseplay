@@ -181,7 +181,7 @@ Users can view statistics from their current session (duration, total keystrokes
   *Relationships*: Belongs to User
 
 - **AIMoodRecommendation**: AI-generated suggestion for next session  
-  *Attributes*: recommendationId (UUID), sessionId (UUID), suggestedMood (enum: calm/focus/energy), rationale (text), confidence (0-1 float), generatedAt (timestamp), geminiModel (string: e.g., "gemini-1.5-flash")  
+  *Attributes*: recommendationId (UUID), sessionId (UUID), suggestedMood (enum: calm/focus/energy), rationale (text), confidence (0-1 float), generatedAt (timestamp), geminiModel (string: e.g., "gemini-2.5-flash")  
   *Relationships*: References FocusSession that triggered recommendation
 
 ## Success Criteria *(mandatory)*

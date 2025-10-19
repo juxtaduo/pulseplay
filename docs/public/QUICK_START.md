@@ -82,9 +82,6 @@ GEMINI_API_KEY=your_gemini_api_key
 PORT=3000
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
-
-# Optional: Context7 MCP for documentation lookup
-CONTEXT7_API_KEY=ctx7sk_your_api_key_here
 ```
 
 Create `.env` in project root for frontend variables:
@@ -96,22 +93,9 @@ VITE_AUTH0_CLIENT_ID=your_client_id
 VITE_AUTH0_AUDIENCE=https://api.pulseplay.ai
 ```
 
-### 3. Configure Context7 MCP (Optional but Recommended)
+### 3. Development Setup Complete
 
-Context7 MCP provides up-to-date documentation for dependencies. See [Context7 Setup Guide](./docs/CONTEXT7_SETUP.md) for detailed instructions.
-
-**Quick setup**: Add to VS Code User Settings (JSON):
-```json
-{
-  "mcp.servers": {
-    "upstash_conte": {
-      "env": {
-        "CONTEXT7_API_KEY": "ctx7sk_your_api_key_here"
-      }
-    }
-  }
-}
-```
+You're now ready to start developing!
 
 ### 4. Start Development Servers
 
@@ -161,7 +145,7 @@ npm run dev:all          # Start both servers
 - Express 5.1.0+ (TypeScript)
 - MongoDB Atlas 7+ with Mongoose 8.19+
 - Auth0 OAuth2 JWT validation
-- Gemini API (gemini-1.5-flash)
+- Gemini API (gemini-2.5-flash)
 - WebSocket (ws 8.18+)
 - Pino structured logging
 

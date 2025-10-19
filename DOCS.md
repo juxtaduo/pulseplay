@@ -35,7 +35,6 @@ Technical documentation for contributors:
 - **[Architecture](docs/developer/ARCHITECTURE.md)** - System architecture and design
 - **[Deployment](docs/developer/DEPLOYMENT.md)** - Production deployment guide
 - **[Background Audio](docs/developer/BACKGROUND_AUDIO.md)** - How background audio works
-- **[Context7 Setup](docs/developer/CONTEXT7_SETUP.md)** - Documentation server setup
 
 ---
 

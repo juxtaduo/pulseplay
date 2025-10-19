@@ -77,7 +77,7 @@ router.post('/mood-recommendation', async (req: Request, res: Response) => {
 			suggestedMood: recommendation.mood,
 			rationale: recommendation.rationale,
 			confidence: recommendation.confidence,
-			geminiModel: 'gemini-1.5-flash',
+			geminiModel: 'gemini-2.5-flash',
 		});
 
 		await aiRecommendation.save();

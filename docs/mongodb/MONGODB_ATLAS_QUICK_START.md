@@ -61,9 +61,6 @@ AUTH0_ISSUER_BASE_URL=https://your-domain.auth0.com
 # Gemini (Required)
 GEMINI_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXX
 
-# Context7 (Required)
-CONTEXT7_API_KEY=ctx7sk_XXXXXXXXXXXXXXXX
-
 # Server Config
 NODE_ENV=production
 BACKEND_PORT=3000

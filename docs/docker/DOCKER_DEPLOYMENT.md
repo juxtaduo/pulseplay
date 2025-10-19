@@ -41,9 +41,6 @@ AUTH0_CLIENT_SECRET=your_client_secret
 
 # Gemini API Key (from https://makersuite.google.com/app/apikey)
 GEMINI_API_KEY=your_gemini_api_key
-
-# Context7 API Key (from https://context7.com)
-CONTEXT7_API_KEY=ctx7sk_your_api_key
 ```
 
 ### 3. Build and Run
@@ -342,7 +339,6 @@ kubectl apply -f .
 | `AUTH0_CLIENT_ID` | Yes | - | Auth0 application client ID |
 | `AUTH0_CLIENT_SECRET` | Yes | - | Auth0 application secret |
 | `GEMINI_API_KEY` | Yes | - | Google Gemini API key |
-| `CONTEXT7_API_KEY` | Yes | - | Context7 API key |
 | `BACKEND_PORT` | No | 3000 | Backend API port |
 | `FRONTEND_PORT` | No | 5173 | Frontend port |
 | `NODE_ENV` | No | production | Node environment |

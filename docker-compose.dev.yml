@@ -46,7 +46,6 @@ services:
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
       AUTH0_ISSUER_BASE_URL: ${AUTH0_ISSUER_BASE_URL}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
-      CONTEXT7_API_KEY: ${CONTEXT7_API_KEY}
       FRONTEND_URL: http://localhost:5173
     volumes:
       # Mount source code for hot reload

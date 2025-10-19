@@ -37,7 +37,7 @@ export async function generateMoodInsight(
 	_userContext: string // Prefix with underscore to indicate intentionally unused
 ): Promise<string> {
 	try {
-		const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+		const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 		// Calculate session characteristics
 		const sessionMinutes = Math.floor(sessionMetrics.duration / 60);
@@ -140,7 +140,7 @@ export async function generateWeeklySummary(
 	}>
 ): Promise<string> {
 	try {
-		const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+		const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 		const totalMinutes = sessions.reduce((sum, s) => sum + s.duration / 60, 0);
 		const avgTempo = sessions.reduce((sum, s) => sum + s.averageTempo, 0) / sessions.length;
@@ -194,7 +194,7 @@ export async function generateMoodRecommendation(sessionData: {
 	rhythmPattern: 'steady' | 'erratic';
 }): Promise<{ mood: string; rationale: string; confidence: number }> {
 	try {
-		const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+		const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 		// Few-shot prompt with structured JSON output
 		const prompt = `You are a focus productivity coach analyzing typing rhythm patterns. Based on the session data below, suggest a mood for the next focus session and explain why.
@@ -243,7 +243,7 @@ Respond ONLY with valid JSON: {"mood": "deep-focus|creative-flow|calm-reading|en
 			suggested_mood: insight.mood,
 			confidence: insight.confidence,
 			latency_ms: latency,
-			model: 'gemini-1.5-flash',
+			model: 'gemini-2.5-flash',
 			session_duration_min: sessionData.duration,
 			rhythm_pattern: sessionData.rhythmPattern,
 		}, 'gemini_mood_recommendation');

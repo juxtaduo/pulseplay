@@ -41,7 +41,7 @@ const moodInsightSchema = new Schema<MoodInsightDocument>(
 		modelUsed: {
 			type: String,
 			required: true,
-			default: 'gemini-1.5-flash',
+			default: 'gemini-2.5-flash',
 		},
 	},
 	{
