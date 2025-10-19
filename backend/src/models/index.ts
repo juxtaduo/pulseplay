@@ -5,5 +5,5 @@
 
 export { FocusSessionModel, type FocusSessionDocument } from './FocusSession.js';
 export { UserPreferencesModel, type UserPreferencesDocument } from './UserPreferences.js';
-export { MoodInsightModel, type MoodInsightDocument } from './MoodInsight.js';
+export { SongInsightModel, type SongInsightDocument } from './SongInsight.js';
 export { WeeklySummaryModel, type WeeklySummaryDocument } from './WeeklySummary.js';

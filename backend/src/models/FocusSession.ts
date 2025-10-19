@@ -50,14 +50,16 @@ const focusSessionSchema = new Schema<FocusSessionDocument>(
 				message: 'userIdHash must be a valid SHA-256 hash (64 hex characters)',
 			},
 		},
-		mood: {
+		song: {
 			type: String,
-			enum: ['deep-focus', 'melodic-flow', 'jazz-harmony', 'thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'],
+			enum: ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'],
 			required: true,
 		},
 		startTime: { type: Date, required: true, default: Date.now },
 		endTime: { type: Date, default: null },
 		totalDurationMinutes: { type: Number, min: 0, default: null },
+		keystrokeCount: { type: Number, min: 0, default: 0 },
+		averageTempo: { type: Number, min: 0, default: 0 },
 		rhythmData: { type: rhythmDataSchema, required: true },
 		state: {
 			type: String,

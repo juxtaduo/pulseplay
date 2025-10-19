@@ -19,7 +19,8 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 - 🎯 **Rhythm Detection** - Tracks keyboard and mouse activity to calculate BPM and tempo
 - 🧠 **AI Mood Recommendations** - Intelligent insights via Gemini API based on your focus patterns
 - 🎨 **Live Waveform Visualization** - 60fps Canvas animation synced with your typing
-- 🎼 **Multiple Moods** - Deep Flow (Lofi), Melodic Flow, Jazz Harmony, A Thousand Years, Kiss The Rain, River Flows In You, Gurenge
+- 🎼 **Piano Song Moods** - A Thousand Years (Christina Perri), Kiss The Rain (Yiruma), River Flows In You (Yiruma), Gurenge (LiSA)
+- 🎹 **MIDI-Based Melodies** - Real piano pieces that adapt to your typing rhythm
 - 🎵 **Adaptive Instruments** - Piano, Flute, Xylophone, and Kalimba that respond to your rhythm
 - 🔐 **Secure Authentication** - OAuth2 PKCE flow with Auth0
 - 💾 **Session History** - Automatic tracking with 90-day data retention
@@ -107,6 +108,7 @@ Visit `http://localhost:5173` in your browser.
 - **[Quick Start Guide](docs/public/QUICK_START.md)** - Get up and running
 - **[Background Audio Guide](docs/developer/BACKGROUND_AUDIO.md)** - How audio works when tab is inactive
 - **[Contributing](docs/public/CONTRIBUTING.md)** - How to contribute to the project
+- **[Docker Deployment](DOCKER_DEPLOYMENT.md)** - Deploy with Docker and MongoDB Atlas
 
 ### For Developers
 
@@ -114,13 +116,18 @@ Visit `http://localhost:5173` in your browser.
 - **[API Reference](docs/developer/API_REFERENCE.md)** - Complete API documentation
 - **[Architecture](docs/developer/ARCHITECTURE.md)** - System architecture and design
 - **[Deployment Guide](docs/developer/DEPLOYMENT.md)** - Production deployment instructions
+- **[Docker Quick Start](DOCKER_QUICK_REFERENCE.md)** - Quick Docker commands reference
 - **[Technical Documentation](docs/developer/DOCUMENTATION.md)** - In-depth technical details
 
 ---
 
 ## 🎮 How to Use
 
-1. **Select a Mood** - Choose from Deep Flow, Melodic Flow, Jazz Harmony, A Thousand Years, Kiss The Rain, River Flows In You, or Gurenge
+1. **Select a Piano Song** - Choose from 4 beautiful piano pieces:
+   - **A Thousand Years** - Christina Perri's calm, romantic piano ballad
+   - **Kiss The Rain** - Yiruma's gentle, contemplative melody
+   - **River Flows In You** - Yiruma's smooth, flowing piece
+   - **Gurenge** - LiSA's energetic anime theme song
 2. **Pick Instruments** - Select up to 4 instruments (Piano, Flute, Xylophone, Kalimba)
 3. **Start Your Session** - Click play and start typing/working
 4. **Adjust Volume** - Use the slider to set your preferred volume level
@@ -160,11 +167,21 @@ Visit `http://localhost:5173` in your browser.
 ### Available Scripts
 
 ```bash
-npm run dev        # Start development server
-npm run build      # Build for production
-npm run preview    # Preview production build
-npm run lint       # Run Biome linter
-npm run typecheck  # Check TypeScript errors
+# Development
+npm run dev          # Start frontend dev server
+npm run dev:all      # Start both frontend and backend
+npm run build        # Build for production
+npm run preview      # Preview production build
+
+# Code Quality
+npm run lint         # Run Biome linter
+npm run typecheck    # Check TypeScript errors
+
+# Docker Commands
+make up              # Start all services
+make down            # Stop all services
+make logs            # View logs
+make rebuild         # Rebuild and restart
 ```
 
 ---

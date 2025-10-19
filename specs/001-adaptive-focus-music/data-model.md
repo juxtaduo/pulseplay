@@ -338,7 +338,7 @@ interface AIMoodRecommendation {
   rationale: string;          // Explanation for recommendation
   confidence: number;         // AI confidence score (0-1)
   generatedAt: Date;          // ISO 8601 timestamp
-  geminiModel: string;        // Gemini model used (e.g., "gemini-1.5-flash")
+  geminiModel: string;        // Gemini model used (e.g., "gemini-2.5-flash")
 }
 ```
 

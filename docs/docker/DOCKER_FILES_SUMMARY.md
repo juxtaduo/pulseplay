@@ -116,9 +116,6 @@ AUTH0_CLIENT_SECRET=your_client_secret
 
 # Google Gemini (from https://makersuite.google.com/)
 GEMINI_API_KEY=your_gemini_api_key
-
-# Context7 (from https://context7.com/)
-CONTEXT7_API_KEY=ctx7sk_your_api_key
 ```
 
 ## 🎯 Common Commands

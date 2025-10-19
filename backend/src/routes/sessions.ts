@@ -9,7 +9,7 @@ import {
 } from '../services/sessionService.js';
 import { hashSHA256 } from '../utils/crypto.js';
 import { logger } from '../config/logger.js';
-import type { Mood, SessionState } from '../types/index.js';
+import type { Song, SessionState } from '../types/index.js';
 
 const router = express.Router();
 
@@ -21,21 +21,21 @@ router.post('/', checkJwt, async (req: Request, res: Response) => {
 	try {
 		const userId = getUserIdFromToken(req);
 		const userIdHash = hashSHA256(userId);
-		const { mood } = req.body as { mood: Mood };
+		const { song } = req.body as { song: Song };
 
-		// Validate mood
-		const validMoods: Mood[] = ['deep-focus', 'melodic-flow', 'jazz-harmony', 'thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
-		if (!mood || !validMoods.includes(mood)) {
+		// Validate song
+		const validSongs: Song[] = ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
+		if (!song || !validSongs.includes(song)) {
 			return res.status(400).json({
-				error: 'Invalid mood',
-				message: 'Mood must be one of: deep-focus, melodic-flow, jazz-harmony, thousand-years, kiss-the-rain, river-flows, gurenge',
+				error: 'Invalid song',
+				message: `Song must be one of: ${validSongs.join(', ')}`,
 			});
 		}
 
-		const session = await createSession({ userIdHash, mood });
+		const session = await createSession({ userIdHash, song });
 
 		logger.info(
-			{ sessionId: session._id.toString(), mood },
+			{ sessionId: session._id.toString(), song },
 			'session_created_via_api',
 		);
 
@@ -265,7 +265,7 @@ router.delete('/:id', checkJwt, async (req: Request, res: Response) => {
  * 
  * @query {number} page - Page number (default: 1)
  * @query {number} limit - Items per page (default: 20, max: 100)
- * @query {string} mood - Filter by mood (optional)
+ * @query {string} song - Filter by song (optional)
  * @query {string} sortBy - Sort field (default: createdAt)
  * @query {string} order - Sort order: asc/desc (default: desc)
  * @returns {sessions: Session[], total: number, page: number, totalPages: number}
@@ -278,31 +278,31 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 		// Parse query parameters
 		const page = Math.max(1, parseInt(req.query.page as string) || 1);
 		const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
-		const mood = req.query.mood as Mood | undefined;
+		const song = req.query.song as Song | undefined;
 		const sortBy = (req.query.sortBy as string) || 'createdAt';
 		const order = (req.query.order as string) === 'asc' ? 1 : -1;
 
-		// Validate mood filter if provided
-		const validMoods: Mood[] = ['deep-focus', 'melodic-flow', 'jazz-harmony', 'thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
-		if (mood && !validMoods.includes(mood)) {
+		// Validate song filter if provided
+		const validSongs: Song[] = ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
+		if (song && !validSongs.includes(song as Song)) {
 			return res.status(400).json({
-				error: 'Invalid mood filter',
-				message: `Mood must be one of: ${validMoods.join(', ')}`,
+				error: 'Invalid song filter',
+				message: `Song must be one of: ${validSongs.join(', ')}`,
 			});
 		}
 
 		// Build query filter
 		const filter: Record<string, unknown> = { userIdHash };
-		if (mood) {
-			filter.mood = mood;
+		if (song) {
+			filter.song = song;
 		}
 
 		// Get sessions with pagination
 		const sessions = await getSessionsByUser(userIdHash);
 		
-		// Filter by mood if specified
-		const filteredSessions = mood 
-			? sessions.filter(s => s.mood === mood)
+		// Filter by song if specified
+		const filteredSessions = song 
+			? sessions.filter(s => s.song === song)
 			: sessions;
 
 		// Sort sessions
@@ -324,7 +324,7 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 			userIdHash,
 			page,
 			limit,
-			mood: mood || 'all',
+			song: song || 'all',
 			total,
 		}, 'session_history_retrieved');
 

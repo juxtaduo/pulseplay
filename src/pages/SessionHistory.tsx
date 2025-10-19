@@ -43,9 +43,6 @@ export const SessionHistory = () => {
 
 	const MOOD_OPTIONS: { value: Mood | 'all'; label: string }[] = [
 		{ value: 'all', label: 'All Songs' },
-		{ value: 'deep-focus', label: 'Deep Flow' },
-		{ value: 'melodic-flow', label: 'Melodic Flow' },
-		{ value: 'jazz-harmony', label: 'Jazz Harmony' },
 		{ value: 'thousand-years', label: 'A Thousand Years' },
 		{ value: 'kiss-the-rain', label: 'Kiss The Rain' },
 		{ value: 'river-flows', label: 'River Flows In You' },
@@ -136,9 +133,6 @@ export const SessionHistory = () => {
 
 	const getMoodColor = (mood: Mood) => {
 		const colors: Record<Mood, string> = {
-			'deep-focus': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-			'melodic-flow': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-			'jazz-harmony': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
 			'thousand-years': 'bg-rose-500/20 text-rose-400 border-rose-500/30',
 			'kiss-the-rain': 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
 			'river-flows': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',

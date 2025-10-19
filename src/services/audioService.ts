@@ -20,24 +20,6 @@ export interface AudioConfig {
  * Mood to audio configuration mapping
  */
 const MOOD_CONFIGS: Record<Mood, AudioConfig> = {
-	'deep-focus': {
-		baseFrequency: 160, // Hz - Low, calming frequency
-		tempo: 60, // BPM - slow, steady
-		volume: 0.5, // 50% volume
-		waveform: 'sine',
-	},
-	'melodic-flow': {
-		baseFrequency: 262, // Hz - C4 (piano ballad key)
-		tempo: 60, // BPM - slow, emotional
-		volume: 0.5, // 50% volume
-		waveform: 'sine',
-	},
-	'jazz-harmony': {
-		baseFrequency: 220, // Hz - A3 (jazz key center)
-		tempo: 90, // BPM - medium swing feel
-		volume: 0.5, // 50% volume
-		waveform: 'sine',
-	},
 	'thousand-years': {
 		baseFrequency: 262, // Hz - C4 (Christina Perri key)
 		tempo: 75, // BPM - slow romantic ballad (from MIDI)
@@ -227,26 +209,11 @@ export class AudioEngine {
 		
 		console.log('[AudioEngine] Config for mood:', mood, config);
 
-		// For melodic-flow mood, skip the lofi beat and vinyl noise
-		// Only play melody notes triggered by keystrokes
-		if (mood === 'melodic-flow') {
-			console.log('[AudioEngine] Melodic-flow mode: No background beats, melody-only');
-		} else if (mood === 'jazz-harmony') {
-			// For jazz-harmony mood, play jazz chord progression (no drums)
-			console.log('[AudioEngine] Jazz-harmony mode: Chord progression with harmonized keystrokes');
-			this.startJazzProgression(config.tempo);
-		} else if (mood === 'thousand-years' || mood === 'kiss-the-rain' || mood === 'river-flows' || mood === 'gurenge') {
-			// For MIDI moods, play background bass notes (< C4)
-			// Melody notes (>= C4) triggered by keystrokes
-			console.log(`[AudioEngine] ${mood} mode: MIDI bass background + keystroke melody`);
-			this.startMidiBass(mood, config.tempo);
-		} else {
-			// Create lofi hip-hop beat elements for other moods
-			this.createLofiBeat(config);
-			
-			// Start vinyl crackle noise
-			this.startVinylNoise();
-		}
+		// All moods now use MIDI-based piano melodies
+		// Play background bass notes (< C4)
+		// Melody notes (>= C4) triggered by keystrokes
+		console.log(`[AudioEngine] ${mood} mode: MIDI bass background + keystroke melody`);
+		this.startMidiBass(mood, config.tempo);
 
 		// Fade in master gain
 		const now = this.ctx.currentTime;

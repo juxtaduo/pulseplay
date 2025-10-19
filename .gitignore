@@ -43,3 +43,4 @@ console.log
 # MIDI files and archives
 src/assets/midi
 docs/archive
+PROJECT_STORY.md

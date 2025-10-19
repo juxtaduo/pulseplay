@@ -377,7 +377,7 @@ PulsePlay embraces simplicity, modularity, and measurable quality. Avoid over-en
 
 **AI Services:**
 - **Gemini API (Google AI)**: Primary AI service for mood insights, contextual feedback
-  - Model: `gemini-1.5-flash` (fast responses) or `gemini-1.5-pro` (complex reasoning)
+  - Model: `gemini-2.5-flash` (fast responses) or `gemini-1.5-pro` (complex reasoning)
   - Use cases: Mood generation, tempo suggestions, focus session summaries
   - Rate limits: Respect API quotas, implement exponential backoff (1s, 2s, 4s, 8s)
   - Error handling: Graceful degradation to rule-based fallbacks

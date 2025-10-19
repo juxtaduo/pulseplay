@@ -8,7 +8,7 @@ PulsePlay AI now continues playing audio even when you switch to other browser t
 ### ✅ Continues Playing:
 1. **Background Music** 
    - Deep Focus lofi beats continue
-   - Jazz Harmony chord progressions continue
+   - Piano song bass notes continue
    - Rivers Flow bass pedal tones continue
    
 2. **Ambient Audio Context**
@@ -61,7 +61,7 @@ document.addEventListener('visibilitychange', () => {
 ### Typical Workflow:
 
 1. **Start PulsePlay**
-   - Select mood (Deep Focus, Melodic Flow, Jazz Harmony, or Rivers Flow)
+   - Select piano song (A Thousand Years, Kiss The Rain, River Flows In You, or Gurenge)
    - Enable instrumental sounds
    - Choose instruments
 

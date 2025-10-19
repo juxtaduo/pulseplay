@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 /**
  * MoodInsights component displays AI-generated mood recommendations after session completion
- * Only shown for sessions ≥10 minutes per FR-016 and T117
+ * Only shown for sessions ≥1 minute per FR-016 and T117 (reduced threshold)
  * @module components/MoodInsights
  */
 
@@ -27,8 +27,8 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		// Only fetch recommendation if session is ≥10 minutes (T117)
-		if (sessionId && sessionDuration >= 600) {
+		// Only fetch recommendation if session is ≥1 minute (T117 - reduced threshold)
+		if (sessionId && sessionDuration >= 60) {
 			fetchRecommendation();
 		}
 	}, [sessionId, sessionDuration]);
@@ -66,8 +66,8 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 		}
 	};
 
-	// Don't render if session is too short (T117)
-	if (sessionDuration < 600) {
+	// Don't render if session is too short (T117 - reduced threshold)
+	if (sessionDuration < 60) {
 		return null;
 	}
 

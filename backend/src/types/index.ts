@@ -4,12 +4,9 @@
  */
 
 /**
- * Available mood types for focus sessions
+ * Valid song types for focus sessions
  */
-export type Mood = 
-	| 'deep-focus'
-	| 'melodic-flow'
-	| 'jazz-harmony'
+export type Song =
 	| 'thousand-years'
 	| 'kiss-the-rain'
 	| 'river-flows'
@@ -50,10 +47,12 @@ export interface RhythmData {
 export interface FocusSession {
 	sessionId: string;
 	userIdHash: string;
-	mood: Mood;
+	song: Song;
 	startTime: Date;
 	endTime: Date | null;
 	totalDurationMinutes: number | null;
+	keystrokeCount: number;
+	averageTempo: number;
 	rhythmData: RhythmData;
 	state: SessionState;
 	createdAt: Date;
@@ -61,24 +60,27 @@ export interface FocusSession {
 }
 
 /**
- * AI mood recommendation
+ * AI song recommendation
  */
-export interface AIMoodRecommendation {
+export interface AISongRecommendation {
 	sessionId: string;
-	suggestedMood: Mood;
+	suggestedSong: Song;
 	reasoning: string;
 	confidence: number;
 	createdAt: Date;
 }
 
 /**
- * Mood insight data structure
+ * Song insight data structure
  */
-export interface MoodInsight {
+export interface SongInsight {
 	sessionId: string;
 	userIdHash: string;
-	mood: Mood;
+	song: Song;
 	insight: string;
+	generatedAt: Date;
+	promptHash: string;
+	modelUsed: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -88,8 +90,12 @@ export interface MoodInsight {
  */
 export interface UserPreferences {
 	userIdHash: string;
-	preferredMoods: Mood[];
+	preferredSongs: Song[];
 	rhythmPreferences: RhythmType[];
+	favoriteTempos: number[];
+	preferredInstruments: string[];
+	volumeLevel: number;
+	enableVisualizations: boolean;
 	sessionGoalMinutes: number;
 	createdAt: Date;
 	updatedAt: Date;
@@ -99,10 +105,11 @@ export interface UserPreferences {
  * API Error structure
  */
 export interface APIError {
-	code: string;
+	error: string;
+	code?: string;
 	message: string;
 	details?: unknown;
-	statusCode: number;
+	statusCode?: number;
 }
 
 /**
@@ -115,8 +122,8 @@ export interface WeeklySummary {
 	totalSessions: number;
 	totalMinutes: number;
 	averageSessionMinutes: number;
-	dominantMood: Mood;
-	moodDistribution: Record<Mood, number>;
+	dominantSong: Song;
+	songDistribution: Record<Song, number>;
 	rhythmInsights: string;
 	createdAt: Date;
 }

@@ -380,8 +380,8 @@ export function useWebSocket(url: string) {
 
 ### Decision
 
-Use **gemini-1.5-flash model with few-shot prompting**:
-- **Model**: `gemini-1.5-flash` (fast, cost-effective, sufficient for text generation)
+Use **gemini-2.5-flash model with few-shot prompting**:
+- **Model**: `gemini-2.5-flash` (fast, cost-effective, sufficient for text generation)
 - **Prompt template**:
   ```
   You are a focus productivity coach analyzing typing rhythm patterns. Based on the session data below, suggest a mood for the next focus session and explain why.
@@ -408,7 +408,7 @@ Use **gemini-1.5-flash model with few-shot prompting**:
 
 ### Rationale
 
-- **Performance**: gemini-1.5-flash <2s response time (vs. gemini-1.5-pro ~5s), meets SC-007 requirement
+- **Performance**: gemini-2.5-flash <2s response time (vs. gemini-1.5-pro ~5s), meets SC-007 requirement
 - **Cost**: Flash model is 10x cheaper than Pro ($0.075/1M tokens vs. $0.75/1M)
 - **Accuracy**: Few-shot examples guide model to generate consistent, relevant mood suggestions
 - **Structured output**: JSON format ensures parseable responses, reduces hallucination risk
@@ -434,7 +434,7 @@ Use **gemini-1.5-flash model with few-shot prompting**:
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 export async function generateMoodInsight(sessionData: {
   duration: number;
@@ -852,7 +852,7 @@ All 7 technology research tasks completed. Key decisions:
 1. ✅ **Web Audio API**: Modular synthesis (OscillatorNode + BiquadFilterNode), mood-specific BPM mappings
 2. ✅ **Canvas Visualization**: 2D API + requestAnimationFrame, AnalyserNode integration for <50ms sync
 3. ✅ **WebSocket**: `ws` library with JSON protocol, heartbeat/reconnection patterns
-4. ✅ **Gemini API**: gemini-1.5-flash with few-shot prompting, structured JSON output
+4. ✅ **Gemini API**: gemini-2.5-flash with few-shot prompting, structured JSON output
 5. ✅ **Auth0**: OAuth2 PKCE (frontend: @auth0/auth0-react, backend: express-oauth2-jwt-bearer)
 6. ✅ **MongoDB**: Mongoose schemas with SHA-256 hashing + TTL indexes (90-day auto-delete)
 7. ✅ **Security**: express-rate-limit (100 req/15min general, 10 req/hour AI), Helmet.js security headers

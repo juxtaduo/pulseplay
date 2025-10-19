@@ -10,7 +10,7 @@ Build an AI-powered web application that generates adaptive focus music in real-
 **Primary Technical Approach**:
 - **Frontend**: React hooks manage Web Audio API audio nodes (OscillatorNode, GainNode, BiquadFilterNode), Canvas requestAnimationFrame loop for 60fps waveform, keyboard/mouse event listeners for rhythm detection
 - **Backend**: Express REST API handles session CRUD, WebSocket server broadcasts real-time rhythm metrics, Gemini API integration generates mood insights, MongoDB Mongoose models persist anonymized session data
-- **AI Integration**: Gemini API (gemini-1.5-flash) analyzes session rhythm patterns (steady/erratic, fast/slow) to generate personalized mood recommendations with transparent prompt logging
+- **AI Integration**: Gemini API (gemini-2.5-flash) analyzes session rhythm patterns (steady/erratic, fast/slow) to generate personalized mood recommendations with transparent prompt logging
 - **Performance**: <200ms latency for keystroke-to-sound (Web Audio API scheduler), 60fps Canvas animation (requestAnimationFrame), <100ms audio-visual sync
 
 ## Technical Context
@@ -36,7 +36,7 @@ Build an AI-powered web application that generates adaptive focus music in real-
 **Constraints**:
 - Web Audio API only (no pre-recorded audio files)
 - Browser-based rhythm detection (no keystroke content leaves browser)
-- Gemini API rate limits (60 requests/minute for gemini-1.5-flash)
+- Gemini API rate limits (60 requests/minute for gemini-2.5-flash)
 - MongoDB Atlas free tier (<512MB storage, <100 concurrent connections)
 - Auth0 free tier (7000 active users, social logins, MFA)
 
@@ -236,7 +236,7 @@ Dockerfile.backend           # [NEW] Backend containerization
 
 4. **Gemini API Prompt Engineering for Music Insights**
    - **Unknown**: How to engineer Gemini prompts that generate accurate, emotionally resonant mood recommendations from rhythm data?
-   - **Research Goal**: Find few-shot examples, structured output patterns (JSON), and token optimization techniques for gemini-1.5-flash
+   - **Research Goal**: Find few-shot examples, structured output patterns (JSON), and token optimization techniques for gemini-2.5-flash
    - **Deliverable**: Decision on prompt templates, few-shot examples for steady/erratic patterns, Gemini model selection (flash vs. pro)
 
 5. **Auth0 React + Express Integration Patterns**

@@ -70,7 +70,6 @@ make shell-mongodb # Access MongoDB shell
    - MongoDB credentials
    - Auth0 credentials (from https://manage.auth0.com/)
    - Gemini API key (from https://makersuite.google.com/)
-   - Context7 API key (from https://context7.com/)
 
 3. **Start services**
    ```bash
