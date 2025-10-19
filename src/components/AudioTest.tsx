@@ -11,7 +11,7 @@ export function AudioTest() {
 
 	const testDirectAudio = async () => {
 		try {
-			console.log('🔊 Starting audio test with ascending triad...');
+			console.log('🔊 Starting audio test with Do-Re-Mi-Fa-Sol-La-Ti-Do scale...');
 			
 			// Create AudioContext
 			const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -25,18 +25,23 @@ export function AudioTest() {
 				console.log(`Resumed! New state: ${ctx.state}`);
 			}
 
-			// Create three ascending tones: C-E-G (C major triad)
+			// Do-Re-Mi-Fa-Sol-La-Ti-Do scale (C major scale)
 			const notes = [
-				{ name: 'C5', freq: 523 },  // Do
-				{ name: 'E5', freq: 659 },  // Mi
-				{ name: 'G5', freq: 784 },  // Sol
+				{ name: 'C5 (Do)', freq: 523.25 },
+				{ name: 'D5 (Re)', freq: 587.33 },
+				{ name: 'E5 (Mi)', freq: 659.25 },
+				{ name: 'F5 (Fa)', freq: 698.46 },
+				{ name: 'G5 (Sol)', freq: 783.99 },
+				{ name: 'A5 (La)', freq: 880.00 },
+				{ name: 'B5 (Ti)', freq: 987.77 },
+				{ name: 'C6 (Do)', freq: 1046.50 },
 			];
 			
-			console.log('🎵 Playing C Major Triad (Do-Mi-Sol)...');
+			console.log('🎵 Playing Do-Re-Mi-Fa-Sol-La-Ti-Do scale (0.3s per note)...');
 			
-			// Play each note in sequence
+			// Play each note in sequence (0.3 seconds each, no overlap)
 			notes.forEach((note, index) => {
-				const startTime = ctx.currentTime + (index * 0.5); // 0.5s apart
+				const startTime = ctx.currentTime + (index * 0.3); // 0.3 second apart (no gap, no overlap)
 				
 				const osc = ctx.createOscillator();
 				const gain = ctx.createGain();
@@ -49,35 +54,35 @@ export function AudioTest() {
 				osc.type = 'sine';
 				osc.frequency.setValueAtTime(note.freq, startTime);
 				
-				// Envelope: fade in and out
+				// Envelope: quick fade in and out for 0.3s duration
 				gain.gain.setValueAtTime(0, startTime);
-				gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05); // Quick attack
-				gain.gain.setValueAtTime(0.3, startTime + 0.4); // Sustain
-				gain.gain.linearRampToValueAtTime(0, startTime + 0.5); // Fade out
+				gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02); // Quick attack
+				gain.gain.setValueAtTime(0.3, startTime + 0.25); // Sustain
+				gain.gain.linearRampToValueAtTime(0, startTime + 0.3); // Quick fade out
 				
-				// Start and stop
+				// Start and stop (exactly 0.3 seconds)
 				osc.start(startTime);
-				osc.stop(startTime + 0.5);
+				osc.stop(startTime + 0.3);
 				
-				console.log(`  ${index + 1}. ${note.name} (${note.freq}Hz)`);
+				console.log(`  ${index + 1}. ${note.name} (${note.freq.toFixed(2)}Hz)`);
 			});
 
 			setIsPlaying(true);
-			console.log('✅ Started! Listen for three ascending tones...');
+			console.log('✅ Started! Listen for 8 notes (Do-Re-Mi-Fa-Sol-La-Ti-Do)...');
 
-			// Complete after 2 seconds (all notes finished)
+			// Complete after 2.4 seconds (8 notes × 0.3s each)
 			setTimeout(() => {
 				setIsPlaying(false);
 				console.log('⏹️ Test complete!');
 				
 				if (ctx.state === 'running') {
 					console.log('✅ SUCCESS: AudioContext is running!');
-					console.log('If you heard the three tones, Web Audio API works.');
+					console.log('If you heard the 8-note scale, Web Audio API works.');
 					console.log('If not, check system audio settings.');
 				} else {
 					console.log('❌ WARNING: AudioContext state is: ' + ctx.state);
 				}
-			}, 2000);
+			}, 2400);
 
 		} catch (error) {
 			console.log('❌ ERROR: ' + (error as Error).message);
