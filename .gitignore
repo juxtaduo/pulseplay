@@ -37,3 +37,7 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# MIDI files and archives
+src/assets/midi
+docs/archive
