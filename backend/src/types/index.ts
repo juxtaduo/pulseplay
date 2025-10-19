@@ -10,7 +10,10 @@ export type Mood =
 	| 'deep-focus'
 	| 'melodic-flow'
 	| 'jazz-harmony'
-	| 'rivers-flow';
+	| 'thousand-years'
+	| 'kiss-the-rain'
+	| 'river-flows'
+	| 'gurenge';
 
 /**
  * Rhythm types based on typing pattern analysis

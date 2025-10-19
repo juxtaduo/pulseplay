@@ -19,11 +19,12 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 - 🎯 **Rhythm Detection** - Tracks keyboard and mouse activity to calculate BPM and tempo
 - 🧠 **AI Mood Recommendations** - Intelligent insights via Gemini API based on your focus patterns
 - 🎨 **Live Waveform Visualization** - 60fps Canvas animation synced with your typing
-- � **Adaptive Instruments** - Piano, violin, electric piano, and bass that respond to your rhythm
+- 🎼 **Multiple Moods** - Deep Flow (Lofi), Melodic Flow, Jazz Harmony, A Thousand Years, Kiss The Rain, River Flows In You, Gurenge
+- 🎵 **Adaptive Instruments** - Piano, Flute, Xylophone, and Kalimba that respond to your rhythm
 - 🔐 **Secure Authentication** - OAuth2 PKCE flow with Auth0
 - 💾 **Session History** - Automatic tracking with 90-day data retention
 - ♿ **Accessibility Mode** - WCAG 2.1 AA compliant with sensory-friendly options
-- 🎚️ **Three Moods** - Choose between Calm (60-80 BPM), Focus (85-110 BPM), or Energy (110-130 BPM)
+- 📊 **Session Statistics** - Real-time metrics: duration, keystrokes, clicks, mouse moves, scrolls
 
 ---
 
@@ -46,87 +47,111 @@ cd pulseplay-ai
 # Install dependencies
 npm install
 
-# Configure environment variables
-cp .env.example .env
-# Edit .env with your MongoDB, Auth0, and Gemini credentials
+# Install backend dependencies
+cd backend && npm install && cd ..
+```
 
-# Start development servers
-# Terminal 1: Frontend (Vite)
+### Configuration
+
+Create a `.env` file in the project root:
+
+```bash
+# Frontend Environment Variables
+VITE_AUTH0_DOMAIN=your-domain.auth0.com
+VITE_AUTH0_CLIENT_ID=your_client_id
+VITE_AUTH0_AUDIENCE=https://api.pulseplay.ai
+VITE_API_URL=http://localhost:3001
+```
+
+Create a `backend/.env` file:
+
+```bash
+# MongoDB Configuration
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/pulseplay
+
+# Auth0 Configuration
+AUTH0_DOMAIN=your-domain.auth0.com
+AUTH0_CLIENT_ID=your_client_id
+AUTH0_CLIENT_SECRET=your_client_secret
+AUTH0_AUDIENCE=https://api.pulseplay.ai
+AUTH0_ISSUER_BASE_URL=https://your-domain.auth0.com
+
+# Gemini API
+GEMINI_API_KEY=your_gemini_api_key
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
+```
+
+### Running the Application
+
+```bash
+# Terminal 1: Start backend server
+cd backend
 npm run dev
 
-# Terminal 2: Backend (Express)
-cd backend
+# Terminal 2: Start frontend (in new terminal)
 npm run dev
 ```
 
-Visit http://localhost:5173 to see the app running!
+Visit `http://localhost:5173` in your browser.
 
 ---
 
-## 📖 Documentation
+## 📚 Documentation
 
-- **[Complete Documentation](./DOCUMENTATION.md)** - Full project documentation
-- **[API Reference](./API_REFERENCE.md)** - Detailed API documentation
-- **[Developer Guide](./DEVELOPER_GUIDE.md)** - Development best practices and guides
+### For Users
+
+- **[Quick Start Guide](docs/public/QUICK_START.md)** - Get up and running
+- **[Background Audio Guide](docs/developer/BACKGROUND_AUDIO.md)** - How audio works when tab is inactive
+- **[Contributing](docs/public/CONTRIBUTING.md)** - How to contribute to the project
+
+### For Developers
+
+- **[Developer Guide](docs/developer/DEVELOPER_GUIDE.md)** - Comprehensive development guide
+- **[API Reference](docs/developer/API_REFERENCE.md)** - Complete API documentation
+- **[Architecture](docs/developer/ARCHITECTURE.md)** - System architecture and design
+- **[Deployment Guide](docs/developer/DEPLOYMENT.md)** - Production deployment instructions
+- **[Technical Documentation](docs/developer/DOCUMENTATION.md)** - In-depth technical details
+
+---
+
+## 🎮 How to Use
+
+1. **Select a Mood** - Choose from Deep Flow, Melodic Flow, Jazz Harmony, A Thousand Years, Kiss The Rain, River Flows In You, or Gurenge
+2. **Pick Instruments** - Select up to 4 instruments (Piano, Flute, Xylophone, Kalimba)
+3. **Start Your Session** - Click play and start typing/working
+4. **Adjust Volume** - Use the slider to set your preferred volume level
+5. **Your Rhythm Creates Music** - The app adapts to your typing and mouse patterns
 
 ---
 
 ## 🏗️ Tech Stack
 
 ### Frontend
-- **React 18** - UI framework
-- **TypeScript** - Type-safe development
-- **Vite** - Fast build tool
-- **TailwindCSS** - Utility-first styling
-- **Lucide React** - Beautiful icons
+
+- **React 18.3** - UI framework
+- **TypeScript 5.5** - Type safety
+- **Vite** - Build tool and dev server
+- **TailwindCSS** - Styling
+- **Web Audio API** - Audio synthesis
+- **Canvas API** - Waveform visualization
+- **Lucide React** - Icon library
 
 ### Backend
-- **Supabase** - Backend as a service
-  - Authentication
-  - PostgreSQL Database
-  - Edge Functions (Serverless)
-  - Real-time subscriptions
 
-### Audio
-- **Web Audio API** - Native browser audio synthesis
-  - OscillatorNode for tone generation
-  - GainNode for volume control
-  - BiquadFilterNode for frequency filtering
-  - ConvolverNode for reverb effects
+- **Node.js + Express** - REST API server
+- **MongoDB Atlas** - Cloud database
+- **Mongoose** - ODM for MongoDB
+- **Auth0** - Authentication and authorization
+- **Google Gemini AI** - Mood recommendations
 
----
+### DevOps
 
-## 📁 Project Structure
-
-```
-pulseplay-ai/
-├── src/
-│   ├── components/       # React UI components
-│   ├── hooks/           # Custom React hooks
-│   ├── services/        # API clients
-│   ├── lib/             # Utilities
-│   └── App.tsx          # Main application
-├── supabase/
-│   ├── functions/       # Edge functions
-│   └── migrations/      # Database schema
-└── Documentation files
-```
-
----
-
-## 🎮 How to Use
-
-1. **Sign Up/Sign In** - Create an account or log in
-2. **Click Play** - Start the audio engine
-3. **Start Typing** - Your typing rhythm will modulate the music
-4. **Adjust Settings** - Change mood, volume, and accessibility mode
-5. **View Insights** - See AI-generated analysis of your work rhythm
-
-### Mood Modes
-
-- **🌊 Calm** - Lower frequencies (130-392 Hz) for relaxed focus
-- **🎯 Focus** - Mid frequencies (145-440 Hz) for productive work
-- **⚡ Energy** - Higher frequencies (165-494 Hz) for high-intensity tasks
+- **Biome** - Linting and formatting
+- **GitHub Actions** - CI/CD (planned)
 
 ---
 
@@ -138,33 +163,33 @@ pulseplay-ai/
 npm run dev        # Start development server
 npm run build      # Build for production
 npm run preview    # Preview production build
-npm run lint       # Run ESLint
+npm run lint       # Run Biome linter
 npm run typecheck  # Check TypeScript errors
 ```
 
-### Environment Variables
+---
 
-Create a `.env` file with:
+## 📁 Project Structure
 
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
-
-### Database Setup
-
-```bash
-# Install Supabase CLI
-npm install -g supabase
-
-# Link your project
-supabase link --project-ref your-project-ref
-
-# Run migrations
-supabase db push
-
-# Deploy edge functions
-supabase functions deploy generate-mood
+pulseplay-ai/
+├── src/                    # Frontend source code
+│   ├── components/         # React components
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Utilities and helpers
+│   ├── pages/             # Page components
+│   └── services/          # API services
+├── backend/               # Backend API server
+│   └── src/
+│       ├── models/        # MongoDB models
+│       ├── routes/        # Express routes
+│       ├── services/      # Business logic
+│       └── middleware/    # Express middleware
+├── docs/                  # Documentation
+│   ├── public/           # User-facing docs
+│   ├── developer/        # Developer docs
+│   └── archive/          # Historical docs
+└── specs/                # Project specifications
 ```
 
 ---
@@ -201,12 +226,6 @@ supabase functions deploy generate-mood
 ## 🧪 Testing
 
 ```bash
-# Run unit tests (when implemented)
-npm test
-
-# Run E2E tests (when implemented)
-npm run test:e2e
-
 # Type checking
 npm run typecheck
 ```
@@ -257,38 +276,25 @@ Contributions are welcome! Please follow these steps:
 
 ## 📝 License
 
-This project is built for an open-source hackathon. License details to be added.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Built with [React](https://reactjs.org/)
-- Powered by [Supabase](https://supabase.com/)
-- Icons from [Lucide](https://lucide.dev/)
-- Styled with [TailwindCSS](https://tailwindcss.com/)
+- **Web Audio API** - For enabling real-time audio synthesis
+- **Google Gemini AI** - For intelligent mood recommendations
+- **Auth0** - For secure authentication
+- **MongoDB Atlas** - For reliable cloud database
+- **React Community** - For amazing open-source tools
 
 ---
 
-## 📧 Contact & Support
+## 📧 Contact
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/pulseplay-ai/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/pulseplay-ai/discussions)
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Mobile app version (React Native)
-- [ ] More instrument types (piano, strings, pads)
-- [ ] Session analytics and charts
-- [ ] Collaborative focus rooms
-- [ ] Pomodoro timer integration
-- [ ] Export session recordings
-- [ ] Spotify playlist integration
-- [ ] Machine learning for advanced mood detection
-- [ ] Binaural beats support
+- **GitHub Issues** - [Report bugs or request features](https://github.com/retiarylime/pulseplay-ai/issues)
+- **Discussions** - [Join the conversation](https://github.com/retiarylime/pulseplay-ai/discussions)
 
 ---
 
-**Built with ❤️ for focused productivity**
+**Built with ❤️ for productivity and creativity**

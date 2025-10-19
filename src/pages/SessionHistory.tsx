@@ -43,10 +43,12 @@ export const SessionHistory = () => {
 
 	const MOOD_OPTIONS: { value: Mood | 'all'; label: string }[] = [
 		{ value: 'all', label: 'All Moods' },
-		{ value: 'deep-focus', label: 'Deep Focus' },
-		{ value: 'creative-flow', label: 'Creative Flow' },
-		{ value: 'calm-reading', label: 'Calm Reading' },
-		{ value: 'energized-coding', label: 'Energized Coding' },
+		{ value: 'deep-focus', label: 'Deep Flow' },
+		{ value: 'melodic-flow', label: 'Melodic Flow' },
+		{ value: 'jazz-harmony', label: 'Jazz Harmony' },
+		{ value: 'thousand-years', label: 'A Thousand Years' },
+		{ value: 'kiss-the-rain', label: 'Kiss The Rain' },
+		{ value: 'river-flows', label: 'River Flows In You' },
 	];
 
 	// Fetch session history (T135)
@@ -134,9 +136,12 @@ export const SessionHistory = () => {
 	const getMoodColor = (mood: Mood) => {
 		const colors: Record<Mood, string> = {
 			'deep-focus': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-			'creative-flow': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-			'calm-reading': 'bg-green-500/20 text-green-400 border-green-500/30',
-			'energized-coding': 'bg-red-500/20 text-red-400 border-red-500/30',
+			'melodic-flow': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+			'jazz-harmony': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+			'thousand-years': 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+			'kiss-the-rain': 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+			'river-flows': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+			'gurenge': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
 		};
 		return colors[mood] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
 	};
