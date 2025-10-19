@@ -5,7 +5,6 @@
  */
 
 import { Schema, model, Document } from 'mongoose';
-import crypto from 'crypto';
 
 /**
  * AIMoodRecommendation document interface

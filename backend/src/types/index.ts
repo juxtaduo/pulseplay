@@ -51,6 +51,8 @@ export interface FocusSession {
 	startTime: Date;
 	endTime: Date | null;
 	totalDurationMinutes: number | null;
+	keystrokeCount: number;
+	averageTempo: number;
 	rhythmData: RhythmData;
 	state: SessionState;
 	createdAt: Date;
@@ -76,6 +78,9 @@ export interface MoodInsight {
 	userIdHash: string;
 	mood: Mood;
 	insight: string;
+	generatedAt: Date;
+	promptHash: string;
+	modelUsed: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -87,6 +92,10 @@ export interface UserPreferences {
 	userIdHash: string;
 	preferredMoods: Mood[];
 	rhythmPreferences: RhythmType[];
+	favoriteTempos: number[];
+	preferredInstruments: string[];
+	volumeLevel: number;
+	enableVisualizations: boolean;
 	sessionGoalMinutes: number;
 	createdAt: Date;
 	updatedAt: Date;
@@ -96,10 +105,11 @@ export interface UserPreferences {
  * API Error structure
  */
 export interface APIError {
-	code: string;
+	error: string;
+	code?: string;
 	message: string;
 	details?: unknown;
-	statusCode: number;
+	statusCode?: number;
 }
 
 /**

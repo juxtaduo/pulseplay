@@ -133,24 +133,17 @@ router.get('/weekly-summary', async (_req: Request, res: Response) => {
 		}
 
 		// Map sessions to metrics format expected by Gemini
-		const sessionMetrics = sessions.map((s) => {
-			const sessionMetrics = {
-				duration: s.totalDurationMinutes * 60,
+		const sessionData = sessions.map((s) => {
+			return {
+				duration: (s.totalDurationMinutes || 0) * 60,
 				totalKeystrokes: s.keystrokeCount || 0,
 				averageTempo: s.averageTempo || 0,
 				selectedMood: s.mood || 'thousand-years',
 			};
-			return sessionMetrics;
 		});
 
 		// Generate weekly summary via Gemini
-		const summary = await generateWeeklySummary(
-			sessions.map((s) => ({
-				duration: (s.totalDurationMinutes || 0) * 60, // Convert to seconds
-				averageTempo: s.rhythmData?.averageKeysPerMinute || 0,
-				selectedMood: s.mood || 'deep-focus',
-			}))
-		);
+		const summary = await generateWeeklySummary(sessionData);
 
 		logger.info({
 			sessions_analyzed: sessions.length,

@@ -12,7 +12,7 @@ import { logger } from '../config/logger.js';
  * @module services/sessionAnalyzer
  */
 
-import type { Mood } from '../types/index.js';
+// Remove unused import
 
 /**
  * Rhythm type based on typing pattern
