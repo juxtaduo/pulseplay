@@ -11,7 +11,6 @@ COPY tsconfig*.json ./
 COPY vite.config.ts ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
-COPY eslint.config.js ./
 COPY index.html ./
 
 # Install frontend dependencies
@@ -19,7 +18,6 @@ RUN npm ci
 
 # Copy frontend source code
 COPY src ./src
-COPY public ./public
 
 # Build frontend
 RUN npm run build
@@ -58,9 +56,6 @@ COPY --from=backend-builder /app/backend/dist ./dist
 # Copy built frontend from builder
 WORKDIR /app
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
-
-# Copy public assets if any
-COPY --from=frontend-builder /app/frontend/public ./frontend/public 2>/dev/null || true
 
 # Expose ports
 # Backend API
