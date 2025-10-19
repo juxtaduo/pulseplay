@@ -6,7 +6,8 @@ FROM node:20-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Copy frontend package files
-COPY package*.json ./
+COPY package.json ./
+COPY package-lock.json* ./
 COPY tsconfig*.json ./
 COPY vite.config.ts ./
 COPY tailwind.config.js ./
@@ -14,7 +15,7 @@ COPY postcss.config.js ./
 COPY index.html ./
 
 # Install frontend dependencies
-RUN npm ci
+RUN npm install --production=false
 
 # Copy frontend source code
 COPY src ./src
@@ -28,11 +29,12 @@ FROM node:20-alpine AS backend-builder
 WORKDIR /app/backend
 
 # Copy backend package files
-COPY backend/package*.json ./
+COPY backend/package.json ./
+COPY backend/package-lock.json* ./
 COPY backend/tsconfig.json ./
 
 # Install backend dependencies
-RUN npm ci
+RUN npm install --production=false
 
 # Copy backend source code
 COPY backend/src ./src
@@ -46,9 +48,10 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 # Install production dependencies for backend
-COPY backend/package*.json ./backend/
+COPY backend/package.json ./backend/
+COPY backend/package-lock.json* ./backend/
 WORKDIR /app/backend
-RUN npm ci --only=production
+RUN npm install --production
 
 # Copy built backend from builder
 COPY --from=backend-builder /app/backend/dist ./dist

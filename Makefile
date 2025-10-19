@@ -32,9 +32,22 @@ up-debug: ## Start all services including Mongo Express
 	@echo "MongoDB:       mongodb://localhost:27017"
 	@echo "Mongo Express: http://localhost:8081"
 
+up-atlas: ## Start services with MongoDB Atlas (no local DB)
+	@echo "$(GREEN)Starting services with MongoDB Atlas...$(NC)"
+	docker-compose -f docker-compose.atlas.yml up -d
+	@echo "$(GREEN)Services started successfully!$(NC)"
+	@echo "Frontend: http://localhost:5173"
+	@echo "Backend:  http://localhost:3000"
+	@echo "MongoDB:  Atlas Cloud"
+
 down: ## Stop all services
 	@echo "$(YELLOW)Stopping all services...$(NC)"
 	docker-compose down
+	@echo "$(GREEN)Services stopped!$(NC)"
+
+down-atlas: ## Stop Atlas services
+	@echo "$(YELLOW)Stopping Atlas services...$(NC)"
+	docker-compose -f docker-compose.atlas.yml down
 	@echo "$(GREEN)Services stopped!$(NC)"
 
 restart: ## Restart all services
@@ -44,6 +57,9 @@ restart: ## Restart all services
 
 logs: ## View logs from all services
 	docker-compose logs -f
+
+logs-atlas: ## View logs from Atlas deployment
+	docker-compose -f docker-compose.atlas.yml logs -f
 
 logs-backend: ## View backend logs
 	docker-compose logs -f backend
