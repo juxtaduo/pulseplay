@@ -1,13 +1,45 @@
 import { LogIn, LogOut, User } from 'lucide-react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect, useState } from 'react';
 
 /**
  * Authentication button component using Auth0
  * Displays login button when unauthenticated, user info and logout when authenticated
+ * Shows development mode when Auth0 is not configured
  * @module components/AuthButton
  */
 
 export const AuthButton = () => {
+	const [auth0Available, setAuth0Available] = useState(true);
+
+	// Check if Auth0 is properly configured by checking the domain
+	useEffect(() => {
+		const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+		const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+		const isSecure = window.location.protocol === 'https:' || 
+			window.location.hostname === 'localhost' || 
+			window.location.hostname === '127.0.0.1';
+
+		const hasValidConfig = domain && clientId && 
+			domain !== 'dev-example.auth0.com' && 
+			clientId !== 'example_client_id';
+
+		setAuth0Available(hasValidConfig && isSecure);
+	}, []);
+
+	// If Auth0 is not available, show development mode
+	if (!auth0Available) {
+		return (
+			<div className="flex items-center gap-2 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-600 rounded-full px-4 py-2">
+				<User size={18} className="text-yellow-600 dark:text-yellow-400" />
+				<span className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">
+					Dev Mode
+				</span>
+			</div>
+		);
+	}
+
+	// Use Auth0 normally when available
 	const { loginWithRedirect, logout, user, isAuthenticated, isLoading } = useAuth0();
 
 	const handleLogin = () => {
