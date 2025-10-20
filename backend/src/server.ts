@@ -17,7 +17,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 // Middleware
 app.use(
 	cors({
-		origin: FRONTEND_URL,
+		origin: [FRONTEND_URL, 'https://pulseplay.lanun.xyz', 'http://pulseplay.lanun.xyz'],
 		credentials: true,
 	}),
 );
