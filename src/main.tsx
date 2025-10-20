@@ -15,7 +15,8 @@ const hasAuth0Config = auth0Domain && auth0ClientId &&
 
 const isSecureOrigin = window.location.protocol === 'https:' || 
 	window.location.hostname === 'localhost' || 
-	window.location.hostname === '127.0.0.1';
+	window.location.hostname === '127.0.0.1' ||
+	window.location.hostname === '192.168.1.237'; // Allow Docker VM IP
 
 const shouldUseAuth0 = hasAuth0Config && isSecureOrigin;
 
