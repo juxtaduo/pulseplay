@@ -118,7 +118,7 @@
 
 ### 8. ✅ Constitution Compliance Verified
 
-**Check**: Feature aligns with all 5 principles of PulsePlay AI Constitution (v2.1.0).
+**Check**: Feature aligns with all 5 principles of PulsePlay Constitution (v2.1.0).
 
 **Result**: PASS
 

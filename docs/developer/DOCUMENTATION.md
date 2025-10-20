@@ -1,4 +1,4 @@
-# PulsePlay AI - Complete Documentation
+# PulsePlay - Complete Documentation
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -72,7 +72,7 @@ The application follows a **component-driven architecture** with:
 ## Project Structure
 
 ```
-pulseplay-ai/
+pulseplay/
 ├── src/
 │   ├── components/          # React UI components
 │   │   ├── AuthButton.tsx        # Authentication UI
@@ -597,8 +597,8 @@ created_at            timestamptz
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/pulseplay-ai.git
-   cd pulseplay-ai
+   git clone https://github.com/yourusername/pulseplay.git
+   cd pulseplay
    ```
 
 2. **Install dependencies**

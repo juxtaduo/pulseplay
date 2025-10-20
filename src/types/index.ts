@@ -1,5 +1,5 @@
 /**
- * Frontend type definitions for PulsePlay AI
+ * Frontend type definitions for PulsePlay
  * @module types
  */
 

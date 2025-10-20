@@ -1,7 +1,7 @@
 # Background Audio & Tab Switching Behavior
 
 ## Overview
-PulsePlay AI now continues playing audio even when you switch to other browser tabs or windows. The background music and ambient sounds will keep playing while you work in other applications.
+PulsePlay now continues playing audio even when you switch to other browser tabs or windows. The background music and ambient sounds will keep playing while you work in other applications.
 
 ## What Works in Background
 

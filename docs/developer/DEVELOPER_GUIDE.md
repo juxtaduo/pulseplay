@@ -1,4 +1,4 @@
-# Developer Guide - PulsePlay AI
+# Developer Guide - PulsePlay
 
 ## Table of Contents
 1. [Development Environment Setup](#development-environment-setup)
@@ -36,8 +36,8 @@
 
 1. **Clone and Install**
    ```bash
-   git clone https://github.com/yourusername/pulseplay-ai.git
-   cd pulseplay-ai
+   git clone https://github.com/yourusername/pulseplay.git
+   cd pulseplay
    npm install
    ```
 
@@ -83,7 +83,7 @@
 ### Directory Structure Explained
 
 ```
-pulseplay-ai/
+pulseplay/
 │
 ├── src/
 │   ├── components/          # React UI components

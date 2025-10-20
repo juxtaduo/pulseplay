@@ -1,4 +1,4 @@
-# 🎵 PulsePlay AI
+# 🎵 PulsePlay
 
 **Turn your typing rhythm into personalized focus music**
 
@@ -42,8 +42,8 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 
 ```bash
 # Clone the repository
-git clone https://github.com/retiarylime/pulseplay-ai.git
-cd pulseplay-ai
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
 
 # Install dependencies
 npm install
@@ -189,7 +189,7 @@ make rebuild         # Rebuild and restart
 ## 📁 Project Structure
 
 ```
-pulseplay-ai/
+pulseplay/
 ├── src/                    # Frontend source code
 │   ├── components/         # React components
 │   ├── hooks/             # Custom React hooks
@@ -309,8 +309,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📧 Contact
 
-- **GitHub Issues** - [Report bugs or request features](https://github.com/retiarylime/pulseplay-ai/issues)
-- **Discussions** - [Join the conversation](https://github.com/retiarylime/pulseplay-ai/discussions)
+- **GitHub Issues** - [Report bugs or request features](https://github.com/juxtaduo/pulseplay/issues)
+- **Discussions** - [Join the conversation](https://github.com/juxtaduo/pulseplay/discussions)
 
 ---
 

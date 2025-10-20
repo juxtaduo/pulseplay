@@ -1,6 +1,6 @@
 # 📖 Documentation Navigation
 
-Quick links to all documentation in the PulsePlay AI project.
+Quick links to all documentation in the PulsePlay project.
 
 ---
 
@@ -58,16 +58,16 @@ Other important project documentation:
 
 ## 🔗 External Resources
 
-- **[GitHub Repository](https://github.com/retiarylime/pulseplay-ai)** - Source code
-- **[Issues](https://github.com/retiarylime/pulseplay-ai/issues)** - Bug reports and features
-- **[Discussions](https://github.com/retiarylime/pulseplay-ai/discussions)** - Community forum
+- **[GitHub Repository](https://github.com/juxtaduo/pulseplay)** - Source code
+- **[Issues](https://github.com/juxtaduo/pulseplay/issues)** - Bug reports and features
+- **[Discussions](https://github.com/juxtaduo/pulseplay/discussions)** - Community forum
 
 ---
 
 ## 📊 Documentation Structure
 
 ```
-pulseplay-ai/
+pulseplay/
 ├── README.md                    # Project overview (start here)
 ├── DOCS.md                      # This file
 ├── CLEANUP_SUMMARY.md           # Recent cleanup details

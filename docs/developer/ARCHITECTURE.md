@@ -1,4 +1,4 @@
-# PulsePlay AI - System Architecture
+# PulsePlay - System Architecture
 
 **Version**: 2.0.0  
 **Last Updated**: October 18, 2025  
@@ -23,7 +23,7 @@
 
 ## Overview
 
-PulsePlay AI is an AI-powered focus music application that generates adaptive Lofi hip-hop beats in real-time based on user typing rhythm. The system combines Web Audio API synthesis, browser-based rhythm detection, and Gemini AI integration to create a personalized focus music experience.
+PulsePlay is an AI-powered focus music application that generates adaptive Lofi hip-hop beats in real-time based on user typing rhythm. The system combines Web Audio API synthesis, browser-based rhythm detection, and Gemini AI integration to create a personalized focus music experience.
 
 ### Core Capabilities
 

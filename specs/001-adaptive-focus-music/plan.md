@@ -50,7 +50,7 @@ Build an AI-powered web application that generates adaptive focus music in real-
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Verify compliance with PulsePlay AI Constitution (v2.1.0):
+Verify compliance with PulsePlay Constitution (v2.1.0):
 
 - [x] **Experience-First Design**: 
   - ✅ UX intuitive (30-second understanding: select mood → start session → type)
@@ -366,7 +366,7 @@ Developer onboarding guide (target: <1 hour setup):
 1. **Clone and Install**
    ```bash
    git clone <repo-url>
-   cd pulseplay-ai
+   cd pulseplay
    git checkout 001-adaptive-focus-music
    npm install
    cd backend && npm install && cd ..
@@ -438,9 +438,9 @@ Run `.specify/scripts/bash/update-agent-context.sh copilot` to update `.github/c
 ## Reporting
 
 **Branch**: `001-adaptive-focus-music`  
-**Implementation Plan**: `/home/rl/Desktop/pulseplay-ai/specs/001-adaptive-focus-music/plan.md`  
-**Feature Specification**: `/home/rl/Desktop/pulseplay-ai/specs/001-adaptive-focus-music/spec.md`  
-**Validation Checklist**: `/home/rl/Desktop/pulseplay-ai/specs/001-adaptive-focus-music/checklists/requirements.md`
+**Implementation Plan**: `/home/rl/Desktop/pulseplay/specs/001-adaptive-focus-music/plan.md`  
+**Feature Specification**: `/home/rl/Desktop/pulseplay/specs/001-adaptive-focus-music/spec.md`  
+**Validation Checklist**: `/home/rl/Desktop/pulseplay/specs/001-adaptive-focus-music/checklists/requirements.md`
 
 **Next Steps**:
 1. Execute Phase 0: Research all 7 technology decisions, create `research.md`

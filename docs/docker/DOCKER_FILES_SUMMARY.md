@@ -2,7 +2,7 @@
 
 ## ✅ Files Created
 
-All Docker deployment files have been successfully created for PulsePlay AI!
+All Docker deployment files have been successfully created for PulsePlay!
 
 ### Core Docker Files (8 files)
 
@@ -317,7 +317,7 @@ docker-compose up -d --build
 
 ## 📞 Support
 
-- **Issues**: https://github.com/retiarylime/pulseplay-ai/issues
+- **Issues**: https://github.com/juxtaduo/pulseplay/issues
 - **Documentation**: See `DOCKER_DEPLOYMENT.md`
 - **Commands**: Run `make help`
 

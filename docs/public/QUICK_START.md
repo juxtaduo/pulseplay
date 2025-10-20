@@ -1,4 +1,4 @@
-# PulsePlay AI - Quick Start Guide
+# PulsePlay - Quick Start Guide
 
 ## Phase 2 Complete ✅
 
@@ -7,7 +7,7 @@ All foundational infrastructure is in place. You can now start implementing User
 ## Project Structure
 
 ```
-pulseplay-ai/
+pulseplay/
 ├── backend/
 │   ├── src/
 │   │   ├── config/          # Configuration files

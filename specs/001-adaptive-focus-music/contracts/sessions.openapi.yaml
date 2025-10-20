@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: PulsePlay AI - Sessions API
+  title: PulsePlay - Sessions API
   description: REST API for managing focus sessions (create, retrieve, update, delete, history)
   version: 1.0.0
   contact:
-    name: PulsePlay AI
-    url: https://github.com/retiarylime/pulseplay-ai
+    name: PulsePlay
+    url: https://github.com/juxtaduo/pulseplay
 
 servers:
   - url: http://localhost:3000/api

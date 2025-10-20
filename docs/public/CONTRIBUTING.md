@@ -1,6 +1,6 @@
-# Contributing to PulsePlay AI
+# Contributing to PulsePlay
 
-First off, thank you for considering contributing to PulsePlay AI! It's people like you that make this project such a great tool for focused productivity.
+First off, thank you for considering contributing to PulsePlay! It's people like you that make this project such a great tool for focused productivity.
 
 ## Table of Contents
 
@@ -52,13 +52,13 @@ This project and everyone participating in it is governed by our Code of Conduct
 
 2. **Clone your fork**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/pulseplay-ai.git
-   cd pulseplay-ai
+   git clone https://github.com/YOUR_USERNAME/pulseplay.git
+   cd pulseplay
    ```
 
 3. **Add upstream remote**
    ```bash
-   git remote add upstream https://github.com/ORIGINAL_OWNER/pulseplay-ai.git
+   git remote add upstream https://github.com/ORIGINAL_OWNER/pulseplay.git
    ```
 
 4. **Install dependencies**
@@ -636,7 +636,7 @@ By contributing, you agree that your contributions will be licensed under the sa
 
 Don't hesitate to ask questions! Open an issue with the `question` label or reach out on Discord.
 
-Thank you for contributing to PulsePlay AI! 🎵✨
+Thank you for contributing to PulsePlay! 🎵✨
 
 ---
 

@@ -1,4 +1,4 @@
-# Multi-stage build for PulsePlay AI
+# Multi-stage build for PulsePlay
 
 # Stage 1: Build Frontend
 FROM node:20-alpine AS frontend-builder

@@ -1,6 +1,6 @@
-# 📚 PulsePlay AI - Documentation Index
+# 📚 PulsePlay - Documentation Index
 
-Welcome to the PulsePlay AI documentation! This index will help you find the information you need.
+Welcome to the PulsePlay documentation! This index will help you find the information you need.
 
 ---
 

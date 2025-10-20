@@ -86,7 +86,7 @@ function App() {
 										Browser Compatibility Warning
 									</h3>
 									<p className="text-slate-700 dark:text-slate-300 text-sm mb-3">
-										Your browser ({browserCheck.browserName} {browserCheck.browserVersion}) may not support all features of PulsePlay AI.
+										Your browser ({browserCheck.browserName} {browserCheck.browserVersion}) may not support all features of PulsePlay.
 									</p>
 									<ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-400 mb-4">
 										{getUnsupportedFeatureMessages(browserCheck).map((msg, i) => (

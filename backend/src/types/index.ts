@@ -1,5 +1,5 @@
 /**
- * Shared type definitions for PulsePlay AI backend
+ * Shared type definitions for PulsePlay backend
  * @module types
  */
 
