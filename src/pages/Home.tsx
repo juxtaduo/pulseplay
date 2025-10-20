@@ -28,7 +28,7 @@ export function Home() {
 	});
 
 	// Session persistence hook (backend API integration)
-	const { sessionId, startSession, stopSession } = useSessionPersistence();
+	const { sessionId, startSession, stopSession, updateSessionRhythm } = useSessionPersistence();
 
 	// Track session duration
 	useEffect(() => {
@@ -48,6 +48,31 @@ export function Home() {
 			}
 		};
 	}, [isPlaying]);
+
+	// Periodically update session with rhythm data (every 30 seconds during active session)
+	useEffect(() => {
+		let intervalId: NodeJS.Timeout;
+
+		if (isPlaying && sessionId && rhythmData.keystrokeCount > 0) {
+			// Update immediately after 10 seconds, then every 30 seconds
+			const updateInterval = 30000; // 30 seconds
+			
+			// First update after 10 seconds to get some initial data
+			const initialTimer = setTimeout(() => {
+				updateSessionRhythm(rhythmData);
+			}, 10000);
+
+			// Regular updates every 30 seconds
+			intervalId = setInterval(() => {
+				updateSessionRhythm(rhythmData);
+			}, updateInterval);
+
+			return () => {
+				clearTimeout(initialTimer);
+				clearInterval(intervalId);
+			};
+		}
+	}, [isPlaying, sessionId, rhythmData.keystrokeCount, updateSessionRhythm, rhythmData]);
 
 	// Handle starting a session
 	const handleStart = async (mood: Mood) => {

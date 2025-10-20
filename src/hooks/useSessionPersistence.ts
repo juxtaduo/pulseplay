@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import type { Song } from '../types';
+import type { RhythmData as FrontendRhythmData } from './useRhythmDetection';
 
 /**
  * React hook for persisting focus sessions to backend API
@@ -21,6 +22,7 @@ export interface UseSessionPersistenceReturn {
 	sessionId: string | null;
 	startSession: (song: Song) => Promise<void>;
 	stopSession: () => Promise<void>;
+	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
 	error: string | null;
 }
 
@@ -83,6 +85,73 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 			}
 		},
 		[isAuthenticated, getAccessTokenSilently]
+	);
+
+	/**
+	 * Update session with rhythm data
+	 */
+	const updateSessionRhythm = useCallback(
+		async (frontendRhythmData: FrontendRhythmData) => {
+			if (!state.sessionId || !isAuthenticated) {
+				console.warn('[useSessionPersistence] Cannot update rhythm: no active session or not authenticated');
+				return;
+			}
+
+			try {
+				setState((prev) => ({ ...prev, error: null }));
+				const token = await getAccessTokenSilently();
+
+				// Transform frontend rhythm data to backend format
+				const rhythmType = frontendRhythmData.intensity === 'high' 
+					? 'energetic' 
+					: frontendRhythmData.intensity === 'medium' 
+					? 'steady' 
+					: 'thoughtful';
+
+				const backendRhythmData = {
+					averageKeysPerMinute: frontendRhythmData.keysPerMinute,
+					rhythmType,
+					peakIntensity: frontendRhythmData.rhythmScore / 100, // Convert score to 0-1 range
+					samples: [] // We'll keep this empty for now, could add historical data later
+				};
+
+				abortControllerRef.current = new AbortController();
+
+				const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({
+						rhythmData: backendRhythmData,
+						keystrokeCount: frontendRhythmData.keystrokeCount,
+						averageTempo: frontendRhythmData.keysPerMinute,
+					}),
+					signal: abortControllerRef.current.signal,
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+					throw new Error(errorData.error || `HTTP ${response.status}`);
+				}
+
+				console.log('[useSessionPersistence] Session rhythm updated:', {
+					keysPerMinute: frontendRhythmData.keysPerMinute,
+					rhythmType,
+					keystrokeCount: frontendRhythmData.keystrokeCount
+				});
+			} catch (err) {
+				if (err instanceof Error && err.name === 'AbortError') {
+					// Request was cancelled, ignore
+					return;
+				}
+				const errorMessage = err instanceof Error ? err.message : 'Failed to update rhythm';
+				setState((prev) => ({ ...prev, error: errorMessage }));
+				console.error('[useSessionPersistence] Update rhythm error:', err);
+			}
+		},
+		[state.sessionId, isAuthenticated, getAccessTokenSilently]
 	);
 
 	/**
@@ -150,6 +219,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 		sessionId: state.sessionId,
 		startSession,
 		stopSession,
+		updateSessionRhythm,
 		error: state.error,
 	};
 }
