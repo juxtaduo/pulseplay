@@ -1,5 +1,5 @@
 import { Play, Pause, Volume2, Piano, Music2, Mic2, Radio } from 'lucide-react';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 import type { InstrumentType } from '../lib/instruments';
 
 /**

@@ -7,7 +7,7 @@ import { AudioTest } from '../components/AudioTest';
 import { useRhythmDetection } from '../hooks/useRhythmDetection';
 import { useAudioEngine } from '../hooks/useAudioEngine';
 import { useSessionPersistence } from '../hooks/useSessionPersistence';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 import type { InstrumentType } from '../lib/instruments';
 
 export function Home() {

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import type { Mood } from '../../backend/src/types';
+import type { Song } from '../types';
 
 /**
  * React hook for persisting focus sessions to backend API
@@ -19,7 +19,7 @@ interface SessionState {
 
 export interface UseSessionPersistenceReturn {
 	sessionId: string | null;
-	startSession: (mood: Mood) => Promise<void>;
+	startSession: (song: Song) => Promise<void>;
 	stopSession: () => Promise<void>;
 	error: string | null;
 }
@@ -37,7 +37,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	 * Start a new focus session
 	 */
 	const startSession = useCallback(
-		async (mood: Mood) => {
+		async (song: Song) => {
 			if (!isAuthenticated) {
 				setState((prev) => ({ ...prev, error: 'Not authenticated' }));
 				console.warn('[useSessionPersistence] Cannot start session: not authenticated');
@@ -56,7 +56,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${token}`,
 					},
-					body: JSON.stringify({ mood }),
+					body: JSON.stringify({ song }),
 					signal: abortControllerRef.current.signal,
 				});
 
