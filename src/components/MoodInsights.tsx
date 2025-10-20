@@ -1,5 +1,6 @@
 import { Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 
 /**
  * MoodInsights component displays AI-generated mood recommendations after session completion
@@ -24,6 +25,7 @@ interface AIRecommendation {
 }
 
 export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsightsProps) => {
+	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -39,11 +41,19 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 		setLoading(true);
 		setError(null);
 
+		if (!isAuthenticated) {
+			setError('Authentication required for AI insights');
+			setLoading(false);
+			return;
+		}
+
 		try {
+			const token = await getAccessTokenSilently();
 			const response = await fetch(`${API_BASE_URL}/api/ai/mood-recommendation`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({ sessionId }),
 			});

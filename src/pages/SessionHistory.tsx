@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { Download, Trash2, Filter, Clock, Activity, TrendingUp, Calendar } from 'lucide-react';
 import { formatDuration, formatRelativeTime } from '../utils/timeFormatter';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 
 /**
  * SessionHistory page displays past focus sessions with filtering and export (T135, T136, T137)
@@ -35,6 +36,7 @@ interface SessionHistoryResponse {
 }
 
 export const SessionHistory = () => {
+	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const [sessions, setSessions] = useState<Session[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -60,10 +62,22 @@ export const SessionHistory = () => {
 		setLoading(true);
 		setError(null);
 
+		if (!isAuthenticated) {
+			setError('Please log in to view session history');
+			setLoading(false);
+			return;
+		}
+
 		try {
+			const token = await getAccessTokenSilently();
 			const moodParam = selectedMood !== 'all' ? `&mood=${selectedMood}` : '';
 			const response = await fetch(
-				`${API_BASE_URL}/api/sessions/history?page=${currentPage}&limit=20${moodParam}`
+				`${API_BASE_URL}/api/sessions/history?page=${currentPage}&limit=20${moodParam}`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
 			);
 
 			if (!response.ok) {
@@ -84,8 +98,18 @@ export const SessionHistory = () => {
 
 	// Export session data (T137)
 	const handleExport = async () => {
+		if (!isAuthenticated) {
+			setError('Please log in to export data');
+			return;
+		}
+
 		try {
-			const response = await fetch(`${API_BASE_URL}/api/sessions/export`);
+			const token = await getAccessTokenSilently();
+			const response = await fetch(`${API_BASE_URL}/api/sessions/export`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
 			if (!response.ok) {
 				throw new Error('Failed to export data');
@@ -108,13 +132,22 @@ export const SessionHistory = () => {
 
 	// Delete all sessions
 	const handleDeleteAll = async () => {
+		if (!isAuthenticated) {
+			setError('Please log in to delete sessions');
+			return;
+		}
+
 		if (!confirm('Are you sure you want to delete ALL sessions? This cannot be undone.')) {
 			return;
 		}
 
 		try {
+			const token = await getAccessTokenSilently();
 			const response = await fetch(`${API_BASE_URL}/api/sessions/all`, {
 				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
 			});
 
 			if (!response.ok) {
