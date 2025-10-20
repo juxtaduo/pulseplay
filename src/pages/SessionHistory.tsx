@@ -13,7 +13,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 interface Session {
 	sessionId: string;
-	mood: Mood;
+	song: Mood; // Backend uses 'song' field, not 'mood'
 	startTime: string;
 	endTime?: string;
 	totalDurationMinutes?: number;
@@ -40,7 +40,7 @@ export const SessionHistory = () => {
 	const [sessions, setSessions] = useState<Session[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedMood, setSelectedMood] = useState<Mood | 'all'>('all');
+	const [selectedSong, setSelectedSong] = useState<Mood | 'all'>('all');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalSessions, setTotalSessions] = useState(0);
@@ -56,7 +56,7 @@ export const SessionHistory = () => {
 	// Fetch session history (T135)
 	useEffect(() => {
 		fetchSessions();
-	}, [selectedMood, currentPage]);
+	}, [selectedSong, currentPage]);
 
 	const fetchSessions = async () => {
 		setLoading(true);
@@ -70,9 +70,9 @@ export const SessionHistory = () => {
 
 		try {
 			const token = await getAccessTokenSilently();
-			const moodParam = selectedMood !== 'all' ? `&mood=${selectedMood}` : '';
+			const songParam = selectedSong !== 'all' ? `&song=${selectedSong}` : '';
 			const response = await fetch(
-				`${API_BASE_URL}/api/sessions/history?page=${currentPage}&limit=20${moodParam}`,
+				`${API_BASE_URL}/api/sessions/history?page=${currentPage}&limit=20${songParam}`,
 				{
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -166,14 +166,15 @@ export const SessionHistory = () => {
 		}
 	};
 
-	const getMoodColor = (mood: Mood) => {
+	const getSongColor = (song?: Mood) => {
+		if (!song) return 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
 		const colors: Record<Mood, string> = {
 			'thousand-years': 'bg-rose-500/20 text-rose-400 border-rose-500/30',
 			'kiss-the-rain': 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
 			'river-flows': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
 			'gurenge': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
 		};
-		return colors[mood] || 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
+		return colors[song] || 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
 	};
 
 	return (
@@ -194,9 +195,9 @@ export const SessionHistory = () => {
 						<div className="flex items-center gap-3">
 							<Filter size={20} className="text-slate-600 dark:text-slate-400" />
 							<select
-								value={selectedMood}
+								value={selectedSong}
 								onChange={(e) => {
-									setSelectedMood(e.target.value as Mood | 'all');
+									setSelectedSong(e.target.value as Mood | 'all');
 									setCurrentPage(1);
 								}}
 								className="bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -268,11 +269,11 @@ export const SessionHistory = () => {
 									<div className="flex-1">
 										<div className="flex items-center gap-3 mb-3">
 											<span
-												className={`px-3 py-1 rounded-full text-xs font-semibold border ${getMoodColor(
-													session.mood
+												className={`px-3 py-1 rounded-full text-xs font-semibold border ${getSongColor(
+													session.song
 												)}`}
 											>
-												{session.mood.replace(/-/g, ' ')}
+												{session.song?.replace(/-/g, ' ') || 'Unknown Song'}
 											</span>
 											<span className="text-xs text-slate-500">
 												{formatRelativeTime(new Date(session.createdAt))}
