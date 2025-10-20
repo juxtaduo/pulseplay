@@ -8,6 +8,8 @@ import type { Mood } from '../../backend/src/types';
  * @module pages/SessionHistory
  */
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 interface Session {
 	sessionId: string;
 	mood: Mood;
@@ -61,7 +63,7 @@ export const SessionHistory = () => {
 		try {
 			const moodParam = selectedMood !== 'all' ? `&mood=${selectedMood}` : '';
 			const response = await fetch(
-				`http://localhost:3001/api/sessions/history?page=${currentPage}&limit=20${moodParam}`
+				`${API_BASE_URL}/api/sessions/history?page=${currentPage}&limit=20${moodParam}`
 			);
 
 			if (!response.ok) {
@@ -83,7 +85,7 @@ export const SessionHistory = () => {
 	// Export session data (T137)
 	const handleExport = async () => {
 		try {
-			const response = await fetch('http://localhost:3001/api/sessions/export');
+			const response = await fetch(`${API_BASE_URL}/api/sessions/export`);
 
 			if (!response.ok) {
 				throw new Error('Failed to export data');
@@ -111,7 +113,7 @@ export const SessionHistory = () => {
 		}
 
 		try {
-			const response = await fetch('http://localhost:3001/api/sessions/all', {
+			const response = await fetch(`${API_BASE_URL}/api/sessions/all`, {
 				method: 'DELETE',
 			});
 

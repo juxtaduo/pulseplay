@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
  * @module components/MoodInsights
  */
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 interface MoodInsightsProps {
 	sessionId: string | null;
 	sessionDuration: number; // seconds
@@ -38,7 +40,7 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 		setError(null);
 
 		try {
-			const response = await fetch('http://localhost:3001/api/ai/mood-recommendation', {
+			const response = await fetch(`${API_BASE_URL}/api/ai/mood-recommendation`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
