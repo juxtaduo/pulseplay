@@ -103,6 +103,14 @@ export function Home() {
 			await startAudio(mood);
 			// Start backend session
 			await startSession(mood);
+			
+			// Immediate test update after session creation
+			setTimeout(() => {
+				if (sessionId) {
+					console.log('[Home] Sending immediate test rhythm update after session creation');
+					updateSessionRhythm(rhythmDataRef.current);
+				}
+			}, 2000); // 2 seconds after session creation
 		} catch (err) {
 			console.error('[App] Failed to start session:', err);
 		}
