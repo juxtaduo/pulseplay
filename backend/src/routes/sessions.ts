@@ -302,34 +302,6 @@ router.get('/:id', checkJwt, async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/sessions
- * Get all sessions for the authenticated user
- */
-router.get('/', checkJwt, async (req: Request, res: Response) => {
-	try {
-		const userId = getUserIdFromToken(req);
-		const userIdHash = hashSHA256(userId);
-		const limit = Number.parseInt(req.query.limit as string, 10) || 10;
-
-		const sessions = await getSessionsByUser(userIdHash, limit);
-
-		return res.json({
-			sessions: sessions.map((s) => s.toJSON()),
-			count: sessions.length,
-		});
-	} catch (error) {
-		logger.error(
-			{ error: error instanceof Error ? error.message : String(error) },
-			'sessions_list_api_error',
-		);
-		return res.status(500).json({
-			error: 'Sessions retrieval failed',
-			message: 'An error occurred while retrieving sessions',
-		});
-	}
-});
-
-/**
  * PUT /api/sessions/:id
  * Update a session (state, endTime, rhythmData)
  */
