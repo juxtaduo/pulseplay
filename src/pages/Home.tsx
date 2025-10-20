@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { RhythmVisualizer } from '../components/RhythmVisualizer';
 import { ControlPanel } from '../components/ControlPanel';
 import { SessionStats } from '../components/SessionStats';
@@ -26,9 +26,17 @@ export function Home() {
 		accessibilityMode: false, // TODO: Add accessibility toggle in UI
 		throttleRapidTyping: true,
 	});
-
+	
 	// Session persistence hook (backend API integration)
 	const { sessionId, startSession, stopSession, updateSessionRhythm } = useSessionPersistence();
+	
+	// Ref to access current rhythm data in interval callbacks
+	const rhythmDataRef = useRef(rhythmData);
+	
+	// Update ref whenever rhythmData changes
+	useEffect(() => {
+		rhythmDataRef.current = rhythmData;
+	}, [rhythmData]);
 
 	// Track session duration
 	useEffect(() => {
@@ -52,27 +60,34 @@ export function Home() {
 	// Periodically update session with rhythm data (every 30 seconds during active session)
 	useEffect(() => {
 		let intervalId: NodeJS.Timeout;
+		let initialTimer: NodeJS.Timeout;
 
-		if (isPlaying && sessionId && rhythmData.keystrokeCount > 0) {
-			// Update immediately after 10 seconds, then every 30 seconds
-			const updateInterval = 30000; // 30 seconds
-			
-			// First update after 10 seconds to get some initial data
-			const initialTimer = setTimeout(() => {
-				updateSessionRhythm(rhythmData);
+		if (isPlaying && sessionId) {
+			// Update immediately after 10 seconds to get some initial data
+			initialTimer = setTimeout(() => {
+				const currentRhythmData = rhythmDataRef.current;
+				console.log('[Home] Sending initial rhythm update:', currentRhythmData);
+				updateSessionRhythm(currentRhythmData);
 			}, 10000);
 
 			// Regular updates every 30 seconds
 			intervalId = setInterval(() => {
-				updateSessionRhythm(rhythmData);
-			}, updateInterval);
+				const currentRhythmData = rhythmDataRef.current;
+				console.log('[Home] Sending periodic rhythm update:', currentRhythmData);
+				updateSessionRhythm(currentRhythmData);
+			}, 30000);
 
 			return () => {
 				clearTimeout(initialTimer);
 				clearInterval(intervalId);
 			};
 		}
-	}, [isPlaying, sessionId, rhythmData.keystrokeCount, updateSessionRhythm, rhythmData]);
+
+		return () => {
+			if (initialTimer) clearTimeout(initialTimer);
+			if (intervalId) clearInterval(intervalId);
+		};
+	}, [isPlaying, sessionId, updateSessionRhythm]); // Removed rhythmData from deps to prevent constant re-running
 
 	// Handle starting a session
 	const handleStart = async (mood: Mood) => {
