@@ -20,7 +20,7 @@ interface SessionState {
 
 export interface UseSessionPersistenceReturn {
 	sessionId: string | null;
-	startSession: (song: Song) => Promise<void>;
+	startSession: (song: Song) => Promise<string | null>;
 	stopSession: () => Promise<void>;
 	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
 	error: string | null;
@@ -39,11 +39,11 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	 * Start a new focus session
 	 */
 	const startSession = useCallback(
-		async (song: Song) => {
+		async (song: Song): Promise<string | null> => {
 			if (!isAuthenticated) {
 				setState((prev) => ({ ...prev, error: 'Not authenticated' }));
 				console.warn('[useSessionPersistence] Cannot start session: not authenticated');
-				return;
+				return null;
 			}
 
 			try {
@@ -68,20 +68,23 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 				}
 
 				const data = await response.json();
+				const sessionId = data.session._id;
 				setState({
-					sessionId: data.session._id,
+					sessionId,
 					startTime: new Date(data.session.startTime),
 					error: null,
 				});
-				console.log('[useSessionPersistence] Session started:', data.session._id);
+				console.log('[useSessionPersistence] Session started:', sessionId);
+				return sessionId;
 			} catch (err) {
 				if (err instanceof Error && err.name === 'AbortError') {
 					// Request was cancelled, ignore
-					return;
+					return null;
 				}
 				const errorMessage = err instanceof Error ? err.message : 'Failed to start session';
 				setState((prev) => ({ ...prev, error: errorMessage }));
 				console.error('[useSessionPersistence] Start session error:', err);
+				return null;
 			}
 		},
 		[isAuthenticated, getAccessTokenSilently]
@@ -92,12 +95,23 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	 */
 	const updateSessionRhythm = useCallback(
 		async (frontendRhythmData: FrontendRhythmData) => {
+			console.log('[useSessionPersistence] updateSessionRhythm called:', {
+				hasSessionId: !!state.sessionId,
+				sessionId: state.sessionId,
+				isAuthenticated,
+				frontendRhythmData
+			});
+
 			if (!state.sessionId || !isAuthenticated) {
-				console.warn('[useSessionPersistence] Cannot update rhythm: no active session or not authenticated');
+				console.warn('[useSessionPersistence] Cannot update rhythm: no active session or not authenticated', {
+					sessionId: state.sessionId,
+					isAuthenticated
+				});
 				return;
 			}
 
 			try {
+				console.log('[useSessionPersistence] Starting rhythm update request...');
 				setState((prev) => ({ ...prev, error: null }));
 				const token = await getAccessTokenSilently();
 
@@ -115,6 +129,17 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 					samples: [] // We'll keep this empty for now, could add historical data later
 				};
 
+				const requestBody = {
+					rhythmData: backendRhythmData,
+					keystrokeCount: frontendRhythmData.keystrokeCount,
+					averageTempo: frontendRhythmData.keysPerMinute,
+				};
+
+				console.log('[useSessionPersistence] Making PUT request:', {
+					url: `${API_BASE_URL}/api/sessions/${state.sessionId}`,
+					body: requestBody
+				});
+
 				abortControllerRef.current = new AbortController();
 
 				const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
@@ -123,12 +148,13 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${token}`,
 					},
-					body: JSON.stringify({
-						rhythmData: backendRhythmData,
-						keystrokeCount: frontendRhythmData.keystrokeCount,
-						averageTempo: frontendRhythmData.keysPerMinute,
-					}),
+					body: JSON.stringify(requestBody),
 					signal: abortControllerRef.current.signal,
+				});
+
+				console.log('[useSessionPersistence] PUT response received:', {
+					status: response.status,
+					ok: response.ok
 				});
 
 				if (!response.ok) {
@@ -136,7 +162,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 					throw new Error(errorData.error || `HTTP ${response.status}`);
 				}
 
-				console.log('[useSessionPersistence] Session rhythm updated:', {
+				console.log('[useSessionPersistence] Session rhythm updated successfully:', {
 					keysPerMinute: frontendRhythmData.keysPerMinute,
 					rhythmType,
 					keystrokeCount: frontendRhythmData.keystrokeCount

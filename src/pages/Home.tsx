@@ -99,18 +99,24 @@ export function Home() {
 	// Handle starting a session
 	const handleStart = async (mood: Mood) => {
 		try {
+			console.log('[Home] handleStart called for mood:', mood);
 			// Start audio engine
 			await startAudio(mood);
 			// Start backend session
-			await startSession(mood);
+			const newSessionId = await startSession(mood);
+			console.log('[Home] Session started, newSessionId:', newSessionId);
 			
 			// Immediate test update after session creation
-			setTimeout(() => {
-				if (sessionId) {
-					console.log('[Home] Sending immediate test rhythm update after session creation');
+			if (newSessionId) {
+				console.log('[Home] Setting up immediate test rhythm update setTimeout');
+				setTimeout(() => {
+					console.log('[Home] setTimeout triggered - sending immediate test rhythm update, sessionId:', newSessionId);
+					console.log('[Home] Current rhythmData:', rhythmDataRef.current);
 					updateSessionRhythm(rhythmDataRef.current);
-				}
-			}, 2000); // 2 seconds after session creation
+				}, 2000); // 2 seconds after session creation
+			} else {
+				console.warn('[Home] No session ID returned from startSession');
+			}
 		} catch (err) {
 			console.error('[App] Failed to start session:', err);
 		}
