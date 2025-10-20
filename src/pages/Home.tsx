@@ -59,28 +59,35 @@ export function Home() {
 
 	// Periodically update session with rhythm data (every 30 seconds during active session)
 	useEffect(() => {
+		console.log('[Home] Rhythm update effect triggered:', { isPlaying, sessionId, hasUpdateFn: !!updateSessionRhythm });
+		
 		let intervalId: NodeJS.Timeout;
 		let initialTimer: NodeJS.Timeout;
 
 		if (isPlaying && sessionId) {
-			// Update immediately after 10 seconds to get some initial data
+			console.log('[Home] Setting up rhythm update timers for session:', sessionId);
+			
+			// Update immediately after 5 seconds to get some initial data (reduced for testing)
 			initialTimer = setTimeout(() => {
 				const currentRhythmData = rhythmDataRef.current;
 				console.log('[Home] Sending initial rhythm update:', currentRhythmData);
 				updateSessionRhythm(currentRhythmData);
-			}, 10000);
+			}, 5000); // Reduced to 5 seconds for faster testing
 
-			// Regular updates every 30 seconds
+			// Regular updates every 15 seconds (reduced for testing)
 			intervalId = setInterval(() => {
 				const currentRhythmData = rhythmDataRef.current;
 				console.log('[Home] Sending periodic rhythm update:', currentRhythmData);
 				updateSessionRhythm(currentRhythmData);
-			}, 30000);
+			}, 15000); // Reduced to 15 seconds for faster testing
 
 			return () => {
+				console.log('[Home] Cleaning up rhythm update timers');
 				clearTimeout(initialTimer);
 				clearInterval(intervalId);
 			};
+		} else {
+			console.log('[Home] Not setting up rhythm updates:', { isPlaying, sessionId });
 		}
 
 		return () => {
