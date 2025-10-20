@@ -50,11 +50,6 @@ services:
       - backend
     networks:
       - pulseplay-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 networks:
   pulseplay-network:

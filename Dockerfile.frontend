@@ -26,6 +26,9 @@ RUN npm run build
 # Stage 2: Nginx serving static files
 FROM nginx:alpine AS production
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Copy built frontend from builder stage
 COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 
@@ -67,8 +70,8 @@ EOF
 EXPOSE 80
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
-  CMD wget --quiet --tries=1 --spider http://localhost:80/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s \
+  CMD curl -f http://127.0.0.1:80/health || exit 1
 
 # Use default nginx startup (no custom scripts)
 CMD ["nginx", "-g", "daemon off;"]
