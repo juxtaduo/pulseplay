@@ -21,12 +21,19 @@ FROM node:20-alpine AS frontend-dev
 
 WORKDIR /app
 
+# Install curl for health checks and other utilities
+RUN apk add --no-cache curl
+
 # Install dependencies
 COPY package*.json ./
 RUN npm ci
 
 # Expose Vite dev server port
 EXPOSE 5173
+
+# Health check for development server
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s \
+  CMD curl -f http://localhost:5173 || exit 1
 
 # Development command with hot reload
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
