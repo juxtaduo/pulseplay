@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 /**
- * MoodInsights component displays AI-generated mood recommendations after session completion
+ * SongInsights component displays AI-generated song recommendations after session completion
  * Only shown for sessions ≥1 minute per FR-016 and T117 (reduced threshold)
- * @module components/MoodInsights
+ * @module components/SongInsights
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-interface MoodInsightsProps {
+interface SongInsightsProps {
 	sessionId: string | null;
 	sessionDuration: number; // seconds
 	onClose?: () => void;
@@ -18,13 +18,13 @@ interface MoodInsightsProps {
 
 interface AIRecommendation {
 	recommendationId: string;
-	suggestedMood: string;
+	suggestedSong: string;
 	rationale: string;
 	confidence: number;
 	generatedAt: string;
 }
 
-export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsightsProps) => {
+export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsightsProps) => {
 	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -71,7 +71,7 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 			const data: AIRecommendation = await response.json();
 			setRecommendation(data);
 		} catch (err) {
-			console.error('[MoodInsights] Failed to fetch recommendation:', err);
+			console.error('[SongInsights] Failed to fetch recommendation:', err);
 			setError('AI insights temporarily unavailable. Try again later.');
 		} finally {
 			setLoading(false);
@@ -132,7 +132,7 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 						<div>
 							<div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Suggested for next session:</div>
 							<div className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
-								{recommendation.suggestedMood.replace(/-/g, ' ')}
+								{recommendation.suggestedSong.replace(/-/g, ' ')}
 							</div>
 						</div>
 					</div>

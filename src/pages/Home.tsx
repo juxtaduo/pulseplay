@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { RhythmVisualizer } from '../components/RhythmVisualizer';
 import { ControlPanel } from '../components/ControlPanel';
 import { SessionStats } from '../components/SessionStats';
-import { MoodInsights } from '../components/MoodInsights';
+import { SongInsights } from '../components/SongInsights';
 import { AudioTest } from '../components/AudioTest';
 import { useRhythmDetection } from '../hooks/useRhythmDetection';
 import { useAudioEngine } from '../hooks/useAudioEngine';
@@ -146,7 +146,7 @@ export function Home() {
 				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥1 minute */}
 				{!isPlaying && sessionId && sessionDuration >= 60 && (
 					<div className="mt-8">
-						<MoodInsights sessionId={sessionId} sessionDuration={sessionDuration} />
+						<SongInsights sessionId={sessionId} sessionDuration={sessionDuration} />
 					</div>
 				)}
 
