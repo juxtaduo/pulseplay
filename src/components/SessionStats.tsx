@@ -37,7 +37,15 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive }: SessionS
 	};
 
 	// Calculate keys per minute (T138 - rolling average tempo)
-	const keysPerMinute = sessionDuration > 0 ? Math.round((rhythmData.keystrokeCount / sessionDuration) * 60) : 0;
+	// Use the keysPerMinute from rhythmData (which has proper extrapolation logic) 
+	// as fallback to local calculation for better accuracy
+	const keysPerMinute = rhythmData.keysPerMinute > 0 
+		? rhythmData.keysPerMinute 
+		: sessionDuration > 0 
+			? Math.round((rhythmData.keystrokeCount / sessionDuration) * 60) 
+			: 0;
+
+
 
 	return (
 		<div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 transition-colors duration-200">

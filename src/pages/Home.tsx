@@ -56,8 +56,8 @@ export function Home() {
 			};
 
 			update();
-			// Use a shorter interval for snappier UI, but compute seconds from timestamp
-			intervalId = setInterval(update, 250);
+			// Update every second for accurate duration display
+			intervalId = setInterval(update, 1000);
 		}
 
 		return () => {
