@@ -189,9 +189,7 @@ export async function updateSession(
 				logger.info(
 					{
 						sessionId: session._id.toString(),
-						newSamplesCount: Array.isArray(newSamples) 
-							? newSamples.length 
-							: newSamples.length,
+						newSamplesCount: newSamples.length,
 						totalSamplesCount: session.rhythmData.samples.length,
 					},
 					'rhythm_samples_updated',
