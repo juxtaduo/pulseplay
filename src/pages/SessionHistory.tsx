@@ -299,7 +299,7 @@ export const SessionHistory = () => {
 												<div>
 													<div className="text-xs text-slate-500">Avg BPM</div>
 													<div className="text-sm font-semibold text-slate-900 dark:text-white">
-														{Math.round(session.rhythmData.averageKeysPerMinute || 0)} keys/min
+														{Math.round(session.rhythmData.averageKeysPerMinute || 0)}
 													</div>
 												</div>
 											</div>

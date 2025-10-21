@@ -149,8 +149,13 @@ export function Home() {
 			// The sessionDuration state already reflects what's shown in SessionStats UI,
 			// so we don't need to recompute it - just use the current value directly
 			await stopSession();
-			// Reset rhythm data
+			
+			// Reset all UI state to initial values
 			resetRhythm();
+			setSessionDuration(0); // Reset duration to 0:00
+			setSelectedInstruments([]); // Clear selected instruments
+			setEnableInstrumentalSounds(false); // Disable instrumental sounds
+			
 			// Clear session start timestamp and deactivate timer
 			sessionStartRef.current = null;
 			setIsTimerActive(false);
