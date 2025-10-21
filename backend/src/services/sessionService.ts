@@ -179,18 +179,19 @@ export async function updateSession(
 			}
 			if (updates.rhythmData.samples) {
 				// Always append new samples to existing ones
-				if (Array.isArray(updates.rhythmData.samples)) {
-					session.rhythmData.samples.push(...updates.rhythmData.samples);
+				const newSamples = updates.rhythmData.samples;
+				if (Array.isArray(newSamples)) {
+					session.rhythmData.samples.push(...newSamples);
 				} else {
-					session.rhythmData.samples = updates.rhythmData.samples;
+					session.rhythmData.samples = newSamples;
 				}
 				
 				logger.info(
 					{
 						sessionId: session._id.toString(),
-						newSamplesCount: Array.isArray(updates.rhythmData.samples) 
-							? updates.rhythmData.samples.length 
-							: (updates.rhythmData.samples ? updates.rhythmData.samples.length : 0),
+						newSamplesCount: Array.isArray(newSamples) 
+							? newSamples.length 
+							: newSamples.length,
 						totalSamplesCount: session.rhythmData.samples.length,
 					},
 					'rhythm_samples_updated',
