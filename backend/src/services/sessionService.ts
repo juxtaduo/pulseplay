@@ -136,26 +136,6 @@ export async function updateSession(
 		// This ensures accurate duration calculation regardless of client-server latency
 		if (updates.state === 'completed' && !session.endTime) {
 			session.endTime = new Date();
-			
-			// Calculate actual average BPM from rhythm samples if available
-			if (session.rhythmData.samples && session.rhythmData.samples.length > 0) {
-				const totalKeysPerMinute = session.rhythmData.samples.reduce(
-					(sum, sample) => sum + sample.keysPerMinute, 
-					0
-				);
-				session.rhythmData.averageKeysPerMinute = Math.round(
-					totalKeysPerMinute / session.rhythmData.samples.length
-				);
-				
-				logger.info(
-					{
-						sessionId: session._id.toString(),
-						samplesCount: session.rhythmData.samples.length,
-						calculatedAverage: session.rhythmData.averageKeysPerMinute,
-					},
-					'average_bpm_calculated_from_samples',
-				);
-			}
 		}
 	}
 
@@ -166,10 +146,8 @@ export async function updateSession(
 	}		if (updates.rhythmData) {
 			// Merge rhythm data
 			if (updates.rhythmData.averageKeysPerMinute !== undefined) {
-				// Only update if session is not completed - when completed, we calculate from samples
-				if (session.state !== 'completed') {
-					session.rhythmData.averageKeysPerMinute = updates.rhythmData.averageKeysPerMinute;
-				}
+				// Accept frontend average temporarily, but will be recalculated from samples below
+				session.rhythmData.averageKeysPerMinute = updates.rhythmData.averageKeysPerMinute;
 			}
 			if (updates.rhythmData.rhythmType) {
 				session.rhythmData.rhythmType = updates.rhythmData.rhythmType;
@@ -195,6 +173,31 @@ export async function updateSession(
 					'rhythm_samples_updated',
 				);
 			}
+		}
+
+		// Calculate actual average BPM from rhythm samples if available
+		// This happens on every update, not just when completing the session
+		if (session.rhythmData.samples && session.rhythmData.samples.length > 0) {
+			const totalKeysPerMinute = session.rhythmData.samples.reduce(
+				(sum, sample) => sum + sample.keysPerMinute, 
+				0
+			);
+			const calculatedAverage = Math.round(
+				totalKeysPerMinute / session.rhythmData.samples.length
+			);
+			
+			// Update the average BPM with calculated value
+			session.rhythmData.averageKeysPerMinute = calculatedAverage;
+			
+			logger.info(
+				{
+					sessionId: session._id.toString(),
+					samplesCount: session.rhythmData.samples.length,
+					calculatedAverage: calculatedAverage,
+					sessionState: session.state,
+				},
+				'average_bpm_calculated_from_samples',
+			);
 		}
 
 		await session.save();
