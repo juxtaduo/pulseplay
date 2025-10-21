@@ -117,19 +117,12 @@ export function Home() {
 				return;
 			}
 
-			// Use backend startTime when provided for the most accurate start timestamp
-			if (startResult.startTime) {
-				const parsed = Date.parse(startResult.startTime);
-				if (!Number.isNaN(parsed)) {
-					sessionStartRef.current = parsed;
-				} else {
-					sessionStartRef.current = Date.now();
-				}
-			} else {
-				sessionStartRef.current = Date.now();
-			}
+			// Always use current time for accurate frontend timer
+			// Backend might return stale startTime from previous sessions
+			sessionStartRef.current = Date.now();
 
-			// Activate the timer
+			// Reset duration to 0 and activate the timer
+			setSessionDuration(0);
 			setIsTimerActive(true);
 
 			// Then start audio engine (this sets isPlaying=true)

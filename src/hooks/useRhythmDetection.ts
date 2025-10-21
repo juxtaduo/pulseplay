@@ -110,10 +110,11 @@ export const useRhythmDetection = (
 		const actualDurationMs = Math.min(timeWindowMs, now - oldestKeystroke);
 		const actualDurationMinutes = actualDurationMs / 60000;
 		
-		// Extrapolate to get keys per minute rate (even for short sessions)
-		const keysPerMinute = actualDurationMinutes > 0 
+		// Only extrapolate if we have at least 5 seconds of data and multiple keystrokes
+		// This prevents unrealistic extrapolation from single keystrokes
+		const keysPerMinute = (actualDurationMs >= 5000 && recentMinuteKeystrokes.length >= 2 && actualDurationMinutes > 0)
 			? Math.round(recentMinuteKeystrokes.length / actualDurationMinutes)
-			: 0;
+			: recentMinuteKeystrokes.length; // Just show raw count for short durations
 
 		// Adjust intensity based on rhythm score (50% faster intervals)
 		// Low: 0-40 (slow, thoughtful - 250ms+ intervals)

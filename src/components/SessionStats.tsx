@@ -41,9 +41,9 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive }: SessionS
 	// as fallback to local calculation for better accuracy
 	const keysPerMinute = rhythmData.keysPerMinute > 0 
 		? rhythmData.keysPerMinute 
-		: sessionDuration > 0 
+		: (sessionDuration >= 5 && rhythmData.keystrokeCount >= 2) 
 			? Math.round((rhythmData.keystrokeCount / sessionDuration) * 60) 
-			: 0;
+			: rhythmData.keystrokeCount; // Show raw keystroke count for short sessions
 
 
 
