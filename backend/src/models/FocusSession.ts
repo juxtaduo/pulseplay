@@ -100,7 +100,8 @@ focusSessionSchema.set('toJSON', {
 focusSessionSchema.pre('save', function (next) {
 	if (this.state === 'completed' && this.endTime && !this.totalDurationMinutes) {
 		const durationMs = this.endTime.getTime() - this.startTime.getTime();
-		this.totalDurationMinutes = Math.round(durationMs / 60000);
+		// Store as precise decimal minutes (e.g., 1.33 minutes for 1 minute 20 seconds)
+		this.totalDurationMinutes = durationMs / 60000;
 	}
 	next();
 });
