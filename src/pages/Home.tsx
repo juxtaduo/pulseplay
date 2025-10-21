@@ -14,6 +14,7 @@ export function Home() {
 	const [sessionDuration, setSessionDuration] = useState(0);
 	const [selectedInstruments, setSelectedInstruments] = useState<InstrumentType[]>([]);
 	const [enableInstrumentalSounds, setEnableInstrumentalSounds] = useState(false);
+	const [isTimerActive, setIsTimerActive] = useState(false);
 
 	// Audio engine hook (Web Audio API)
 	const { isPlaying, currentMood, volume, startAudio, stopAudio, setVolume, error: audioError } =
@@ -47,7 +48,7 @@ export function Home() {
 	useEffect(() => {
 		let intervalId: NodeJS.Timeout | null = null;
 
-		if (sessionStartRef.current) {
+		if (isTimerActive && sessionStartRef.current) {
 			// Update immediately so UI doesn't wait one second to show 0/1s
 			const update = () => {
 				const elapsed = Math.floor((Date.now() - sessionStartRef.current!) / 1000);
@@ -62,7 +63,7 @@ export function Home() {
 		return () => {
 			if (intervalId) clearInterval(intervalId);
 		};
-	}, [/* depend on sessionId to start/stop timer when session changes */]);
+	}, [isTimerActive]); // Trigger when timer becomes active/inactive
 
 	// Periodically update session with rhythm data (every 30 seconds during active session)
 	useEffect(() => {
@@ -128,6 +129,9 @@ export function Home() {
 				sessionStartRef.current = Date.now();
 			}
 
+			// Activate the timer
+			setIsTimerActive(true);
+
 			// Then start audio engine (this sets isPlaying=true)
 			await startAudio(mood);
 		} catch (err) {
@@ -154,8 +158,9 @@ export function Home() {
 			await stopSession();
 			// Reset rhythm data
 			resetRhythm();
-			// Clear session start timestamp and keep the final duration visible until manually reset
+			// Clear session start timestamp and deactivate timer
 			sessionStartRef.current = null;
+			setIsTimerActive(false);
 		} catch (err) {
 			console.error('[App] Failed to stop session:', err);
 		}
