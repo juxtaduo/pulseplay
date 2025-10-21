@@ -97,7 +97,7 @@ export const useRhythmDetection = (
 		const bpm = Math.round((60000 / Math.max(averageInterval, 50)) * 0.25);
 
 		// Calculate keys per minute (keyboard only)
-		// For sessions shorter than 60 seconds, extrapolate based on actual duration
+		// Use a rolling window approach with more conservative extrapolation
 		const timeWindowMs = 60000; // 1 minute
 		const recentMinuteKeystrokes = keystrokeTimestamps.current.filter(
 			(ts) => now - ts < timeWindowMs
@@ -110,11 +110,22 @@ export const useRhythmDetection = (
 		const actualDurationMs = Math.min(timeWindowMs, now - oldestKeystroke);
 		const actualDurationMinutes = actualDurationMs / 60000;
 		
-		// Only extrapolate if we have at least 5 seconds of data and multiple keystrokes
-		// This prevents unrealistic extrapolation from single keystrokes
-		const keysPerMinute = (actualDurationMs >= 5000 && recentMinuteKeystrokes.length >= 2 && actualDurationMinutes > 0)
-			? Math.round(recentMinuteKeystrokes.length / actualDurationMinutes)
-			: recentMinuteKeystrokes.length; // Just show raw count for short durations
+		// More conservative keys/minute calculation to prevent exponential growth
+		let keysPerMinute = 0;
+		if (recentMinuteKeystrokes.length === 0) {
+			keysPerMinute = 0;
+		} else if (actualDurationMs < 10000) { // Less than 10 seconds
+			// For very short sessions, show raw count (no extrapolation)
+			keysPerMinute = recentMinuteKeystrokes.length;
+		} else if (actualDurationMs < 30000) { // 10-30 seconds  
+			// Conservative extrapolation: cap at 2x current rate to prevent spikes
+			const rawExtrapolation = recentMinuteKeystrokes.length / actualDurationMinutes;
+			const conservativeCap = Math.min(rawExtrapolation, recentMinuteKeystrokes.length * 2);
+			keysPerMinute = Math.round(conservativeCap);
+		} else {
+			// 30+ seconds: normal extrapolation
+			keysPerMinute = Math.round(recentMinuteKeystrokes.length / actualDurationMinutes);
+		}
 
 		// Adjust intensity based on rhythm score (50% faster intervals)
 		// Low: 0-40 (slow, thoughtful - 250ms+ intervals)
