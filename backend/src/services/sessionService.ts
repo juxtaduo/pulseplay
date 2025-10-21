@@ -136,6 +136,26 @@ export async function updateSession(
 		// This ensures accurate duration calculation regardless of client-server latency
 		if (updates.state === 'completed' && !session.endTime) {
 			session.endTime = new Date();
+			
+			// Calculate actual average BPM from rhythm samples if available
+			if (session.rhythmData.samples && session.rhythmData.samples.length > 0) {
+				const totalKeysPerMinute = session.rhythmData.samples.reduce(
+					(sum, sample) => sum + sample.keysPerMinute, 
+					0
+				);
+				session.rhythmData.averageKeysPerMinute = Math.round(
+					totalKeysPerMinute / session.rhythmData.samples.length
+				);
+				
+				logger.info(
+					{
+						sessionId: session._id.toString(),
+						samplesCount: session.rhythmData.samples.length,
+						calculatedAverage: session.rhythmData.averageKeysPerMinute,
+					},
+					'average_bpm_calculated_from_samples',
+				);
+			}
 		}
 	}
 
@@ -146,7 +166,10 @@ export async function updateSession(
 	}		if (updates.rhythmData) {
 			// Merge rhythm data
 			if (updates.rhythmData.averageKeysPerMinute !== undefined) {
-				session.rhythmData.averageKeysPerMinute = updates.rhythmData.averageKeysPerMinute;
+				// Only update if session is not completed - when completed, we calculate from samples
+				if (session.state !== 'completed') {
+					session.rhythmData.averageKeysPerMinute = updates.rhythmData.averageKeysPerMinute;
+				}
 			}
 			if (updates.rhythmData.rhythmType) {
 				session.rhythmData.rhythmType = updates.rhythmData.rhythmType;
@@ -155,7 +178,23 @@ export async function updateSession(
 				session.rhythmData.peakIntensity = updates.rhythmData.peakIntensity;
 			}
 			if (updates.rhythmData.samples) {
-				session.rhythmData.samples = updates.rhythmData.samples;
+				// Always append new samples to existing ones
+				if (Array.isArray(updates.rhythmData.samples)) {
+					session.rhythmData.samples.push(...updates.rhythmData.samples);
+				} else {
+					session.rhythmData.samples = updates.rhythmData.samples;
+				}
+				
+				logger.info(
+					{
+						sessionId: session._id.toString(),
+						newSamplesCount: Array.isArray(updates.rhythmData.samples) 
+							? updates.rhythmData.samples.length 
+							: (updates.rhythmData.samples ? updates.rhythmData.samples.length : 0),
+						totalSamplesCount: session.rhythmData.samples.length,
+					},
+					'rhythm_samples_updated',
+				);
 			}
 		}
 

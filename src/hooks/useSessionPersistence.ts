@@ -122,11 +122,19 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 					? 'steady' 
 					: 'thoughtful';
 
+				// Create rhythm samples from current measurement
+				const now = new Date();
+				const currentSample = {
+					timestamp: now,
+					keysPerMinute: frontendRhythmData.keysPerMinute,
+					intensity: frontendRhythmData.rhythmScore / 100, // Convert score to 0-1 range
+				};
+
 				const backendRhythmData = {
 					averageKeysPerMinute: frontendRhythmData.keysPerMinute,
 					rhythmType,
 					peakIntensity: frontendRhythmData.rhythmScore / 100, // Convert score to 0-1 range
-					samples: [] // We'll keep this empty for now, could add historical data later
+					samples: [currentSample] // Send current sample to be added to backend collection
 				};
 
 				const requestBody = {
