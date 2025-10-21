@@ -67,19 +67,19 @@ export function Home() {
 		if (isPlaying && sessionId) {
 			console.log('[Home] Setting up rhythm update timers for session:', sessionId);
 			
-			// Update immediately after 5 seconds to get some initial data (reduced for testing)
+			// Initial update after 30 seconds to get some data
 			initialTimer = setTimeout(() => {
 				const currentRhythmData = rhythmDataRef.current;
 				console.log('[Home] Sending initial rhythm update:', currentRhythmData);
 				updateSessionRhythm(currentRhythmData);
-			}, 5000); // Reduced to 5 seconds for faster testing
+			}, 30000); // 30 seconds
 
-			// Regular updates every 15 seconds (reduced for testing)
+			// Regular updates every 60 seconds
 			intervalId = setInterval(() => {
 				const currentRhythmData = rhythmDataRef.current;
 				console.log('[Home] Sending periodic rhythm update:', currentRhythmData);
 				updateSessionRhythm(currentRhythmData);
-			}, 15000); // Reduced to 15 seconds for faster testing
+			}, 60000); // 60 seconds
 
 			return () => {
 				console.log('[Home] Cleaning up rhythm update timers');
@@ -106,15 +106,7 @@ export function Home() {
 			const newSessionId = await startSession(mood);
 			console.log('[Home] Session started, newSessionId:', newSessionId);
 			
-			// Immediate test update after session creation
-			if (newSessionId) {
-				console.log('[Home] Setting up immediate test rhythm update setTimeout');
-				setTimeout(() => {
-					console.log('[Home] setTimeout triggered - sending immediate test rhythm update, sessionId:', newSessionId);
-					console.log('[Home] Current rhythmData:', rhythmDataRef.current);
-					updateSessionRhythm(rhythmDataRef.current);
-				}, 2000); // 2 seconds after session creation
-			} else {
+			if (!newSessionId) {
 				console.warn('[Home] No session ID returned from startSession');
 			}
 		} catch (err) {
