@@ -203,7 +203,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 				},
 				body: JSON.stringify({
 					state: 'completed',
-					endTime: new Date().toISOString(),
+					// endTime is now automatically set by the backend for accuracy
 				}),
 				signal: abortControllerRef.current.signal,
 			});
