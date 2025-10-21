@@ -12,9 +12,11 @@
  * formatDuration(125) // "2:05"
  */
 export function formatDuration(seconds: number): string {
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const secs = seconds % 60;
+	// Round to avoid floating point precision issues
+	const totalSeconds = Math.round(seconds);
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
+	const secs = totalSeconds % 60;
 
 	if (hours > 0) {
 		return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -32,8 +34,11 @@ export function formatDuration(seconds: number): string {
  * formatDurationHuman(125) // "2 minutes"
  */
 export function formatDurationHuman(seconds: number): string {
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
+	// Round to avoid floating point precision issues
+	const totalSeconds = Math.round(seconds);
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
+	const remainingSeconds = totalSeconds % 60;
 
 	const parts: string[] = [];
 
@@ -46,7 +51,7 @@ export function formatDurationHuman(seconds: number): string {
 	}
 
 	if (parts.length === 0) {
-		return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+		return `${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}`;
 	}
 
 	return parts.join(' ');
