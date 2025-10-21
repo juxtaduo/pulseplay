@@ -135,9 +135,21 @@ export function Home() {
 	// Handle stopping a session
 	const handleStop = async () => {
 		try {
+			// IMMEDIATE UI RESET - No delays for user experience
+			// Reset all UI state to initial values FIRST
+			resetRhythm();
+			setSessionDuration(0); // Reset duration to 0:00 immediately
+			setSelectedInstruments([]); // Clear selected instruments immediately
+			setEnableInstrumentalSounds(false); // Disable instrumental sounds immediately
+			
+			// Clear session start timestamp and deactivate timer immediately
+			sessionStartRef.current = null;
+			setIsTimerActive(false);
+			
 			// Stop audio engine (with fadeout)
 			stopAudio();
 			
+			// ASYNC OPERATIONS - These can happen in background without blocking UI
 			// Send final rhythm update with current data before stopping
 			// This ensures even short sessions (1-60s) save their extrapolated BPM
 			if (sessionId) {
@@ -149,16 +161,6 @@ export function Home() {
 			// The sessionDuration state already reflects what's shown in SessionStats UI,
 			// so we don't need to recompute it - just use the current value directly
 			await stopSession();
-			
-			// Reset all UI state to initial values
-			resetRhythm();
-			setSessionDuration(0); // Reset duration to 0:00
-			setSelectedInstruments([]); // Clear selected instruments
-			setEnableInstrumentalSounds(false); // Disable instrumental sounds
-			
-			// Clear session start timestamp and deactivate timer
-			sessionStartRef.current = null;
-			setIsTimerActive(false);
 		} catch (err) {
 			console.error('[App] Failed to stop session:', err);
 		}
