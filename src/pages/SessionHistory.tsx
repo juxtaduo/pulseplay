@@ -297,7 +297,7 @@ export const SessionHistory = () => {
 											<div className="flex items-center gap-2">
 												<TrendingUp size={16} className="text-slate-600 dark:text-slate-400" />
 												<div>
-													<div className="text-xs text-slate-500">Avg Tempo</div>
+													<div className="text-xs text-slate-500">Avg BPM</div>
 													<div className="text-sm font-semibold text-slate-900 dark:text-white">
 														{Math.round(session.rhythmData.averageKeysPerMinute || 0)} keys/min
 													</div>
