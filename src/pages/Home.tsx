@@ -32,30 +32,37 @@ export function Home() {
 	
 	// Ref to access current rhythm data in interval callbacks
 	const rhythmDataRef = useRef(rhythmData);
+
+	// Ref to record session start timestamp (ms) so duration starts immediately when session is created
+	const sessionStartRef = useRef<number | null>(null);
 	
 	// Update ref whenever rhythmData changes
 	useEffect(() => {
 		rhythmDataRef.current = rhythmData;
 	}, [rhythmData]);
 
-	// Track session duration
+	// Track session duration based on the recorded start timestamp.
+	// This avoids the initial 1s delay caused by setInterval(+1) and makes the
+	// frontend duration align with the backend session start time.
 	useEffect(() => {
-		let intervalId: NodeJS.Timeout;
+		let intervalId: NodeJS.Timeout | null = null;
 
-		if (isPlaying) {
-			intervalId = setInterval(() => {
-				setSessionDuration((prev) => prev + 1);
-			}, 1000);
-		} else {
-			setSessionDuration(0);
+		if (sessionStartRef.current) {
+			// Update immediately so UI doesn't wait one second to show 0/1s
+			const update = () => {
+				const elapsed = Math.floor((Date.now() - sessionStartRef.current!) / 1000);
+				setSessionDuration(Math.max(0, elapsed));
+			};
+
+			update();
+			// Use a shorter interval for snappier UI, but compute seconds from timestamp
+			intervalId = setInterval(update, 250);
 		}
 
 		return () => {
-			if (intervalId) {
-				clearInterval(intervalId);
-			}
+			if (intervalId) clearInterval(intervalId);
 		};
-	}, [isPlaying]);
+	}, [/* depend on sessionId to start/stop timer when session changes */]);
 
 	// Periodically update session with rhythm data (every 30 seconds during active session)
 	useEffect(() => {
@@ -100,15 +107,29 @@ export function Home() {
 	const handleStart = async (mood: Mood) => {
 		try {
 			console.log('[Home] handleStart called for mood:', mood);
-			// Start audio engine
-			await startAudio(mood);
-			// Start backend session
-			const newSessionId = await startSession(mood);
-			console.log('[Home] Session started, newSessionId:', newSessionId);
-			
-			if (!newSessionId) {
-				console.warn('[Home] No session ID returned from startSession');
+			// Start backend session FIRST to get accurate timing
+			const startResult = await startSession(mood);
+			console.log('[Home] Session started result:', startResult);
+
+			if (!startResult || !startResult.sessionId) {
+				console.warn('[Home] No session returned from startSession');
+				return;
 			}
+
+			// Use backend startTime when provided for the most accurate start timestamp
+			if (startResult.startTime) {
+				const parsed = Date.parse(startResult.startTime);
+				if (!Number.isNaN(parsed)) {
+					sessionStartRef.current = parsed;
+				} else {
+					sessionStartRef.current = Date.now();
+				}
+			} else {
+				sessionStartRef.current = Date.now();
+			}
+
+			// Then start audio engine (this sets isPlaying=true)
+			await startAudio(mood);
 		} catch (err) {
 			console.error('[App] Failed to start session:', err);
 		}
@@ -119,10 +140,22 @@ export function Home() {
 		try {
 			// Stop audio engine (with fadeout)
 			stopAudio();
+			
+			// Send final rhythm update with current data before stopping
+			// This ensures even short sessions (1-60s) save their extrapolated BPM
+			if (sessionId) {
+				console.log('[Home] Sending final rhythm update before stopping session');
+				await updateSessionRhythm(rhythmData);
+			}
+			
 			// Stop backend session
+			// The sessionDuration state already reflects what's shown in SessionStats UI,
+			// so we don't need to recompute it - just use the current value directly
 			await stopSession();
 			// Reset rhythm data
 			resetRhythm();
+			// Clear session start timestamp and keep the final duration visible until manually reset
+			sessionStartRef.current = null;
 		} catch (err) {
 			console.error('[App] Failed to stop session:', err);
 		}

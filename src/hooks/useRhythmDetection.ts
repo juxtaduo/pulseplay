@@ -97,11 +97,23 @@ export const useRhythmDetection = (
 		const bpm = Math.round((60000 / Math.max(averageInterval, 50)) * 0.25);
 
 		// Calculate keys per minute (keyboard only)
+		// For sessions shorter than 60 seconds, extrapolate based on actual duration
 		const timeWindowMs = 60000; // 1 minute
 		const recentMinuteKeystrokes = keystrokeTimestamps.current.filter(
 			(ts) => now - ts < timeWindowMs
 		);
-		const keysPerMinute = recentMinuteKeystrokes.length;
+		
+		// Calculate actual time window used (for sessions < 60s)
+		const oldestKeystroke = keystrokeTimestamps.current.length > 0 
+			? Math.min(...keystrokeTimestamps.current) 
+			: now;
+		const actualDurationMs = Math.min(timeWindowMs, now - oldestKeystroke);
+		const actualDurationMinutes = actualDurationMs / 60000;
+		
+		// Extrapolate to get keys per minute rate (even for short sessions)
+		const keysPerMinute = actualDurationMinutes > 0 
+			? Math.round(recentMinuteKeystrokes.length / actualDurationMinutes)
+			: 0;
 
 		// Adjust intensity based on rhythm score (50% faster intervals)
 		// Low: 0-40 (slow, thoughtful - 250ms+ intervals)

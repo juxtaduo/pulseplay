@@ -20,7 +20,7 @@ interface SessionState {
 
 export interface UseSessionPersistenceReturn {
 	sessionId: string | null;
-	startSession: (song: Song) => Promise<string | null>;
+	startSession: (song: Song) => Promise<{ sessionId: string | null; startTime: string | null }>;
 	stopSession: () => Promise<void>;
 	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
 	error: string | null;
@@ -39,11 +39,11 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	 * Start a new focus session
 	 */
 	const startSession = useCallback(
-		async (song: Song): Promise<string | null> => {
+		async (song: Song): Promise<{ sessionId: string | null; startTime: string | null }> => {
 			if (!isAuthenticated) {
 				setState((prev) => ({ ...prev, error: 'Not authenticated' }));
 				console.warn('[useSessionPersistence] Cannot start session: not authenticated');
-				return null;
+				return { sessionId: null, startTime: null };
 			}
 
 			try {
@@ -69,22 +69,23 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 
 				const data = await response.json();
 				const sessionId = data.session.sessionId;
+				const startTime = data.session.startTime || null;
 				setState({
 					sessionId,
-					startTime: new Date(data.session.startTime),
+					startTime: startTime ? new Date(startTime) : null,
 					error: null,
 				});
-				console.log('[useSessionPersistence] Session started:', sessionId);
-				return sessionId;
+				console.log('[useSessionPersistence] Session started:', sessionId, 'startTime:', startTime);
+				return { sessionId, startTime };
 			} catch (err) {
 				if (err instanceof Error && err.name === 'AbortError') {
 					// Request was cancelled, ignore
-					return null;
+					return { sessionId: null, startTime: null };
 				}
 				const errorMessage = err instanceof Error ? err.message : 'Failed to start session';
 				setState((prev) => ({ ...prev, error: errorMessage }));
 				console.error('[useSessionPersistence] Start session error:', err);
-				return null;
+				return { sessionId: null, startTime: null };
 			}
 		},
 		[isAuthenticated, getAccessTokenSilently]

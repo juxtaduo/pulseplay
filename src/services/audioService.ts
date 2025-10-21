@@ -6,7 +6,7 @@
  */
 
 import { getAudioContext } from '../lib/audioContext';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 import type { InstrumentConfig } from '../lib/instruments';
 
 export interface AudioConfig {
@@ -232,6 +232,7 @@ export class AudioEngine {
 	 * Create lofi hip-hop beat with drums only (no continuous chords/bass)
 	 * @private
 	 */
+	// @ts-ignore - Keeping for future use
 	private createLofiBeat(config: AudioConfig): void {
 		// Start the drum loop
 		this.startDrumLoop(config.tempo);
@@ -388,6 +389,7 @@ export class AudioEngine {
 	 * Changes chords every 4 beats (measures)
 	 * @private
 	 */
+	// @ts-ignore - Keeping for future use
 	private startJazzProgression(tempo: number): void {
 		const beatsPerMeasure = 4;
 		const measureDuration = (60 / tempo) * beatsPerMeasure; // seconds per measure
@@ -529,6 +531,7 @@ export class AudioEngine {
 	 * Start vinyl crackle/noise for lofi texture
 	 * @private
 	 */
+	// @ts-ignore - Keeping for future use
 	private startVinylNoise(): void {
 		// Create pink noise buffer (softer than white noise)
 		const bufferSize = this.ctx.sampleRate * 2; // 2 seconds of noise, looped
@@ -672,6 +675,7 @@ export class AudioEngine {
 	 * Loops back to start when reaching the end
 	 * @private
 	 */
+	// @ts-ignore - Keeping for future use
 	private getNextMelodyNote(): number {
 		const note = this.melodySequence[this.melodyIndex];
 		this.melodyIndex = (this.melodyIndex + 1) % this.melodySequence.length;
@@ -684,6 +688,7 @@ export class AudioEngine {
 	 * Returns a note from the current chord's scale
 	 * @private
 	 */
+	// @ts-ignore - Keeping for future use
 	private getNextJazzNote(): number {
 		const currentChord = this.jazzChordProgression[this.jazzChordIndex];
 		const scale = this.jazzChordScales[currentChord.name as keyof typeof this.jazzChordScales];
@@ -737,11 +742,7 @@ export class AudioEngine {
 	): void {
 		// Select note based on current mood
 		let frequency: number;
-		if (this.currentMood === 'melodic-flow') {
-			frequency = this.getNextMelodyNote();
-		} else if (this.currentMood === 'jazz-harmony') {
-			frequency = this.getNextJazzNote();
-		} else if (this.currentMood === 'thousand-years' || this.currentMood === 'kiss-the-rain' || this.currentMood === 'river-flows' || this.currentMood === 'gurenge') {
+		if (this.currentMood === 'thousand-years' || this.currentMood === 'kiss-the-rain' || this.currentMood === 'river-flows' || this.currentMood === 'gurenge') {
 			frequency = this.getNextMidiNote();
 		} else {
 			// Get next note from pentatonic scale for other moods

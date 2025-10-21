@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getAudioEngine, type AudioEngine } from '../services/audioService';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 
 /**
  * React hook for managing Web Audio API audio engine
