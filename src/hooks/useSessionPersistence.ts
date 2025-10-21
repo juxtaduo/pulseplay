@@ -68,7 +68,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 				}
 
 				const data = await response.json();
-				const sessionId = data.session._id;
+				const sessionId = data.session.sessionId;
 				setState({
 					sessionId,
 					startTime: new Date(data.session.startTime),
