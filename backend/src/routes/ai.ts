@@ -37,12 +37,12 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 			return res.status(404).json({ error: 'Session not found' });
 		}
 
-		// Check if session is at least 1 minute (T117 - reduced threshold)
+		// Check if session is at least 30 seconds (reduced threshold for better UX)
 		const sessionDuration = session.totalDurationMinutes || 0;
-		if (sessionDuration < 1) {
+		if (sessionDuration < 0.5) { // 0.5 minutes = 30 seconds
 			return res.status(400).json({
 				error: 'Session too short for AI insights',
-				message: 'AI recommendations require sessions of at least 1 minute',
+				message: 'AI recommendations require sessions of at least 30 seconds',
 			});
 		}
 

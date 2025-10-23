@@ -31,8 +31,8 @@ export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsigh
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		// Only fetch recommendation if session is ≥1 minute (T117 - reduced threshold)
-		if (sessionId && sessionDuration >= 60) {
+		// Only fetch recommendation if session is ≥30 seconds (reduced threshold for better UX)
+		if (sessionId && sessionDuration >= 30) {
 			fetchRecommendation();
 		}
 	}, [sessionId, sessionDuration]);
@@ -78,8 +78,8 @@ export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsigh
 		}
 	};
 
-	// Don't render if session is too short (T117 - reduced threshold)
-	if (sessionDuration < 60) {
+	// Don't render if session is too short (reduced threshold for better UX)
+	if (sessionDuration < 30) {
 		return null;
 	}
 

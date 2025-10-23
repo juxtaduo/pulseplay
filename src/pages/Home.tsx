@@ -196,8 +196,8 @@ export function Home() {
 
 				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} />
 
-				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥1 minute */}
-				{!isPlaying && sessionId && sessionDuration >= 60 && (
+				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
+				{!isPlaying && sessionId && sessionDuration >= 30 && (
 					<div className="mt-8">
 						<SongInsights sessionId={sessionId} sessionDuration={sessionDuration} />
 					</div>
