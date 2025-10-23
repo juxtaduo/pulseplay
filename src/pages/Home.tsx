@@ -13,6 +13,7 @@ import type { InstrumentType } from '../lib/instruments';
 export function Home() {
 	const [sessionDuration, setSessionDuration] = useState(0);
 	const [completedSessionDuration, setCompletedSessionDuration] = useState<number | null>(null);
+	const [completedSessionId, setCompletedSessionId] = useState<string | null>(null);
 	const [selectedInstruments, setSelectedInstruments] = useState<InstrumentType[]>([]);
 	const [enableInstrumentalSounds, setEnableInstrumentalSounds] = useState(false);
 
@@ -27,13 +28,13 @@ export function Home() {
 		accessibilityMode: false, // TODO: Add accessibility toggle in UI
 		throttleRapidTyping: true,
 	});
-	
+
 	// Session persistence hook (backend API integration)
 	const { sessionId, startSession, stopSession, updateSessionRhythm } = useSessionPersistence();
-	
+
 	// Ref to access current rhythm data in interval callbacks
 	const rhythmDataRef = useRef(rhythmData);
-	
+
 	// Update ref whenever rhythmData changes
 	useEffect(() => {
 		rhythmDataRef.current = rhythmData;
@@ -61,13 +62,13 @@ export function Home() {
 	// Periodically update session with rhythm data (every 30 seconds during active session)
 	useEffect(() => {
 		console.log('[Home] Rhythm update effect triggered:', { isPlaying, sessionId, hasUpdateFn: !!updateSessionRhythm });
-		
+
 		let intervalId: NodeJS.Timeout;
 		let initialTimer: NodeJS.Timeout;
 
 		if (isPlaying && sessionId) {
 			console.log('[Home] Setting up rhythm update timers for session:', sessionId);
-			
+
 			// Initial update after 30 seconds to get some data
 			initialTimer = setTimeout(() => {
 				const currentRhythmData = rhythmDataRef.current;
@@ -101,14 +102,15 @@ export function Home() {
 	const handleStart = async (mood: Mood) => {
 		try {
 			console.log('[Home] handleStart called for mood:', mood);
-			// Reset completed session duration for new session
+			// Reset completed session duration and ID for new session
 			setCompletedSessionDuration(null);
+			setCompletedSessionId(null);
 			// Start audio engine
 			await startAudio(mood);
 			// Start backend session
 			const newSessionId = await startSession(mood);
-			console.log('[Home] Session started, newSessionId:', newSessionId);
-			
+			console.log('[Home] Session started, newSessionId:', newSessionId); 
+
 			if (!newSessionId) {
 				console.warn('[Home] No session ID returned from startSession');
 			}
@@ -120,8 +122,9 @@ export function Home() {
 	// Handle stopping a session
 	const handleStop = async () => {
 		try {
-			// Save the current session duration before stopping
+			// Save the current session duration and ID before stopping
 			setCompletedSessionDuration(sessionDuration);
+			setCompletedSessionId(sessionId);
 			// Stop audio engine (with fadeout)
 			stopAudio();
 			// Stop backend session
@@ -160,20 +163,20 @@ export function Home() {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
 			<main className="max-w-7xl mx-auto px-4 py-8">
-			{displayError && (
-				<div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-					<p className="text-red-400 text-sm">{displayError}</p>
-				</div>
-			)}
+				{displayError && (
+					<div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+						<p className="text-red-400 text-sm">{displayError}</p>
+					</div>
+				)}
 
-			{/* Audio Diagnostic Test - Shows if you can't hear sound */}
-			{!isPlaying && (
-				<div className="mb-8">
-					<AudioTest />
-				</div>
-			)}
+				{/* Audio Diagnostic Test - Shows if you can't hear sound */}
+				{!isPlaying && (
+					<div className="mb-8">
+						<AudioTest />
+					</div>
+				)}
 
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
 					<div className="flex flex-col items-center justify-center">
 						<RhythmVisualizer rhythmData={rhythmData} isPlaying={isPlaying} />
 						{currentMood && (
@@ -202,9 +205,9 @@ export function Home() {
 				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} />
 
 				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
-				{!isPlaying && sessionId && (completedSessionDuration || 0) >= 30 && (
+				{!isPlaying && completedSessionId && (completedSessionDuration || 0) >= 30 && (
 					<div className="mt-8">
-						<SongInsights sessionId={sessionId} sessionDuration={completedSessionDuration || 0} />
+						<SongInsights sessionId={completedSessionId} sessionDuration={completedSessionDuration || 0} />
 					</div>
 				)}
 
