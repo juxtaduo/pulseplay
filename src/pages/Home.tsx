@@ -12,6 +12,7 @@ import type { InstrumentType } from '../lib/instruments';
 
 export function Home() {
 	const [sessionDuration, setSessionDuration] = useState(0);
+	const [completedSessionDuration, setCompletedSessionDuration] = useState<number | null>(null);
 	const [selectedInstruments, setSelectedInstruments] = useState<InstrumentType[]>([]);
 	const [enableInstrumentalSounds, setEnableInstrumentalSounds] = useState(false);
 
@@ -100,6 +101,8 @@ export function Home() {
 	const handleStart = async (mood: Mood) => {
 		try {
 			console.log('[Home] handleStart called for mood:', mood);
+			// Reset completed session duration for new session
+			setCompletedSessionDuration(null);
 			// Start audio engine
 			await startAudio(mood);
 			// Start backend session
@@ -117,6 +120,8 @@ export function Home() {
 	// Handle stopping a session
 	const handleStop = async () => {
 		try {
+			// Save the current session duration before stopping
+			setCompletedSessionDuration(sessionDuration);
 			// Stop audio engine (with fadeout)
 			stopAudio();
 			// Stop backend session
@@ -197,9 +202,9 @@ export function Home() {
 				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} />
 
 				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
-				{!isPlaying && sessionId && sessionDuration >= 30 && (
+				{!isPlaying && sessionId && (completedSessionDuration || 0) >= 30 && (
 					<div className="mt-8">
-						<SongInsights sessionId={sessionId} sessionDuration={sessionDuration} />
+						<SongInsights sessionId={sessionId} sessionDuration={completedSessionDuration || 0} />
 					</div>
 				)}
 
