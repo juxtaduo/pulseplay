@@ -49,7 +49,7 @@ export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsigh
 
 		try {
 			const token = await getAccessTokenSilently();
-			const response = await fetch(`${API_BASE_URL}/api/ai/mood-recommendation`, {
+			const response = await fetch(`${API_BASE_URL}/api/ai/song-recommendation`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

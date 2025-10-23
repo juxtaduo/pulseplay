@@ -57,7 +57,7 @@ app.use(errorHandler);
 async function startServer() {
 	try {
 		// Connect to MongoDB (optional for testing - requires real MongoDB Atlas URI)
-		const mongoUri = process.env.MONGODB_URI || '';
+		const mongoUri = process.env.MONGODB_ATLAS_URI || '';
 		const isRealMongoUri =
 			mongoUri.includes('mongodb+srv://') || (mongoUri.includes('mongodb://') && !mongoUri.includes('localhost'));
 

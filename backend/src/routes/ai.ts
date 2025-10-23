@@ -5,6 +5,7 @@
 
 import { Router, type Request, type Response } from 'express';
 import { logger } from '../config/logger.js';
+import { checkJwt } from '../config/auth0.js';
 import { FocusSessionModel } from '../models/FocusSession.js';
 import { AISongRecommendation } from '../models/AISongRecommendation.js';
 import { generateSongRecommendation, generateWeeklySummary } from '../services/geminiService.js';
@@ -21,7 +22,7 @@ const router = Router();
  * @returns {AISongRecommendation} - AI-generated song recommendation
  * @access Requires Auth0 authentication
  */
-router.post('/song-recommendation', async (req: Request, res: Response) => {
+router.post('/song-recommendation', checkJwt, async (req: Request, res: Response) => {
 	try {
 		const { sessionId } = req.body;
 
@@ -71,10 +72,24 @@ router.post('/song-recommendation', async (req: Request, res: Response) => {
 			rhythmPattern: analysis.rhythmPattern,
 		});
 
+		// Map Gemini mood recommendations to actual song names
+		const songMapping: Record<string, 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'> = {
+			'deep-focus': 'thousand-years',
+			'creative-flow': 'river-flows',
+			'calm-reading': 'kiss-the-rain',
+			'energized-coding': 'gurenge',
+		};
+
+		const mappedSong = songMapping[recommendation.song] || 'thousand-years';
+
+		// Generate unique recommendation ID
+		const recommendationId = `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
 		// Save recommendation to database
 		const aiRecommendation = new AISongRecommendation({
+			recommendationId,
 			sessionId,
-			suggestedSong: recommendation.song,
+			suggestedSong: mappedSong,
 			rationale: recommendation.rationale,
 			confidence: recommendation.confidence,
 			geminiModel: 'gemini-2.5-flash',
@@ -111,7 +126,7 @@ router.post('/song-recommendation', async (req: Request, res: Response) => {
  * @returns {summary: string} - AI-generated weekly summary
  * @access Requires Auth0 authentication
  */
-router.get('/weekly-summary', async (_req: Request, res: Response) => {
+router.get('/weekly-summary', checkJwt, async (_req: Request, res: Response) => {
 	try {
 		// Get sessions from last 7 days
 		const sevenDaysAgo = new Date();

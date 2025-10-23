@@ -65,7 +65,7 @@ export interface FocusSession {
 export interface AISongRecommendation {
 	sessionId: string;
 	suggestedSong: Song;
-	reasoning: string;
+	rationale: string;
 	confidence: number;
 	createdAt: Date;
 }

@@ -16,6 +16,7 @@ export interface IAISongRecommendation extends Document {
 	rationale: string;
 	confidence: number; // 0.0 - 1.0
 	generatedAt: Date;
+	geminiModel?: string;
 }
 
 /**
@@ -52,6 +53,10 @@ const aiSongRecommendationSchema = new Schema<IAISongRecommendation>({
 		required: true,
 	},
 	generatedAt: { type: Date, default: Date.now },
+	geminiModel: {
+		type: String,
+		default: 'gemini-2.5-flash',
+	},
 });
 
 // Indexes

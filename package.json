@@ -21,6 +21,7 @@
     "@auth0/auth0-react": "^2.8.0",
     "@google/generative-ai": "^0.24.1",
     "@tonejs/midi": "^2.0.28",
+    "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
