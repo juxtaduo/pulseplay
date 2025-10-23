@@ -122,13 +122,13 @@ export function Home() {
 	// Handle stopping a session
 	const handleStop = async () => {
 		try {
-			// Save the current session duration and ID before stopping
-			setCompletedSessionDuration(sessionDuration);
-			setCompletedSessionId(sessionId);
 			// Stop audio engine (with fadeout)
 			stopAudio();
 			// Stop backend session
 			await stopSession();
+			// Now that session is completed, save the duration and ID for AI insights
+			setCompletedSessionDuration(sessionDuration);
+			setCompletedSessionId(sessionId);
 			// Reset rhythm data
 			resetRhythm();
 		} catch (err) {

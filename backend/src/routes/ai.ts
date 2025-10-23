@@ -40,13 +40,21 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 		// Check if session is at least 30 seconds (reduced threshold for better UX)
 		// If duration is not calculated yet, try to calculate it
 		let sessionDuration = session.totalDurationMinutes;
-		if (!sessionDuration && session.state === 'completed' && session.endTime) {
+		if (!sessionDuration && session.endTime) {
+			// Session has endTime, calculate duration regardless of state
 			const durationMs = session.endTime.getTime() - session.startTime.getTime();
 			sessionDuration = durationMs / 60000;
 			// Update the session with the calculated duration
 			session.totalDurationMinutes = sessionDuration;
 			await session.save();
 			logger.info({ sessionId, calculatedDuration: sessionDuration }, 'session_duration_recalculated');
+		} else if (!sessionDuration && !session.endTime && session.state === 'active') {
+			// Session is still active and has no endTime - this shouldn't happen for completed sessions
+			logger.warn({ sessionId, sessionState: session.state }, 'ai_called_on_active_session');
+			return res.status(400).json({
+				error: 'Session not completed',
+				message: 'Cannot generate AI insights for active sessions. Please complete your session first.',
+			});
 		}
 
 		logger.info({
