@@ -96,7 +96,7 @@ export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsigh
 						<Sparkles size={20} className="text-purple-400" />
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Mood Insights</h3>
+						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
 						<p className="text-xs text-slate-600 dark:text-slate-400">Powered by Gemini</p>
 					</div>
 				</div>
