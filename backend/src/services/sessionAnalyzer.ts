@@ -26,6 +26,7 @@ export interface SessionAnalysisInput {
 	duration: number; // seconds
 	totalKeystrokes: number;
 	averageTempo: number; // keys/min
+	averageBpm: number; // Average BPM for the session
 	keystrokeTimestamps?: number[]; // Optional: for rhythm variance analysis
 }
 
@@ -35,6 +36,7 @@ export interface SessionAnalysisInput {
 export interface SessionAnalysisResult {
 	duration: number; // minutes (converted)
 	avgTempo: number; // keys/min
+	averageBpm: number; // Average BPM for the session
 	rhythmPattern: 'steady' | 'erratic';
 	tempoCategory: 'slow' | 'medium' | 'fast';
 	activityLevel: 'low' | 'medium' | 'high';
@@ -48,12 +50,14 @@ export interface SessionAnalysisResult {
 export function analyzeSessionPattern(sessionData: SessionAnalysisInput): SessionAnalysisResult {
 	const durationMinutes = Math.floor(sessionData.duration / 60);
 	const avgTempo = sessionData.averageTempo;
+	const avgBpm = sessionData.averageBpm;
 
-	// Classify tempo category
+	// Classify tempo category (consider both keys/min and BPM)
 	let tempoCategory: 'slow' | 'medium' | 'fast';
-	if (avgTempo < 40) {
+	const combinedTempo = Math.max(avgTempo, avgBpm * 2); // Rough conversion: BPM * 2 ≈ keys/min
+	if (combinedTempo < 40) {
 		tempoCategory = 'slow';
-	} else if (avgTempo < 80) {
+	} else if (combinedTempo < 80) {
 		tempoCategory = 'medium';
 	} else {
 		tempoCategory = 'fast';
@@ -61,9 +65,9 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 
 	// Classify activity level (used for song suggestions)
 	let activityLevel: 'low' | 'medium' | 'high';
-	if (avgTempo < 40) {
+	if (combinedTempo < 40) {
 		activityLevel = 'low';
-	} else if (avgTempo < 80) {
+	} else if (combinedTempo < 80) {
 		activityLevel = 'medium';
 	} else {
 		activityLevel = 'high';
@@ -123,6 +127,7 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 	return {
 		duration: durationMinutes,
 		avgTempo,
+		averageBpm: avgBpm,
 		rhythmPattern,
 		tempoCategory,
 		activityLevel,

@@ -191,6 +191,7 @@ Provide a 2-3 sentence summary highlighting patterns and suggesting improvements
 export async function generateSongRecommendation(sessionData: {
 	duration: number;
 	avgTempo: number;
+	averageBpm: number;
 	rhythmPattern: 'steady' | 'erratic';
 }): Promise<{ song: string; rationale: string; confidence: number }> {
 	try {
@@ -202,18 +203,19 @@ export async function generateSongRecommendation(sessionData: {
 Song options: deep-focus, creative-flow, calm-reading, energized-coding
 
 Examples:
-Input: 20 min, 100 keys/min, steady
-Output: {"song": "energized-coding", "rationale": "Your consistent high-speed rhythm indicates strong focus momentum. Energized coding mode will maintain this flow state.", "confidence": 0.85}
+Input: 20 min, 100 keys/min, 85 BPM, steady
+Output: {"song": "energized-coding", "rationale": "Your consistent high-speed rhythm (100 keys/min) and steady BPM (85) indicates strong focus momentum. Energized coding mode will maintain this flow state.", "confidence": 0.85}
 
-Input: 15 min, 40 keys/min, erratic
-Output: {"song": "calm-reading", "rationale": "Your slower, thoughtful rhythm suggests deep contemplation. Calm reading mode will support sustained concentration.", "confidence": 0.78}
+Input: 15 min, 40 keys/min, 35 BPM, erratic
+Output: {"song": "calm-reading", "rationale": "Your slower, variable rhythm (40 keys/min) with moderate BPM (35) suggests deep contemplation. Calm reading mode will support sustained concentration.", "confidence": 0.78}
 
-Input: 12 min, 75 keys/min, steady
-Output: {"song": "creative-flow", "rationale": "Your moderate, steady rhythm suggests balanced productivity. Creative flow mode will nurture sustained inspiration.", "confidence": 0.82}
+Input: 12 min, 75 keys/min, 65 BPM, steady
+Output: {"song": "creative-flow", "rationale": "Your moderate, steady rhythm (75 keys/min) and consistent BPM (65) suggests balanced productivity. Creative flow mode will nurture sustained inspiration.", "confidence": 0.82}
 
 Now analyze this session:
 - Duration: ${sessionData.duration} minutes
 - Average Typing Speed: ${sessionData.avgTempo} keystrokes/min
+- Average BPM: ${sessionData.averageBpm} BPM
 - Rhythm Pattern: ${sessionData.rhythmPattern}
 
 Respond ONLY with valid JSON: {"song": "deep-focus|creative-flow|calm-reading|energized-coding", "rationale": "string", "confidence": 0.0-1.0}`;

@@ -60,6 +60,7 @@ const focusSessionSchema = new Schema<FocusSessionDocument>(
 		totalDurationMinutes: { type: Number, min: 0, default: null },
 		keystrokeCount: { type: Number, min: 0, default: 0 },
 		averageTempo: { type: Number, min: 0, default: 0 },
+		averageBpm: { type: Number, min: 0, default: 0 }, // Average BPM for the entire session
 		rhythmData: { type: rhythmDataSchema, required: true },
 		state: {
 			type: String,

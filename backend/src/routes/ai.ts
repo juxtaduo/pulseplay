@@ -91,18 +91,21 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 		// Analyze session pattern (T113)
 		const sessionDurationSeconds = sessionDuration * 60; // Convert to seconds
 		const averageTempo = session.rhythmData.averageKeysPerMinute || 0;
+		const averageBpm = session.averageBpm || 0; // Include average BPM
 		const totalKeystrokes = Math.round((averageTempo * sessionDuration)); // Estimate from average tempo
 		
 		const analysis = analyzeSessionPattern({
 			duration: sessionDurationSeconds,
 			totalKeystrokes,
 			averageTempo,
+			averageBpm, // Include average BPM in analysis
 		});
 
 		// Generate Gemini AI recommendation (T111)
 		const recommendation = await generateSongRecommendation({
 			duration: analysis.duration,
 			avgTempo: analysis.avgTempo,
+			averageBpm: analysis.averageBpm, // Include average BPM
 			rhythmPattern: analysis.rhythmPattern,
 		});
 
