@@ -38,8 +38,34 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 		}
 
 		// Check if session is at least 30 seconds (reduced threshold for better UX)
-		const sessionDuration = session.totalDurationMinutes || 0;
-		if (sessionDuration < 0.5) { // 0.5 minutes = 30 seconds
+		// If duration is not calculated yet, try to calculate it
+		let sessionDuration = session.totalDurationMinutes;
+		if (!sessionDuration && session.state === 'completed' && session.endTime) {
+			const durationMs = session.endTime.getTime() - session.startTime.getTime();
+			sessionDuration = durationMs / 60000;
+			// Update the session with the calculated duration
+			session.totalDurationMinutes = sessionDuration;
+			await session.save();
+			logger.info({ sessionId, calculatedDuration: sessionDuration }, 'session_duration_recalculated');
+		}
+
+		logger.info({
+			sessionId,
+			sessionState: session.state,
+			sessionDuration,
+			hasEndTime: !!session.endTime,
+			startTime: session.startTime,
+			endTime: session.endTime
+		}, 'ai_session_check');
+
+		if (!sessionDuration || sessionDuration < 0.5) { // 0.5 minutes = 30 seconds
+			logger.warn({
+				sessionId,
+				sessionDuration,
+				sessionState: session.state,
+				startTime: session.startTime,
+				endTime: session.endTime
+			}, 'ai_session_too_short');
 			return res.status(400).json({
 				error: 'Session too short for AI insights',
 				message: 'AI recommendations require sessions of at least 30 seconds',
