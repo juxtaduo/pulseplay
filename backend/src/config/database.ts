@@ -12,10 +12,10 @@ import { logger } from './logger.js';
  * @throws {Error} If connection fails after retries
  */
 export async function connectDatabase(): Promise<void> {
-	const mongoUri = process.env.MONGODB_URI;
+	const mongoUri = process.env.MONGODB_ATLAS_URI;
 
 	if (!mongoUri) {
-		throw new Error('MONGODB_URI environment variable is not defined');
+		throw new Error('MONGODB_ATLAS_URI environment variable is not defined');
 	}
 
 	try {

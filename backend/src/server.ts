@@ -17,7 +17,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 // Middleware
 app.use(
 	cors({
-		origin: FRONTEND_URL,
+		origin: [FRONTEND_URL, 'https://pulseplay.lanun.xyz', 'http://pulseplay.lanun.xyz'],
 		credentials: true,
 	}),
 );
@@ -29,9 +29,13 @@ app.use((req, _res, next) => {
 	next();
 });
 
-// Health check endpoint
+// Health check endpoints
 app.get('/health', (_req, res) => {
 	res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/health', (_req, res) => {
+	res.json({ status: 'ok', timestamp: new Date().toISOString(), service: 'pulseplay-backend' });
 });
 
 // API routes
@@ -53,7 +57,7 @@ app.use(errorHandler);
 async function startServer() {
 	try {
 		// Connect to MongoDB (optional for testing - requires real MongoDB Atlas URI)
-		const mongoUri = process.env.MONGODB_URI || '';
+		const mongoUri = process.env.MONGODB_ATLAS_URI || '';
 		const isRealMongoUri =
 			mongoUri.includes('mongodb+srv://') || (mongoUri.includes('mongodb://') && !mongoUri.includes('localhost'));
 

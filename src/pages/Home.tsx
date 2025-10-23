@@ -1,17 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { RhythmVisualizer } from '../components/RhythmVisualizer';
 import { ControlPanel } from '../components/ControlPanel';
 import { SessionStats } from '../components/SessionStats';
-import { MoodInsights } from '../components/MoodInsights';
+import { SongInsights } from '../components/SongInsights';
 import { AudioTest } from '../components/AudioTest';
 import { useRhythmDetection } from '../hooks/useRhythmDetection';
 import { useAudioEngine } from '../hooks/useAudioEngine';
 import { useSessionPersistence } from '../hooks/useSessionPersistence';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 import type { InstrumentType } from '../lib/instruments';
 
 export function Home() {
 	const [sessionDuration, setSessionDuration] = useState(0);
+	const [completedSessionDuration, setCompletedSessionDuration] = useState<number | null>(null);
+	const [completedSessionId, setCompletedSessionId] = useState<string | null>(null);
 	const [selectedInstruments, setSelectedInstruments] = useState<InstrumentType[]>([]);
 	const [enableInstrumentalSounds, setEnableInstrumentalSounds] = useState(false);
 
@@ -28,7 +30,15 @@ export function Home() {
 	});
 
 	// Session persistence hook (backend API integration)
-	const { sessionId, startSession, stopSession } = useSessionPersistence();
+	const { sessionId, startSession, stopSession, updateSessionRhythm } = useSessionPersistence();
+
+	// Ref to access current rhythm data in interval callbacks
+	const rhythmDataRef = useRef(rhythmData);
+
+	// Update ref whenever rhythmData changes
+	useEffect(() => {
+		rhythmDataRef.current = rhythmData;
+	}, [rhythmData]);
 
 	// Track session duration
 	useEffect(() => {
@@ -49,13 +59,61 @@ export function Home() {
 		};
 	}, [isPlaying]);
 
+	// Periodically update session with rhythm data (every 30 seconds during active session)
+	useEffect(() => {
+		console.log('[Home] Rhythm update effect triggered:', { isPlaying, sessionId, hasUpdateFn: !!updateSessionRhythm });
+
+		let intervalId: NodeJS.Timeout;
+		let initialTimer: NodeJS.Timeout;
+
+		if (isPlaying && sessionId) {
+			console.log('[Home] Setting up rhythm update timers for session:', sessionId);
+
+			// Initial update after 30 seconds to get some data
+			initialTimer = setTimeout(() => {
+				const currentRhythmData = rhythmDataRef.current;
+				console.log('[Home] Sending initial rhythm update:', currentRhythmData);
+				updateSessionRhythm(currentRhythmData);
+			}, 30000); // 30 seconds
+
+			// Regular updates every 60 seconds
+			intervalId = setInterval(() => {
+				const currentRhythmData = rhythmDataRef.current;
+				console.log('[Home] Sending periodic rhythm update:', currentRhythmData);
+				updateSessionRhythm(currentRhythmData);
+			}, 60000); // 60 seconds
+
+			return () => {
+				console.log('[Home] Cleaning up rhythm update timers');
+				clearTimeout(initialTimer);
+				clearInterval(intervalId);
+			};
+		} else {
+			console.log('[Home] Not setting up rhythm updates:', { isPlaying, sessionId });
+		}
+
+		return () => {
+			if (initialTimer) clearTimeout(initialTimer);
+			if (intervalId) clearInterval(intervalId);
+		};
+	}, [isPlaying, sessionId, updateSessionRhythm]); // Removed rhythmData from deps to prevent constant re-running
+
 	// Handle starting a session
 	const handleStart = async (mood: Mood) => {
 		try {
+			console.log('[Home] handleStart called for mood:', mood);
+			// Reset completed session duration and ID for new session
+			setCompletedSessionDuration(null);
+			setCompletedSessionId(null);
 			// Start audio engine
 			await startAudio(mood);
 			// Start backend session
-			await startSession(mood);
+			const newSessionId = await startSession(mood);
+			console.log('[Home] Session started, newSessionId:', newSessionId); 
+
+			if (!newSessionId) {
+				console.warn('[Home] No session ID returned from startSession');
+			}
 		} catch (err) {
 			console.error('[App] Failed to start session:', err);
 		}
@@ -68,6 +126,9 @@ export function Home() {
 			stopAudio();
 			// Stop backend session
 			await stopSession();
+			// Now that session is completed, save the duration and ID for AI insights
+			setCompletedSessionDuration(sessionDuration);
+			setCompletedSessionId(sessionId);
 			// Reset rhythm data
 			resetRhythm();
 		} catch (err) {
@@ -102,20 +163,20 @@ export function Home() {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
 			<main className="max-w-7xl mx-auto px-4 py-8">
-			{displayError && (
-				<div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-					<p className="text-red-400 text-sm">{displayError}</p>
-				</div>
-			)}
+				{displayError && (
+					<div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+						<p className="text-red-400 text-sm">{displayError}</p>
+					</div>
+				)}
 
-			{/* Audio Diagnostic Test - Shows if you can't hear sound */}
-			{!isPlaying && (
-				<div className="mb-8">
-					<AudioTest />
-				</div>
-			)}
+				{/* Audio Diagnostic Test - Shows if you can't hear sound */}
+				{!isPlaying && (
+					<div className="mb-8">
+						<AudioTest />
+					</div>
+				)}
 
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
 					<div className="flex flex-col items-center justify-center">
 						<RhythmVisualizer rhythmData={rhythmData} isPlaying={isPlaying} />
 						{currentMood && (
@@ -143,10 +204,10 @@ export function Home() {
 
 				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} />
 
-				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥1 minute */}
-				{!isPlaying && sessionId && sessionDuration >= 60 && (
+				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
+				{!isPlaying && completedSessionId && (completedSessionDuration || 0) >= 30 && (
 					<div className="mt-8">
-						<MoodInsights sessionId={sessionId} sessionDuration={sessionDuration} />
+						<SongInsights sessionId={completedSessionId} sessionDuration={completedSessionDuration || 0} />
 					</div>
 				)}
 

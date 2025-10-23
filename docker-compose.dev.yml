@@ -20,7 +20,7 @@ services:
     networks:
       - pulseplay-network-dev
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/pulseplay --quiet
       interval: 10s
       timeout: 5s
       retries: 5
@@ -90,6 +90,12 @@ services:
     networks:
       - pulseplay-network-dev
     command: npm run dev -- --host 0.0.0.0
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # Mongo Express for database management
   mongo-express:

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Universal MIDI Parser for PulsePlay AI
+ * Universal MIDI Parser for PulsePlay
  * Parse any MIDI file and separate notes by C4 threshold for audioService
  * 
  * Usage:
@@ -322,7 +322,7 @@ async function parseAllMidiFiles() {
  * Show usage information
  */
 function showUsage() {
-  console.log('\n🎵 Universal MIDI Parser for PulsePlay AI');
+  console.log('\n🎵 Universal MIDI Parser for PulsePlay');
   console.log('='.repeat(60));
   console.log('\nUsage:');
   console.log('  node scripts/parseMidi.js <filename>      # Parse single file');

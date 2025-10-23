@@ -1,6 +1,6 @@
 # 📚 Public Documentation
 
-Welcome to PulsePlay AI! This directory contains user-facing documentation to help you get started and make the most of the application.
+Welcome to PulsePlay! This directory contains user-facing documentation to help you get started and make the most of the application.
 
 ## 📖 Documentation Index
 
@@ -18,12 +18,12 @@ Welcome to PulsePlay AI! This directory contains user-facing documentation to he
 
 - [Back to Main README](../../README.md)
 - [Developer Documentation](../developer/INDEX.md)
-- [GitHub Repository](https://github.com/retiarylime/pulseplay-ai)
+- [GitHub Repository](https://github.com/juxtaduo/pulseplay)
 
 ---
 
 ## ❓ Need Help?
 
-- **Bug Reports**: [Open an issue](https://github.com/retiarylime/pulseplay-ai/issues)
-- **Questions**: [Start a discussion](https://github.com/retiarylime/pulseplay-ai/discussions)
-- **Feature Requests**: [Open an issue](https://github.com/retiarylime/pulseplay-ai/issues/new)
+- **Bug Reports**: [Open an issue](https://github.com/juxtaduo/pulseplay/issues)
+- **Questions**: [Start a discussion](https://github.com/juxtaduo/pulseplay/discussions)
+- **Feature Requests**: [Open an issue](https://github.com/juxtaduo/pulseplay/issues/new)

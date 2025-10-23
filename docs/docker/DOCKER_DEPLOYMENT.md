@@ -1,6 +1,6 @@
-# PulsePlay AI - Docker Deployment Guide
+# PulsePlay - Docker Deployment Guide
 
-This guide will help you deploy PulsePlay AI using Docker containers.
+This guide will help you deploy PulsePlay using Docker containers.
 
 ## 📋 Prerequisites
 
@@ -15,8 +15,8 @@ This guide will help you deploy PulsePlay AI using Docker containers.
 
 ```bash
 # Clone the repository
-git clone https://github.com/retiarylime/pulseplay-ai.git
-cd pulseplay-ai
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
 
 # Copy the environment template
 cp .env.docker.template .env
@@ -346,9 +346,9 @@ kubectl apply -f .
 
 ## 🆘 Support
 
-- **Issues**: https://github.com/retiarylime/pulseplay-ai/issues
-- **Discussions**: https://github.com/retiarylime/pulseplay-ai/discussions
-- **Documentation**: https://github.com/retiarylime/pulseplay-ai/wiki
+- **Issues**: https://github.com/juxtaduo/pulseplay/issues
+- **Discussions**: https://github.com/juxtaduo/pulseplay/discussions
+- **Documentation**: https://github.com/juxtaduo/pulseplay/wiki
 
 ## 📄 License
 

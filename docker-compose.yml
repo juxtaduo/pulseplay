@@ -18,7 +18,7 @@ services:
     networks:
       - pulseplay-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/pulseplay --quiet
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,7 +52,7 @@ services:
     networks:
       - pulseplay-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -72,11 +72,6 @@ services:
       - backend
     networks:
       - pulseplay-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   # Optional: Mongo Express (MongoDB Admin UI)
   mongo-express:

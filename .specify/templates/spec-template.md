@@ -117,7 +117,7 @@
 
 ### Constitution Compliance
 
-This feature MUST comply with PulsePlay AI Constitution (v2.0.0):
+This feature MUST comply with PulsePlay Constitution (v2.0.0):
 
 - [ ] **Experience-First Design**: Interface intuitive, distraction-free, WCAG 2.1 AA compliant, audio-visual synchronization seamless
 - [ ] **AI-Augmented Creativity**: AI integration (Gemini/Gradient AI) transparent, value-driven, fail-safe fallbacks implemented

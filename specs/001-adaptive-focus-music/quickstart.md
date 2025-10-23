@@ -4,7 +4,7 @@
 **Target Setup Time**: <1 hour  
 **Date**: 2025-10-18
 
-This guide helps developers set up the PulsePlay AI Adaptive Focus Music Engine for local development in under 1 hour.
+This guide helps developers set up the PulsePlay Adaptive Focus Music Engine for local development in under 1 hour.
 
 ---
 
@@ -26,8 +26,8 @@ Before starting, ensure you have:
 
 ```bash
 # Clone repository
-git clone https://github.com/retiarylime/pulseplay-ai.git
-cd pulseplay-ai
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
 
 # Checkout feature branch
 git checkout 001-adaptive-focus-music
@@ -227,7 +227,7 @@ curl http://localhost:3000/health
 
 #### Test Frontend
 1. Open http://localhost:5173 in browser
-2. Should see PulsePlay AI interface
+2. Should see PulsePlay interface
 3. Click "Login" (redirects to Auth0)
 4. After login, should see "Start Session" button
 
@@ -272,7 +272,7 @@ npm run test:e2e
 ## Project Structure Overview
 
 ```
-pulseplay-ai/
+pulseplay/
 ├── src/                          # Frontend (React + Vite)
 │   ├── components/               # UI components
 │   │   ├── AuthButton.tsx        # Auth0 login/logout

@@ -119,7 +119,7 @@ export class ErrorBoundary extends Component<Props, State> {
 							<p className="text-xs text-slate-500 text-center">
 								If this problem persists, please{' '}
 								<a
-									href="https://github.com/retiarylime/pulseplay-ai/issues"
+									href="https://github.com/juxtaduo/pulseplay/issues"
 									target="_blank"
 									rel="noopener noreferrer"
 									className="text-blue-400 hover:text-blue-300 underline"

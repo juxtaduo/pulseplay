@@ -18,7 +18,6 @@ const songInsightSchema = new Schema<SongInsightDocument>(
 			type: Schema.Types.ObjectId,
 			required: true,
 			ref: 'FocusSession',
-			index: true,
 		},
 		insight: {
 			type: String,

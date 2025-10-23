@@ -7,7 +7,7 @@ RED := \033[0;31m
 NC := \033[0m # No Color
 
 help: ## Show this help message
-	@echo "$(GREEN)PulsePlay AI - Docker Commands$(NC)"
+	@echo "$(GREEN)PulsePlay - Docker Commands$(NC)"
 	@echo ""
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make $(YELLOW)<target>$(NC)\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
@@ -130,7 +130,7 @@ health: ## Check health of all services
 	@curl -s http://localhost:5173 > /dev/null && echo "$(GREEN)Frontend OK$(NC)" || echo "$(RED)Frontend not responding$(NC)"
 
 init: ## Initialize project (copy env template, install deps)
-	@echo "$(YELLOW)Initializing PulsePlay AI...$(NC)"
+	@echo "$(YELLOW)Initializing PulsePlay...$(NC)"
 	@if [ ! -f .env ]; then \
 		cp .env.docker.template .env; \
 		echo "$(GREEN)Created .env file from template$(NC)"; \

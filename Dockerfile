@@ -1,4 +1,4 @@
-# Multi-stage build for PulsePlay AI
+# Multi-stage build for PulsePlay
 
 # Stage 1: Build Frontend
 FROM node:20-alpine AS frontend-builder
@@ -47,6 +47,9 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Install production dependencies for backend
 COPY backend/package.json ./backend/
 COPY backend/package-lock.json* ./backend/
@@ -70,8 +73,8 @@ EXPOSE 5173
 ENV NODE_ENV=production
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s \
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Start the backend server
 WORKDIR /app/backend

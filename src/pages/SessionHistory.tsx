@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { Download, Trash2, Filter, Clock, Activity, TrendingUp, Calendar } from 'lucide-react';
 import { formatDuration, formatRelativeTime } from '../utils/timeFormatter';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 
 /**
  * SessionHistory page displays past focus sessions with filtering and export (T135, T136, T137)
  * @module pages/SessionHistory
  */
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 interface Session {
 	sessionId: string;
-	mood: Mood;
+	song: Mood; // Backend uses 'song' field, not 'mood'
 	startTime: string;
 	endTime?: string;
 	totalDurationMinutes?: number;
@@ -33,10 +36,11 @@ interface SessionHistoryResponse {
 }
 
 export const SessionHistory = () => {
+	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const [sessions, setSessions] = useState<Session[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedMood, setSelectedMood] = useState<Mood | 'all'>('all');
+	const [selectedSong, setSelectedSong] = useState<Mood | 'all'>('all');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalSessions, setTotalSessions] = useState(0);
@@ -52,16 +56,28 @@ export const SessionHistory = () => {
 	// Fetch session history (T135)
 	useEffect(() => {
 		fetchSessions();
-	}, [selectedMood, currentPage]);
+	}, [selectedSong, currentPage]);
 
 	const fetchSessions = async () => {
 		setLoading(true);
 		setError(null);
 
+		if (!isAuthenticated) {
+			setError('Please log in to view session history');
+			setLoading(false);
+			return;
+		}
+
 		try {
-			const moodParam = selectedMood !== 'all' ? `&mood=${selectedMood}` : '';
+			const token = await getAccessTokenSilently();
+			const songParam = selectedSong !== 'all' ? `&song=${selectedSong}` : '';
 			const response = await fetch(
-				`http://localhost:3001/api/sessions/history?page=${currentPage}&limit=20${moodParam}`
+				`${API_BASE_URL}/api/sessions/history?page=${currentPage}&limit=20${songParam}`,
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				}
 			);
 
 			if (!response.ok) {
@@ -82,8 +98,18 @@ export const SessionHistory = () => {
 
 	// Export session data (T137)
 	const handleExport = async () => {
+		if (!isAuthenticated) {
+			setError('Please log in to export data');
+			return;
+		}
+
 		try {
-			const response = await fetch('http://localhost:3001/api/sessions/export');
+			const token = await getAccessTokenSilently();
+			const response = await fetch(`${API_BASE_URL}/api/sessions/export`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
 			if (!response.ok) {
 				throw new Error('Failed to export data');
@@ -106,13 +132,22 @@ export const SessionHistory = () => {
 
 	// Delete all sessions
 	const handleDeleteAll = async () => {
+		if (!isAuthenticated) {
+			setError('Please log in to delete sessions');
+			return;
+		}
+
 		if (!confirm('Are you sure you want to delete ALL sessions? This cannot be undone.')) {
 			return;
 		}
 
 		try {
-			const response = await fetch('http://localhost:3001/api/sessions/all', {
+			const token = await getAccessTokenSilently();
+			const response = await fetch(`${API_BASE_URL}/api/sessions/all`, {
 				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
 			});
 
 			if (!response.ok) {
@@ -131,14 +166,15 @@ export const SessionHistory = () => {
 		}
 	};
 
-	const getMoodColor = (mood: Mood) => {
+	const getSongColor = (song?: Mood) => {
+		if (!song) return 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
 		const colors: Record<Mood, string> = {
 			'thousand-years': 'bg-rose-500/20 text-rose-400 border-rose-500/30',
 			'kiss-the-rain': 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
 			'river-flows': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
 			'gurenge': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
 		};
-		return colors[mood] || 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
+		return colors[song] || 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
 	};
 
 	return (
@@ -159,9 +195,9 @@ export const SessionHistory = () => {
 						<div className="flex items-center gap-3">
 							<Filter size={20} className="text-slate-600 dark:text-slate-400" />
 							<select
-								value={selectedMood}
+								value={selectedSong}
 								onChange={(e) => {
-									setSelectedMood(e.target.value as Mood | 'all');
+									setSelectedSong(e.target.value as Mood | 'all');
 									setCurrentPage(1);
 								}}
 								className="bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -233,11 +269,11 @@ export const SessionHistory = () => {
 									<div className="flex-1">
 										<div className="flex items-center gap-3 mb-3">
 											<span
-												className={`px-3 py-1 rounded-full text-xs font-semibold border ${getMoodColor(
-													session.mood
+												className={`px-3 py-1 rounded-full text-xs font-semibold border ${getSongColor(
+													session.song
 												)}`}
 											>
-												{session.mood.replace(/-/g, ' ')}
+												{session.song?.replace(/-/g, ' ') || 'Unknown Song'}
 											</span>
 											<span className="text-xs text-slate-500">
 												{formatRelativeTime(new Date(session.createdAt))}
@@ -261,7 +297,7 @@ export const SessionHistory = () => {
 											<div className="flex items-center gap-2">
 												<TrendingUp size={16} className="text-slate-600 dark:text-slate-400" />
 												<div>
-													<div className="text-xs text-slate-500">Avg Tempo</div>
+													<div className="text-xs text-slate-500">Avg BPM</div>
 													<div className="text-sm font-semibold text-slate-900 dark:text-white">
 														{Math.round(session.rhythmData.averageKeysPerMinute || 0)} keys/min
 													</div>

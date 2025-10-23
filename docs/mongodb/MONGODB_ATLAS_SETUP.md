@@ -390,4 +390,4 @@ mongodb+srv://...@cluster0.../pulseplay-prod
 
 ---
 
-✅ **You're all set!** Your PulsePlay AI app is now using MongoDB Atlas instead of a local database.
+✅ **You're all set!** Your PulsePlay app is now using MongoDB Atlas instead of a local database.

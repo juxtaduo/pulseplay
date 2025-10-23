@@ -205,7 +205,7 @@ Users can view statistics from their current session (duration, total keystrokes
 
 ### Constitution Compliance
 
-This feature MUST comply with PulsePlay AI Constitution (v2.1.0):
+This feature MUST comply with PulsePlay Constitution (v2.1.0):
 
 - [ ] **Experience-First Design**: Interface intuitive (30-second understanding), distraction-free (Lofi aesthetic, no visual clutter), WCAG 2.1 AA compliant (keyboard nav, ARIA labels, color contrast 4.5:1), audio-visual synchronization seamless (<100ms latency)
 - [ ] **AI-Augmented Creativity**: Gemini API integration transparent (logs all prompts/responses), value-driven (mood recommendations improve over time), fail-safe fallbacks implemented (generic tips if API fails)

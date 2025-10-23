@@ -1,4 +1,4 @@
-# PulsePlay AI - Deployment Guide
+# PulsePlay - Deployment Guide
 
 **Version**: 2.0.0  
 **Last Updated**: October 18, 2025  
@@ -46,8 +46,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/retiarylime/pulseplay-ai.git
-cd pulseplay-ai
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
 ```
 
 ### 2. Install Dependencies
@@ -148,7 +148,7 @@ MongoDB will auto-create collections on first write, but you can pre-create them
 1. Go to [Auth0 Dashboard](https://manage.auth0.com/)
 2. Sign up or log in
 3. Go to **Applications** → **Create Application**
-4. **Name**: `PulsePlay AI`
+4. **Name**: `PulsePlay`
 5. **Application Type**: **Single Page Application (SPA)**
 6. Click **"Create"**
 
@@ -176,7 +176,7 @@ MongoDB will auto-create collections on first write, but you can pre-create them
 ### Step 3: Create API
 
 1. Go to **APIs** → **Create API**
-2. **Name**: `PulsePlay AI Backend`
+2. **Name**: `PulsePlay Backend`
 3. **Identifier**: `https://api.pulseplay.ai` (your backend URL)
 4. **Signing Algorithm**: **RS256**
 5. Click **"Create"**
@@ -189,12 +189,12 @@ MongoDB will auto-create collections on first write, but you can pre-create them
 
 ### Step 5: Copy Credentials
 
-From **Applications** → **PulsePlay AI** → **Settings**:
+From **Applications** → **PulsePlay** → **Settings**:
 
 - **Domain**: `your-tenant.auth0.com`
 - **Client ID**: `abc123xyz...`
 
-From **Applications** → **PulsePlay AI** → **Settings** → **Advanced** → **OAuth**:
+From **Applications** → **PulsePlay** → **Settings** → **Advanced** → **OAuth**:
 
 - **Client Secret**: `secret123...` (for backend only)
 
@@ -246,7 +246,7 @@ vercel
 
 # Follow prompts:
 # - Link to existing project? No
-# - Project name: pulseplay-ai
+# - Project name: pulseplay
 # - Directory: ./
 # - Build command: npm run build
 # - Output directory: dist
@@ -322,7 +322,7 @@ netlify deploy --prod
 1. Click **"New Project"**
 2. Select **"Deploy from GitHub repo"**
 3. Connect your GitHub account
-4. Select `pulseplay-ai` repository
+4. Select `pulseplay` repository
 
 #### Step 3: Configure Build Settings
 
@@ -365,7 +365,7 @@ Railway auto-deploys on every push to `main` branch.
 
 1. Click **"New"** → **"Web Service"**
 2. Connect GitHub repository
-3. Select `pulseplay-ai`
+3. Select `pulseplay`
 
 #### Step 3: Configure Service
 
@@ -555,7 +555,7 @@ Consider integrating:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/retiarylime/pulseplay-ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/juxtaduo/pulseplay/issues)
 - **Documentation**: [README.md](../README.md)
 - **Architecture**: [ARCHITECTURE.md](./ARCHITECTURE.md)
 

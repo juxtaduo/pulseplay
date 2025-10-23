@@ -31,7 +31,7 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Verify compliance with PulsePlay AI Constitution (v2.0.0):
+Verify compliance with PulsePlay Constitution (v2.0.0):
 
 - [ ] **Experience-First Design**: UX intuitive & distraction-free, audio-visual sync planned, accessibility (WCAG 2.1 AA) requirements identified
 - [ ] **AI-Augmented Creativity**: Gemini API / Gradient AI integration adds measurable value, prompts transparent & logged, fail-safe fallbacks defined

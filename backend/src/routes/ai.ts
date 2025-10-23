@@ -5,6 +5,7 @@
 
 import { Router, type Request, type Response } from 'express';
 import { logger } from '../config/logger.js';
+import { checkJwt } from '../config/auth0.js';
 import { FocusSessionModel } from '../models/FocusSession.js';
 import { AISongRecommendation } from '../models/AISongRecommendation.js';
 import { generateSongRecommendation, generateWeeklySummary } from '../services/geminiService.js';
@@ -21,7 +22,7 @@ const router = Router();
  * @returns {AISongRecommendation} - AI-generated song recommendation
  * @access Requires Auth0 authentication
  */
-router.post('/song-recommendation', async (req: Request, res: Response) => {
+router.post('/song-recommendation', checkJwt, async (req: Request, res: Response) => {
 	try {
 		const { sessionId } = req.body;
 
@@ -36,12 +37,46 @@ router.post('/song-recommendation', async (req: Request, res: Response) => {
 			return res.status(404).json({ error: 'Session not found' });
 		}
 
-		// Check if session is at least 1 minute (T117 - reduced threshold)
-		const sessionDuration = session.totalDurationMinutes || 0;
-		if (sessionDuration < 1) {
+		// Check if session is at least 30 seconds (reduced threshold for better UX)
+		// If duration is not calculated yet, try to calculate it
+		let sessionDuration = session.totalDurationMinutes;
+		if (!sessionDuration && session.endTime) {
+			// Session has endTime, calculate duration regardless of state
+			const durationMs = session.endTime.getTime() - session.startTime.getTime();
+			sessionDuration = durationMs / 60000;
+			// Update the session with the calculated duration
+			session.totalDurationMinutes = sessionDuration;
+			await session.save();
+			logger.info({ sessionId, calculatedDuration: sessionDuration }, 'session_duration_recalculated');
+		} else if (!sessionDuration && !session.endTime && session.state === 'active') {
+			// Session is still active and has no endTime - this shouldn't happen for completed sessions
+			logger.warn({ sessionId, sessionState: session.state }, 'ai_called_on_active_session');
+			return res.status(400).json({
+				error: 'Session not completed',
+				message: 'Cannot generate AI insights for active sessions. Please complete your session first.',
+			});
+		}
+
+		logger.info({
+			sessionId,
+			sessionState: session.state,
+			sessionDuration,
+			hasEndTime: !!session.endTime,
+			startTime: session.startTime,
+			endTime: session.endTime
+		}, 'ai_session_check');
+
+		if (!sessionDuration || sessionDuration < 0.5) { // 0.5 minutes = 30 seconds
+			logger.warn({
+				sessionId,
+				sessionDuration,
+				sessionState: session.state,
+				startTime: session.startTime,
+				endTime: session.endTime
+			}, 'ai_session_too_short');
 			return res.status(400).json({
 				error: 'Session too short for AI insights',
-				message: 'AI recommendations require sessions of at least 1 minute',
+				message: 'AI recommendations require sessions of at least 30 seconds',
 			});
 		}
 
@@ -71,10 +106,24 @@ router.post('/song-recommendation', async (req: Request, res: Response) => {
 			rhythmPattern: analysis.rhythmPattern,
 		});
 
+		// Map Gemini mood recommendations to actual song names
+		const songMapping: Record<string, 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'> = {
+			'deep-focus': 'thousand-years',
+			'creative-flow': 'river-flows',
+			'calm-reading': 'kiss-the-rain',
+			'energized-coding': 'gurenge',
+		};
+
+		const mappedSong = songMapping[recommendation.song] || 'thousand-years';
+
+		// Generate unique recommendation ID
+		const recommendationId = `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
 		// Save recommendation to database
 		const aiRecommendation = new AISongRecommendation({
+			recommendationId,
 			sessionId,
-			suggestedSong: recommendation.song,
+			suggestedSong: mappedSong,
 			rationale: recommendation.rationale,
 			confidence: recommendation.confidence,
 			geminiModel: 'gemini-2.5-flash',
@@ -111,7 +160,7 @@ router.post('/song-recommendation', async (req: Request, res: Response) => {
  * @returns {summary: string} - AI-generated weekly summary
  * @access Requires Auth0 authentication
  */
-router.get('/weekly-summary', async (_req: Request, res: Response) => {
+router.get('/weekly-summary', checkJwt, async (_req: Request, res: Response) => {
 	try {
 		// Get sessions from last 7 days
 		const sevenDaysAgo = new Date();

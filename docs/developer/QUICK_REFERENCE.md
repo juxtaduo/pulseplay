@@ -1,4 +1,4 @@
-# Quick Reference Guide - PulsePlay AI
+# Quick Reference Guide - PulsePlay
 
 A cheat sheet for common tasks, commands, and code patterns.
 

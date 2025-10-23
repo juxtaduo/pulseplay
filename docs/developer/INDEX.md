@@ -1,6 +1,6 @@
 # 🛠️ Developer Documentation
 
-This directory contains comprehensive technical documentation for developers working on PulsePlay AI.
+This directory contains comprehensive technical documentation for developers working on PulsePlay.
 
 ## 📖 Documentation Index
 
@@ -104,5 +104,5 @@ See [CONTRIBUTING.md](../public/CONTRIBUTING.md) for contribution guidelines.
 
 ## 📧 Questions?
 
-- **Technical Issues**: [GitHub Issues](https://github.com/retiarylime/pulseplay-ai/issues)
-- **Architecture Discussions**: [GitHub Discussions](https://github.com/retiarylime/pulseplay-ai/discussions)
+- **Technical Issues**: [GitHub Issues](https://github.com/juxtaduo/pulseplay/issues)
+- **Architecture Discussions**: [GitHub Discussions](https://github.com/juxtaduo/pulseplay/discussions)

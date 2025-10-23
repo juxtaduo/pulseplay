@@ -16,6 +16,7 @@ export interface IAISongRecommendation extends Document {
 	rationale: string;
 	confidence: number; // 0.0 - 1.0
 	generatedAt: Date;
+	geminiModel?: string;
 }
 
 /**
@@ -26,7 +27,6 @@ const aiSongRecommendationSchema = new Schema<IAISongRecommendation>({
 	recommendationId: {
 		type: String,
 		required: true,
-		unique: true,
 		validate: {
 			validator: (v: string) => /^[a-zA-Z0-9_-]{10,30}$/.test(v),
 			message: 'recommendationId must be alphanumeric (10-30 chars)',
@@ -35,7 +35,6 @@ const aiSongRecommendationSchema = new Schema<IAISongRecommendation>({
 	sessionId: {
 		type: String,
 		required: true,
-		index: true,
 	},
 	suggestedSong: {
 		type: String,
@@ -54,6 +53,10 @@ const aiSongRecommendationSchema = new Schema<IAISongRecommendation>({
 		required: true,
 	},
 	generatedAt: { type: Date, default: Date.now },
+	geminiModel: {
+		type: String,
+		default: 'gemini-2.5-flash',
+	},
 });
 
 // Indexes

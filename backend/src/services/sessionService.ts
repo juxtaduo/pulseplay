@@ -128,16 +128,22 @@ export async function updateSession(
 			return null;
 		}
 
-		// Update fields
-		if (updates.state) {
-			session.state = updates.state;
+	// Update fields
+	if (updates.state) {
+		session.state = updates.state;
+		
+		// If session is being completed, set endTime to current server time
+		// This ensures accurate duration calculation regardless of client-server latency
+		if (updates.state === 'completed' && !session.endTime) {
+			session.endTime = new Date();
 		}
+	}
 
-		if (updates.endTime) {
-			session.endTime = updates.endTime;
-		}
-
-		if (updates.rhythmData) {
+	if (updates.endTime && updates.state !== 'completed') {
+		// Only allow manual endTime setting if not completing the session
+		// When completing, we use server time for accuracy
+		session.endTime = updates.endTime;
+	}		if (updates.rhythmData) {
 			// Merge rhythm data
 			if (updates.rhythmData.averageKeysPerMinute !== undefined) {
 				session.rhythmData.averageKeysPerMinute = updates.rhythmData.averageKeysPerMinute;

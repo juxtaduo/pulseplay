@@ -223,7 +223,7 @@ docker system prune -a
 ### Automated Backup (Cron)
 ```bash
 # Add to crontab
-0 2 * * * cd /path/to/pulseplay-ai && make backup
+0 2 * * * cd /path/to/pulseplay && make backup
 ```
 
 ### Manual Backup
@@ -263,5 +263,5 @@ gcloud run deploy pulseplay \
 ## 📞 Support
 
 - Documentation: `DOCKER_DEPLOYMENT.md`
-- Issues: https://github.com/retiarylime/pulseplay-ai/issues
+- Issues: https://github.com/juxtaduo/pulseplay/issues
 - Make commands: `make help`

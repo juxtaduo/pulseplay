@@ -2,7 +2,7 @@
 
 ## 📦 What's Included
 
-Your PulsePlay AI application now has a complete Docker deployment setup with **12 files** created:
+Your PulsePlay application now has a complete Docker deployment setup with **12 files** created:
 
 ### Configuration Files (8)
 - ✅ `Dockerfile` - Production build
@@ -214,7 +214,7 @@ make rebuild
 - **Full Guide**: Read `DOCKER_DEPLOYMENT.md`
 - **Quick Reference**: See `DOCKER_QUICK_REFERENCE.md`
 - **Commands**: Run `make help`
-- **Issues**: https://github.com/retiarylime/pulseplay-ai/issues
+- **Issues**: https://github.com/juxtaduo/pulseplay/issues
 
 ---
 

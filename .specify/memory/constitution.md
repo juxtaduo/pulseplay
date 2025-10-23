@@ -39,11 +39,11 @@ Sync Impact Report:
 - Non-breaking changes: Tooling change only, code style and linting rules can be configured to match previous behavior
 -->
 
-# PulsePlay AI Constitution
+# PulsePlay Constitution
 
 ## Project Context
 
-**Project Name**: PulsePlay AI  
+**Project Name**: PulsePlay  
 **Mission**: Transform typing rhythm and mouse activity into personalized, adaptive focus music powered by AI-augmented creativity  
 **Target Users**: Developers, writers, designers, neurodiverse professionals, and productivity-focused individuals seeking intelligent, emotionally resonant ambient soundscapes  
 **Core Technology**: Real-time audio synthesis via Web Audio API, rhythm detection from user input patterns, AI-powered music generation via Gemini API and Gradient AI

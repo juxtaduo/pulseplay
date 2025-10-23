@@ -1,13 +1,16 @@
 import { Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 
 /**
- * MoodInsights component displays AI-generated mood recommendations after session completion
+ * SongInsights component displays AI-generated song recommendations after session completion
  * Only shown for sessions ≥1 minute per FR-016 and T117 (reduced threshold)
- * @module components/MoodInsights
+ * @module components/SongInsights
  */
 
-interface MoodInsightsProps {
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+interface SongInsightsProps {
 	sessionId: string | null;
 	sessionDuration: number; // seconds
 	onClose?: () => void;
@@ -15,20 +18,21 @@ interface MoodInsightsProps {
 
 interface AIRecommendation {
 	recommendationId: string;
-	suggestedMood: string;
+	suggestedSong: string;
 	rationale: string;
 	confidence: number;
 	generatedAt: string;
 }
 
-export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsightsProps) => {
+export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsightsProps) => {
+	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		// Only fetch recommendation if session is ≥1 minute (T117 - reduced threshold)
-		if (sessionId && sessionDuration >= 60) {
+		// Only fetch recommendation if session is ≥30 seconds (reduced threshold for better UX)
+		if (sessionId && sessionDuration >= 30) {
 			fetchRecommendation();
 		}
 	}, [sessionId, sessionDuration]);
@@ -37,11 +41,19 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 		setLoading(true);
 		setError(null);
 
+		if (!isAuthenticated) {
+			setError('Authentication required for AI insights');
+			setLoading(false);
+			return;
+		}
+
 		try {
-			const response = await fetch('http://localhost:3001/api/ai/mood-recommendation', {
+			const token = await getAccessTokenSilently();
+			const response = await fetch(`${API_BASE_URL}/api/ai/song-recommendation`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({ sessionId }),
 			});
@@ -59,15 +71,15 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 			const data: AIRecommendation = await response.json();
 			setRecommendation(data);
 		} catch (err) {
-			console.error('[MoodInsights] Failed to fetch recommendation:', err);
+			console.error('[SongInsights] Failed to fetch recommendation:', err);
 			setError('AI insights temporarily unavailable. Try again later.');
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	// Don't render if session is too short (T117 - reduced threshold)
-	if (sessionDuration < 60) {
+	// Don't render if session is too short (reduced threshold for better UX)
+	if (sessionDuration < 30) {
 		return null;
 	}
 
@@ -84,7 +96,7 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 						<Sparkles size={20} className="text-purple-400" />
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Mood Insights</h3>
+						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
 						<p className="text-xs text-slate-600 dark:text-slate-400">Powered by Gemini</p>
 					</div>
 				</div>
@@ -120,7 +132,7 @@ export const MoodInsights = ({ sessionId, sessionDuration, onClose }: MoodInsigh
 						<div>
 							<div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Suggested for next session:</div>
 							<div className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
-								{recommendation.suggestedMood.replace(/-/g, ' ')}
+								{recommendation.suggestedSong.replace(/-/g, ' ')}
 							</div>
 						</div>
 					</div>
