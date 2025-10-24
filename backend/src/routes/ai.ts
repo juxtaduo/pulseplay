@@ -248,7 +248,7 @@ router.post('/song-recommendation-guest', async (req: Request, res: Response) =>
 	try {
 		const { rhythmData, keystrokeCount, averageBpm, sessionDuration } = req.body;
 
-		if (!rhythmData || !keystrokeCount || !averageBpm || !sessionDuration) {
+		if (!rhythmData || typeof keystrokeCount !== 'number' || !averageBpm || !sessionDuration) {
 			return res.status(400).json({ error: 'Missing required data' });
 		}
 
