@@ -289,11 +289,7 @@ export function Home() {
 					</div>
 				)}
 
-				{sessionId && (
-					<div className="mt-6 text-center text-slate-500 text-sm">
-						Session ID: {sessionId.slice(0, 8)}...
-					</div>
-				)}
+				{/* Session ID display removed for cleaner UI */}
 			</main>
 		</div>
 	);

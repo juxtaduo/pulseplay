@@ -235,4 +235,90 @@ router.get('/weekly-summary', checkJwt, async (_req: Request, res: Response) => 
 	}
 });
 
+/**
+ * POST /api/ai/song-recommendation-guest
+ * Generate AI-driven song recommendation for unauthenticated users
+ * 
+ * @route POST /api/ai/song-recommendation-guest
+ * @body {rhythmData: object, keystrokeCount: number, averageBpm: number, sessionDuration: number}
+ * @returns {AISongRecommendation} - AI-generated song recommendation (not saved to DB)
+ * @access Public - no authentication required
+ */
+router.post('/song-recommendation-guest', async (req: Request, res: Response) => {
+	try {
+		const { rhythmData, keystrokeCount, averageBpm, sessionDuration } = req.body;
+
+		if (!rhythmData || !keystrokeCount || !averageBpm || !sessionDuration) {
+			return res.status(400).json({ error: 'Missing required data' });
+		}
+
+		if (sessionDuration < 30) { // 30 seconds minimum
+			logger.warn({ sessionDuration }, 'guest_ai_session_too_short');
+			return res.status(400).json({
+				error: 'Session too short for AI insights',
+				message: 'AI recommendations require sessions of at least 30 seconds',
+			});
+		}
+
+		// Analyze session pattern (T113) using the provided data
+		const analysis = analyzeSessionPattern({
+			duration: sessionDuration, // Already in seconds
+			totalKeystrokes: keystrokeCount,
+			averageBpm, // Use provided average BPM
+		});
+
+		// Generate Gemini AI recommendation (T111)
+		const recommendation = await generateSongRecommendation({
+			duration: analysis.duration, // Already in seconds
+			averageBpm: analysis.averageBpm, // Use provided average BPM
+			rhythmPattern: analysis.rhythmPattern,
+		});
+
+		// Map Gemini mood recommendations to actual song names
+		const songMapping: Record<string, 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'> = {
+			'deep-focus': 'thousand-years',
+			'creative-flow': 'river-flows',
+			'calm-reading': 'kiss-the-rain',
+			'energized-coding': 'gurenge',
+		};
+
+		const mappedSong = songMapping[recommendation.song] || 'thousand-years';
+
+		// Generate unique recommendation ID (for consistency with authenticated endpoint)
+		const recommendationId = `guest_rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+		// Create recommendation object but don't save to database for guest users
+		const aiRecommendation = {
+			recommendationId,
+			sessionId: null, // No session ID for guest users
+			suggestedSong: mappedSong,
+			rationale: recommendation.rationale,
+			confidence: recommendation.confidence,
+			geminiModel: 'gemini-2.5-flash',
+			generatedAt: new Date().toISOString(),
+		};
+
+		logger.info({
+			isGuest: true,
+			sessionDuration,
+			keystrokeCount,
+			averageBpm,
+			suggested_song: recommendation.song,
+			confidence: recommendation.confidence,
+		}, 'guest_ai_song_recommendation_created');
+
+		return res.status(201).json(aiRecommendation);
+	} catch (error) {
+		logger.error({
+			error: error instanceof Error ? error.message : 'Unknown error',
+			stack: error instanceof Error ? error.stack : undefined,
+		}, 'guest_ai_song_recommendation_error');
+
+		return res.status(500).json({
+			error: 'Failed to generate song recommendation',
+			message: error instanceof Error ? error.message : 'Unknown error',
+		});
+	}
+});
+
 export default router;
