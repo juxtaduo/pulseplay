@@ -89,6 +89,11 @@ export const SessionHistory = () => {
 		};
 	}, []);
 
+	// Fetch sessions when component mounts or filters change
+	useEffect(() => {
+		fetchSessions();
+	}, [selectedSong, currentPage, isAuthenticated]);
+
 	const fetchSessions = async () => {
 		setLoading(true);
 		setError(null);
