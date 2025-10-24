@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getAudioEngine, type AudioEngine } from '../services/audioService';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 
 /**
  * React hook for managing Web Audio API audio engine
@@ -14,7 +14,7 @@ export interface UseAudioEngineReturn {
 	currentMood: Mood | null;
 	volume: number;
 	startAudio: (mood: Mood) => Promise<void>;
-	stopAudio: () => void;
+	stopAudio: (clearMood?: boolean) => void;
 	setVolume: (volume: number) => void;
 	error: string | null;
 }
@@ -84,7 +84,7 @@ export function useAudioEngine(): UseAudioEngineReturn {
 	/**
 	 * Stop audio playback with 2-second exponential fadeout
 	 */
-	const stopAudio = useCallback(() => {
+	const stopAudio = useCallback((clearMood: boolean = true) => {
 		if (!engineRef.current) {
 			console.warn('[useAudioEngine] Engine not available for stop');
 			return;
@@ -93,8 +93,10 @@ export function useAudioEngine(): UseAudioEngineReturn {
 		try {
 			engineRef.current.stop();
 			setIsPlaying(false);
-			setCurrentMood(null);
-			console.log('[useAudioEngine] Stopped audio');
+			if (clearMood) {
+				setCurrentMood(null);
+			}
+			console.log('[useAudioEngine] Stopped audio, clearMood:', clearMood);
 		} catch (err) {
 			setError('Failed to stop audio');
 			console.error('[useAudioEngine] Stop error:', err);

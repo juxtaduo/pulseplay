@@ -123,8 +123,8 @@ export function Home() {
 	// Handle stopping a session
 	const handleStop = async () => {
 		try {
-			// Stop audio engine (with fadeout)
-			stopAudio();
+			// Stop audio engine (with fadeout) and clear mood
+			stopAudio(true);
 			// Stop backend session with final rhythm data
 			await stopSession(rhythmData);
 			// Now that session is completed, save the duration and ID for AI insights
@@ -142,9 +142,9 @@ export function Home() {
 	// Handle pausing/resuming a session
 	const handlePauseResume = async () => {
 		if (isPlaying) {
-			// Pause the session
+			// Pause the session - stop audio but keep currentMood for UI freezing
 			setIsPaused(true);
-			stopAudio();
+			stopAudio(false); // Don't clear mood when pausing
 		} else if (currentMood) {
 			// Resume the session
 			setIsPaused(false);
@@ -156,16 +156,19 @@ export function Home() {
 	const handleReset = () => {
 		// Reset all session stats to 0
 		setSessionDuration(0);
-		setCompletedSessionDuration(null);
-		setCompletedSessionId(null);
 		resetRhythm();
 		
 		// Reset song and instrument selections
 		setSelectedInstruments([]);
 		setEnableInstrumentalSounds(false);
 		
+		// Clear current mood when resetting
+		stopAudio(true); // This will clear the mood
+		
 		// Reset paused state
 		setIsPaused(false);
+		
+		// Note: Keep completedSessionId and completedSessionDuration to preserve AI insights
 	};
 
 	// Handle instrument selection toggle (Phase 6: T091)
@@ -238,10 +241,14 @@ export function Home() {
 
 				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} isPaused={isPaused} />
 
-				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
-				{!isPlaying && completedSessionId && (completedSessionDuration || 0) >= 30 && (
+				{/* AI Song Insights (Phase 7: T116, T117) - Shown when paused (preview) or completed (final) */}
+				{(!isPlaying && ((isPaused && sessionId && sessionDuration >= 30) || (completedSessionId && (completedSessionDuration || 0) >= 30))) && (
 					<div className="mt-8">
-						<SongInsights sessionId={completedSessionId} sessionDuration={completedSessionDuration || 0} />
+						<SongInsights
+							sessionId={isPaused ? sessionId : completedSessionId}
+							sessionDuration={isPaused ? sessionDuration : (completedSessionDuration || 0)}
+							isPreview={isPaused}
+						/>
 					</div>
 				)}
 
