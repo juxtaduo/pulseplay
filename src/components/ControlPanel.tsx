@@ -110,10 +110,10 @@ export const ControlPanel = ({
 						disabled={(!currentMood && !isPlaying && !isPaused) || isCompleted}
 						className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md ${
 							isPlaying
-								? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600'
+								? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 dark:from-orange-500 dark:to-orange-600 dark:hover:from-orange-700 dark:hover:to-orange-800'
 								: isPaused
-									? 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600'
-									: 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600'
+									? 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 dark:from-emerald-500 dark:to-emerald-600 dark:hover:from-emerald-700 dark:hover:to-emerald-800'
+									: 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 dark:from-emerald-500 dark:to-emerald-600 dark:hover:from-emerald-700 dark:hover:to-emerald-800'
 						} text-white`}
 						aria-label={
 							isPlaying 
@@ -137,7 +137,7 @@ export const ControlPanel = ({
 						<button
 							onClick={onStop}
 							disabled={isCompleted}
-							className="p-4 rounded-full bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+							className="p-4 rounded-full bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 dark:from-red-500 dark:to-red-600 dark:hover:from-red-700 dark:hover:to-red-800 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
 							aria-label="Stop and complete session"
 							title={isCompleted ? "Session completed" : "Stop session and get AI insights"}
 						>
@@ -149,7 +149,7 @@ export const ControlPanel = ({
 						<button
 							onClick={handleReset}
 							disabled={!isPlaying && !isPaused && !currentMood && !isCompleted}
-							className="p-4 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+							className="p-4 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 dark:from-amber-500 dark:to-amber-600 dark:hover:from-amber-700 dark:hover:to-amber-800 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
 							aria-label="Reset session"
 							title={isCompleted ? "Reset to start new session" : "Reset"}
 						>
