@@ -6,7 +6,7 @@
  */
 
 import { getAudioContext } from '../lib/audioContext';
-import type { Mood } from '../../backend/src/types';
+import type { Mood } from '../types';
 import type { InstrumentConfig } from '../lib/instruments';
 
 export interface AudioConfig {
@@ -629,6 +629,54 @@ export class AudioEngine {
 	}
 
 	/**
+	 * Pause audio playback without stopping oscillators/intervals
+	 * Preserves playback position for seamless resume
+	 */
+	pause(): void {
+		if (!this.isPlaying) return;
+
+		console.log('[AudioEngine] Pausing audio playback...');
+
+		const now = this.ctx.currentTime;
+		const fadeOutDuration = 0.5; // Quick fade for pause
+
+		// Fade out master gain to mute audio
+		this.masterGain.gain.cancelScheduledValues(now);
+		this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+		this.masterGain.gain.exponentialRampToValueAtTime(0.001, now + fadeOutDuration);
+
+		// Keep all intervals and oscillators running, just muted
+		this.isPlaying = false;
+
+		console.log('[AudioEngine] Audio playback paused');
+	}
+
+	/**
+	 * Resume audio playback from paused state
+	 * Restores volume without restarting sequences
+	 */
+	resume(): void {
+		if (this.isPlaying) return;
+
+		console.log('[AudioEngine] Resuming audio playback...');
+
+		const now = this.ctx.currentTime;
+		const fadeInDuration = 0.5; // Quick fade for resume
+
+		// Fade in master gain to restore volume
+		this.masterGain.gain.cancelScheduledValues(now);
+		this.masterGain.gain.setValueAtTime(0.001, now);
+		this.masterGain.gain.exponentialRampToValueAtTime(
+			this.currentMood ? MOOD_CONFIGS[this.currentMood].volume : 0.45,
+			now + fadeInDuration
+		);
+
+		this.isPlaying = true;
+
+		console.log('[AudioEngine] Audio playback resumed');
+	}
+
+	/**
 	 * Set volume (0-1 range)
 	 */
 	setVolume(volume: number): void {
@@ -737,11 +785,7 @@ export class AudioEngine {
 	): void {
 		// Select note based on current mood
 		let frequency: number;
-		if (this.currentMood === 'melodic-flow') {
-			frequency = this.getNextMelodyNote();
-		} else if (this.currentMood === 'jazz-harmony') {
-			frequency = this.getNextJazzNote();
-		} else if (this.currentMood === 'thousand-years' || this.currentMood === 'kiss-the-rain' || this.currentMood === 'river-flows' || this.currentMood === 'gurenge') {
+		if (this.currentMood === 'thousand-years' || this.currentMood === 'kiss-the-rain' || this.currentMood === 'river-flows' || this.currentMood === 'gurenge') {
 			frequency = this.getNextMidiNote();
 		} else {
 			// Get next note from pentatonic scale for other moods

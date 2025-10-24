@@ -54,6 +54,7 @@ export const useRhythmDetection = (
 	const keystrokeTimestamps = useRef<number[]>([]);
 	const clickTimestamps = useRef<number[]>([]); // Track mouse clicks (T130)
 	const mouseMovements = useRef<number[]>([]);
+	const scrollTimestamps = useRef<number[]>([]); // Track scroll events separately
 	const lastUpdateTime = useRef<number>(Date.now());
 	const audioEngineRef = useRef(getAudioEngine());
 	const instrumentIndexRef = useRef(0); // Round-robin index for multiple instruments
@@ -61,6 +62,12 @@ export const useRhythmDetection = (
 	const lastMouseMoveTime = useRef<number>(0); // Throttle mouse move events
 	const lastScrollTime = useRef<number>(0); // Throttle scroll events
 	const bpmHistory = useRef<number[]>([]); // Track BPM values over time for averaging
+	
+	// Cumulative counters for total session activity (not limited by array sizes)
+	const totalKeystrokes = useRef<number>(0);
+	const totalClicks = useRef<number>(0);
+	const totalMouseMoves = useRef<number>(0);
+	const totalScrolls = useRef<number>(0);
 
 	const calculateRhythm = useCallback(() => {
     const now = Date.now();
@@ -165,14 +172,10 @@ export const useRhythmDetection = (
 			bpm: Math.min(bpm, 180),
 			averageBpm: finalAverageBpm,
 			intensity,
-			keystrokeCount: keystrokeTimestamps.current.length,
-			clickCount: clickTimestamps.current.length,
-			mouseMoveCount: mouseMovements.current.length,
-			scrollCount: mouseMovements.current.filter((ts, i, arr) => {
-				// Count scroll events (those that came from wheel events)
-				// For now, approximate by counting mouse movements
-				return i === 0 || ts - arr[i - 1] > 200; // Scroll throttle is 200ms
-			}).length,
+			keystrokeCount: totalKeystrokes.current,
+			clickCount: totalClicks.current,
+			mouseMoveCount: totalMouseMoves.current,
+			scrollCount: totalScrolls.current,
 			averageInterval: Math.round(averageInterval),
 			keysPerMinute,
 		});
@@ -181,7 +184,8 @@ export const useRhythmDetection = (
 
 		const now = Date.now();
 		keystrokeTimestamps.current.push(now);
-		console.log('[useRhythmDetection] Keystroke detected, total:', keystrokeTimestamps.current.length);
+		totalKeystrokes.current++; // Increment cumulative counter
+		console.log('[useRhythmDetection] Keystroke detected, total:', totalKeystrokes.current);
 
 		if (keystrokeTimestamps.current.length > 50) {
 			keystrokeTimestamps.current.shift();
@@ -255,6 +259,7 @@ export const useRhythmDetection = (
 		}
 		
 		mouseMovements.current.push(now);
+		totalMouseMoves.current++; // Increment cumulative counter
 
 		if (mouseMovements.current.length > 30) {
 			mouseMovements.current.shift();
@@ -286,6 +291,13 @@ export const useRhythmDetection = (
 			return;
 		}
 		
+		// Record scroll event timestamp
+		scrollTimestamps.current.push(now);
+		totalScrolls.current++; // Increment cumulative counter
+		if (scrollTimestamps.current.length > 50) {
+			scrollTimestamps.current.shift();
+		}
+		
 		lastScrollTime.current = now;
 		lastKeystrokeTime.current = now;
 
@@ -306,6 +318,7 @@ export const useRhythmDetection = (
 		// Track click timestamp (T130 - session stats)
 		const now = Date.now();
 		clickTimestamps.current.push(now);
+		totalClicks.current++; // Increment cumulative counter
 
 		// Play bass-range sound for mouse clicks (T074) if enabled
 		if (enableInstrumentalSounds && selectedInstruments.length > 0) {
@@ -324,6 +337,11 @@ export const useRhythmDetection = (
 				keystrokeTimestamps.current = [];
 				clickTimestamps.current = [];
 				mouseMovements.current = [];
+				scrollTimestamps.current = []; // Reset scroll timestamps
+				totalKeystrokes.current = 0; // Reset cumulative counters
+				totalClicks.current = 0;
+				totalMouseMoves.current = 0;
+				totalScrolls.current = 0;
 				lastKeystrokeTime.current = 0;
 				instrumentIndexRef.current = 0;
 				setRhythmData({
@@ -348,6 +366,9 @@ export const useRhythmDetection = (
 		window.addEventListener('wheel', handleMouseScroll as any, { passive: true });
 
 		const intervalId = setInterval(calculateRhythm, 1000);
+
+		// Update rhythm data immediately when becoming active
+		calculateRhythm();
 
 		// Inactivity detection: stop instrumental sounds after 5 seconds (T076)
 		let inactivityTimer: NodeJS.Timeout;
@@ -385,6 +406,11 @@ export const useRhythmDetection = (
 		keystrokeTimestamps.current = [];
 		clickTimestamps.current = [];
 		mouseMovements.current = [];
+		scrollTimestamps.current = []; // Reset scroll timestamps
+		totalKeystrokes.current = 0; // Reset cumulative counters
+		totalClicks.current = 0;
+		totalMouseMoves.current = 0;
+		totalScrolls.current = 0;
 		bpmHistory.current = []; // Reset BPM history
 		lastKeystrokeTime.current = 0;
 		instrumentIndexRef.current = 0;

@@ -15,6 +15,8 @@ export interface UseAudioEngineReturn {
 	volume: number;
 	startAudio: (mood: Mood) => Promise<void>;
 	stopAudio: (clearMood?: boolean) => void;
+	pauseAudio: () => void;
+	resumeAudio: () => void;
 	setVolume: (volume: number) => void;
 	error: string | null;
 }
@@ -104,6 +106,44 @@ export function useAudioEngine(): UseAudioEngineReturn {
 	}, []);
 
 	/**
+	 * Pause audio playback without stopping oscillators/intervals
+	 */
+	const pauseAudio = useCallback(() => {
+		if (!engineRef.current) {
+			console.warn('[useAudioEngine] Engine not available for pause');
+			return;
+		}
+
+		try {
+			engineRef.current.pause();
+			setIsPlaying(false);
+			console.log('[useAudioEngine] Paused audio');
+		} catch (err) {
+			setError('Failed to pause audio');
+			console.error('[useAudioEngine] Pause error:', err);
+		}
+	}, []);
+
+	/**
+	 * Resume audio playback from paused state
+	 */
+	const resumeAudio = useCallback(() => {
+		if (!engineRef.current) {
+			console.warn('[useAudioEngine] Engine not available for resume');
+			return;
+		}
+
+		try {
+			engineRef.current.resume();
+			setIsPlaying(true);
+			console.log('[useAudioEngine] Resumed audio');
+		} catch (err) {
+			setError('Failed to resume audio');
+			console.error('[useAudioEngine] Resume error:', err);
+		}
+	}, []);
+
+	/**
 	 * Set volume with smooth ramping (0-1 range)
 	 */
 	const setVolume = useCallback((newVolume: number) => {
@@ -129,6 +169,8 @@ export function useAudioEngine(): UseAudioEngineReturn {
 		volume,
 		startAudio,
 		stopAudio,
+		pauseAudio,
+		resumeAudio,
 		setVolume,
 		error,
 	};

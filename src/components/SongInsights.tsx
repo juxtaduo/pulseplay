@@ -1,6 +1,7 @@
 import { Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import type { RhythmData } from '../hooks/useRhythmDetection';
 
 /**
  * SongInsights component displays AI-generated song recommendations after session completion
@@ -13,6 +14,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 interface SongInsightsProps {
 	sessionId: string | null;
 	sessionDuration: number; // seconds
+	rhythmData?: RhythmData; // For unauthenticated users
 	onClose?: () => void;
 }
 
@@ -24,7 +26,7 @@ interface AIRecommendation {
 	generatedAt: string;
 }
 
-export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsightsProps) => {
+export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }: SongInsightsProps) => {
 	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -32,31 +34,60 @@ export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsigh
 
 	useEffect(() => {
 		// Only fetch recommendation if session is ≥30 seconds (reduced threshold for better UX)
-		if (sessionId && sessionDuration >= 30) {
+		// For authenticated users, require sessionId; for unauthenticated, require rhythmData
+		if (sessionDuration >= 30 && ((isAuthenticated && sessionId) || (!isAuthenticated && rhythmData))) {
 			fetchRecommendation();
 		}
-	}, [sessionId, sessionDuration]);
+	}, [sessionId, sessionDuration, rhythmData, isAuthenticated]);
 
 	const fetchRecommendation = async () => {
 		setLoading(true);
 		setError(null);
 
-		if (!isAuthenticated) {
-			setError('Authentication required for AI insights');
-			setLoading(false);
-			return;
-		}
-
 		try {
-			const token = await getAccessTokenSilently();
-			const response = await fetch(`${API_BASE_URL}/api/ai/song-recommendation`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({ sessionId }),
-			});
+			let response: Response;
+
+			if (isAuthenticated && sessionId) {
+				// Authenticated user: use sessionId approach
+				const token = await getAccessTokenSilently();
+				response = await fetch(`${API_BASE_URL}/api/ai/song-recommendation`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({ sessionId }),
+				});
+			} else if (!isAuthenticated && rhythmData) {
+				// Unauthenticated user: send rhythm data directly
+				const rhythmType = rhythmData.intensity === 'high' 
+					? 'energetic' 
+					: rhythmData.intensity === 'medium' 
+					? 'steady' 
+					: 'thoughtful';
+
+				const requestBody = {
+					rhythmData: {
+						averageKeysPerMinute: rhythmData.keysPerMinute,
+						rhythmType,
+						peakIntensity: rhythmData.rhythmScore / 100,
+						samples: []
+					},
+					keystrokeCount: rhythmData.keystrokeCount,
+					averageBpm: rhythmData.averageBpm,
+					sessionDuration
+				};
+
+				response = await fetch(`${API_BASE_URL}/api/ai/song-recommendation-guest`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(requestBody),
+				});
+			} else {
+				throw new Error('Invalid state for AI recommendation');
+			}
 
 			if (response.status === 400) {
 				const errorData = await response.json();
@@ -83,8 +114,8 @@ export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsigh
 		return null;
 	}
 
-	// Don't render if no sessionId
-	if (!sessionId) {
+	// Don't render if no sessionId (authenticated) and no rhythmData (unauthenticated)
+	if (!sessionId && !rhythmData) {
 		return null;
 	}
 

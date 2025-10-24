@@ -73,18 +73,27 @@ export const ControlPanel = ({
 		}
 	};
 
-	const handlePlayPauseReset = () => {
+	const handlePlayPause = () => {
 		if (isPlaying) {
 			// Currently playing, so pause
 			onPauseResume();
-		} else if (isPaused) {
-			// Currently paused, so reset
-			onReset();
-		} else if (currentMood) {
-			// Not playing and not paused, so play
-			onStart(currentMood);
+		} else {
+			// Currently paused or not started, so play/resume
+			if (currentMood) {
+				if (isPaused) {
+					// Resume paused session
+					onPauseResume();
+				} else {
+					// Start new session
+					onStart(currentMood);
+				}
+			}
+			// If no mood selected, do nothing (user must select mood first)
 		}
-		// If not playing and no mood selected, do nothing (user must select mood first)
+	};
+
+	const handleReset = () => {
+		onReset();
 	};
 
 	// Convert 0-1 range to 0-100 for display
@@ -95,42 +104,56 @@ export const ControlPanel = ({
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-semibold text-slate-900 dark:text-white">Music Selection</h2>
 				<div className="flex items-center gap-3">
+					{/* Play/Pause button */}
 					<button
-						onClick={handlePlayPauseReset}
-						disabled={!currentMood && !isPlaying && !isPaused}
+						onClick={handlePlayPause}
+						disabled={(!currentMood && !isPlaying && !isPaused) || isCompleted}
 						className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
 							isPlaying
 								? 'bg-orange-500 hover:bg-orange-600'
 								: isPaused
-									? 'bg-yellow-500 hover:bg-yellow-600'
+									? 'bg-green-500 hover:bg-green-600'
 									: 'bg-green-500 hover:bg-green-600'
 						} text-white`}
 						aria-label={
 							isPlaying 
 								? 'Pause music' 
 								: isPaused 
-									? 'Reset session' 
+									? 'Resume music' 
 									: 'Play music'
 						}
 						title={
 							isPlaying 
 								? 'Pause' 
 								: isPaused 
-									? 'Reset' 
+									? 'Resume' 
 									: 'Play'
 						}
 					>
-						{isPlaying ? <Pause size={24} /> : isPaused ? <RotateCcw size={24} /> : <Play size={24} />}
+						{isPlaying ? <Pause size={24} /> : <Play size={24} />}
 					</button>
-					{/* Stop button - to the right of play/pause/reset button */}
-					{onStop && (isPlaying || isPaused) && (
+					{/* Stop button */}
+					{onStop && ((isPlaying || isPaused) || isCompleted) && (
 						<button
 							onClick={onStop}
-							className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all"
+							disabled={isCompleted}
+							className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 							aria-label="Stop and complete session"
-							title="Stop session and get AI insights"
+							title={isCompleted ? "Session completed" : "Stop session and get AI insights"}
 						>
 							<Square size={24} />
+						</button>
+					)}
+					{/* Reset button - rightmost */}
+					{((isPlaying || isPaused) || isCompleted) && (
+						<button
+							onClick={handleReset}
+							disabled={!isPlaying && !isPaused && !currentMood && !isCompleted}
+							className="p-4 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+							aria-label="Reset session"
+							title={isCompleted ? "Reset to start new session" : "Reset"}
+						>
+							<RotateCcw size={24} />
 						</button>
 					)}
 				</div>
@@ -151,7 +174,7 @@ export const ControlPanel = ({
 						<button
 							key={moodOption.value}
 							onClick={() => handleMoodSelect(moodOption.value)}
-							disabled={isPaused || isCompleted}
+							disabled={isPaused || isCompleted || (isPlaying && currentMood !== moodOption.value)}
 							className={`py-3 px-4 rounded-lg font-medium transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed ${
 								currentMood === moodOption.value
 									? 'bg-blue-500 text-white ring-2 ring-blue-400'
@@ -219,7 +242,8 @@ export const ControlPanel = ({
 						max="100"
 						value={displayVolume}
 						onChange={(e) => onVolumeChange(Number(e.target.value) / 100)}
-						className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+						disabled={isCompleted}
+						className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
 						aria-label="Volume slider"
 					/>
 				</div>

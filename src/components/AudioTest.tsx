@@ -101,7 +101,7 @@ export function AudioTest() {
 			}`}
 		>
 			<Play size={20} />
-			{isPlaying ? 'Playing...' : 'Play Test Tones'}
+			{isPlaying ? 'Playing...' : 'Test'}
 		</button>
 	);
 }

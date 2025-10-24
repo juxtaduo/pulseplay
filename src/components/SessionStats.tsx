@@ -25,6 +25,10 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive, isPaused, 
 		if (!isPaused && !isCompleted) {
 			setFrozenRhythmData(rhythmData);
 			setFrozenSessionDuration(sessionDuration);
+		} else if (isPaused) {
+			// When pausing, freeze the current values
+			setFrozenRhythmData(rhythmData);
+			setFrozenSessionDuration(sessionDuration);
 		}
 	}, [rhythmData, sessionDuration, isPaused, isCompleted]);
 
