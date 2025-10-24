@@ -135,15 +135,16 @@ function hashString(str: string): string {
 export async function generateWeeklySummary(
 	sessions: Array<{
 		duration: number;
-		averageTempo: number;
+		averageBpm: number;
 		selectedSong: string;
 	}>
 ): Promise<string> {
 	try {
 		const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-		const totalMinutes = sessions.reduce((sum, s) => sum + s.duration / 60, 0);
-		const avgTempo = sessions.reduce((sum, s) => sum + s.averageTempo, 0) / sessions.length;
+		const totalSeconds = sessions.reduce((sum, s) => sum + s.duration, 0);
+		const totalMinutes = totalSeconds / 60;
+		const avgBpm = sessions.reduce((sum, s) => sum + s.averageBpm, 0) / sessions.length;
 		const songCounts = sessions.reduce(
 			(acc, s) => {
 				acc[s.selectedSong] = (acc[s.selectedSong] || 0) + 1;
@@ -156,7 +157,7 @@ export async function generateWeeklySummary(
 
 Sessions: ${sessions.length} total
 Total time: ${Math.floor(totalMinutes)} minutes
-Average tempo: ${Math.floor(avgTempo)} keys/min
+Average BPM: ${Math.floor(avgBpm)} BPM
 Song preferences: ${Object.entries(songCounts)
 			.map(([song, count]) => `${song}: ${count}`)
 			.join(', ')}
@@ -168,7 +169,7 @@ Provide a 2-3 sentence summary highlighting patterns and suggesting improvements
 
 		logger.info({
 			sessions_analyzed: sessions.length,
-			total_minutes: Math.floor(totalMinutes),
+			total_seconds: totalSeconds,
 		}, 'gemini_weekly_summary');
 
 		return summary.trim();
@@ -178,7 +179,7 @@ Provide a 2-3 sentence summary highlighting patterns and suggesting improvements
 		}, 'gemini_weekly_summary_error');
 
 		return `You completed ${sessions.length} focus sessions this week, totaling ${Math.floor(
-			sessions.reduce((sum, s) => sum + s.duration / 60, 0)
+			sessions.reduce((sum, s) => sum + s.duration, 0) / 60
 		)} minutes of focused work. Keep building this habit!`;
 	}
 }
@@ -189,13 +190,15 @@ Provide a 2-3 sentence summary highlighting patterns and suggesting improvements
  * @returns Promise resolving to song recommendation with rationale and confidence
  */
 export async function generateSongRecommendation(sessionData: {
-	duration: number;
-	avgTempo: number;
+	duration: number; // in seconds
 	averageBpm: number;
 	rhythmPattern: 'steady' | 'erratic';
 }): Promise<{ song: string; rationale: string; confidence: number }> {
 	try {
 		const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+		// Convert duration to minutes for display
+		const durationMinutes = Math.floor(sessionData.duration / 60);
 
 		// Few-shot prompt with structured JSON output
 		const prompt = `You are a focus productivity coach analyzing typing rhythm patterns. Based on the session data below, suggest a song for the next focus session and explain why.
@@ -203,18 +206,17 @@ export async function generateSongRecommendation(sessionData: {
 Song options: deep-focus, creative-flow, calm-reading, energized-coding
 
 Examples:
-Input: 20 min, 100 keys/min, 85 BPM, steady
-Output: {"song": "energized-coding", "rationale": "Your consistent high-speed rhythm (100 keys/min) and steady BPM (85) indicates strong focus momentum. Energized coding mode will maintain this flow state.", "confidence": 0.85}
+Input: 1200 sec (20 min), 85 BPM, steady
+Output: {"song": "energized-coding", "rationale": "Your steady BPM (85) indicates strong focus momentum. Energized coding mode will maintain this flow state.", "confidence": 0.85}
 
-Input: 15 min, 40 keys/min, 35 BPM, erratic
-Output: {"song": "calm-reading", "rationale": "Your slower, variable rhythm (40 keys/min) with moderate BPM (35) suggests deep contemplation. Calm reading mode will support sustained concentration.", "confidence": 0.78}
+Input: 900 sec (15 min), 35 BPM, erratic
+Output: {"song": "calm-reading", "rationale": "Your moderate BPM (35) with erratic pattern suggests deep contemplation. Calm reading mode will support sustained concentration.", "confidence": 0.78}
 
-Input: 12 min, 75 keys/min, 65 BPM, steady
-Output: {"song": "creative-flow", "rationale": "Your moderate, steady rhythm (75 keys/min) and consistent BPM (65) suggests balanced productivity. Creative flow mode will nurture sustained inspiration.", "confidence": 0.82}
+Input: 720 sec (12 min), 65 BPM, steady
+Output: {"song": "creative-flow", "rationale": "Your consistent BPM (65) suggests balanced productivity. Creative flow mode will nurture sustained inspiration.", "confidence": 0.82}
 
 Now analyze this session:
-- Duration: ${sessionData.duration} minutes
-- Average Typing Speed: ${sessionData.avgTempo} keystrokes/min
+- Duration: ${sessionData.duration} seconds (${durationMinutes} minutes)
 - Average BPM: ${sessionData.averageBpm} BPM
 - Rhythm Pattern: ${sessionData.rhythmPattern}
 
@@ -246,7 +248,7 @@ Respond ONLY with valid JSON: {"song": "deep-focus|creative-flow|calm-reading|en
 			confidence: insight.confidence,
 			latency_ms: latency,
 			model: 'gemini-2.5-flash',
-			session_duration_min: sessionData.duration,
+			session_duration_sec: sessionData.duration,
 			rhythm_pattern: sessionData.rhythmPattern,
 		}, 'gemini_song_recommendation');
 

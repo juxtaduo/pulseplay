@@ -75,11 +75,16 @@ export const useRhythmDetection = (
     );
 
 		if (recentInteractions.length < 2) {
+			// Even with low recent activity, update averageBpm if we have historical data
+			const historicalAverageBpm = bpmHistory.current.length > 0 
+				? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
+				: 0;
+			
 			setRhythmData((prev) => ({
 				...prev,
 				rhythmScore: 0,
 				bpm: 0,
-				averageBpm: prev.averageBpm, // Keep existing average
+				averageBpm: historicalAverageBpm || prev.averageBpm, // Keep existing average if no historical data
 				intensity: 'low',
 				keysPerMinute: 0,
 			}));
@@ -109,7 +114,7 @@ export const useRhythmDetection = (
 		// Calculate average BPM from history
 		const averageBpm = bpmHistory.current.length > 0 
 			? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
-			: 0;
+			: bpm; // If no history, use current BPM as average
 
 		// Calculate keys per minute (keyboard only)
 		const timeWindowMs = 60000; // 1 minute

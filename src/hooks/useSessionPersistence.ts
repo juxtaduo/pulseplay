@@ -132,7 +132,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 				const requestBody = {
 					rhythmData: backendRhythmData,
 					keystrokeCount: frontendRhythmData.keystrokeCount,
-					averageTempo: frontendRhythmData.keysPerMinute,
+					averageBpm: frontendRhythmData.averageBpm, // Include average BPM
 				};
 
 				console.log('[useSessionPersistence] Making PUT request:', {
@@ -215,7 +215,6 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 					samples: [] // We'll keep this empty for now, could add historical data later
 				};
 				requestBody.keystrokeCount = finalRhythmData.keystrokeCount;
-				requestBody.averageTempo = finalRhythmData.keysPerMinute;
 				requestBody.averageBpm = finalRhythmData.averageBpm; // Include average BPM
 			}
 

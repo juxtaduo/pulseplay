@@ -57,9 +57,8 @@ const focusSessionSchema = new Schema<FocusSessionDocument>(
 		},
 		startTime: { type: Date, required: true, default: Date.now },
 		endTime: { type: Date, default: null },
-		totalDurationMinutes: { type: Number, min: 0, default: null },
+		totalDurationSeconds: { type: Number, min: 0, default: null },
 		keystrokeCount: { type: Number, min: 0, default: 0 },
-		averageTempo: { type: Number, min: 0, default: 0 },
 		averageBpm: { type: Number, min: 0, default: 0 }, // Average BPM for the entire session
 		rhythmData: { type: rhythmDataSchema, required: true },
 		state: {
@@ -99,10 +98,10 @@ focusSessionSchema.set('toJSON', {
  * Calculate total duration before saving if session is completed
  */
 focusSessionSchema.pre('save', function (next) {
-	if (this.state === 'completed' && this.endTime && !this.totalDurationMinutes) {
+	if (this.state === 'completed' && this.endTime && !this.totalDurationSeconds) {
 		const durationMs = this.endTime.getTime() - this.startTime.getTime();
-		// Store as precise decimal minutes (e.g., 1.33 minutes for 1 minute 20 seconds)
-		this.totalDurationMinutes = durationMs / 60000;
+		// Store as precise seconds (e.g., 80 seconds for 1 minute 20 seconds)
+		this.totalDurationSeconds = Math.round(durationMs / 1000);
 	}
 	next();
 });

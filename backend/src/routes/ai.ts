@@ -39,13 +39,13 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 
 		// Check if session is at least 30 seconds (reduced threshold for better UX)
 		// If duration is not calculated yet, try to calculate it
-		let sessionDuration = session.totalDurationMinutes;
+		let sessionDuration = session.totalDurationSeconds;
 		if (!sessionDuration && session.endTime) {
 			// Session has endTime, calculate duration regardless of state
 			const durationMs = session.endTime.getTime() - session.startTime.getTime();
-			sessionDuration = durationMs / 60000;
+			sessionDuration = Math.round(durationMs / 1000);
 			// Update the session with the calculated duration
-			session.totalDurationMinutes = sessionDuration;
+			session.totalDurationSeconds = sessionDuration;
 			await session.save();
 			logger.info({ sessionId, calculatedDuration: sessionDuration }, 'session_duration_recalculated');
 		} else if (!sessionDuration && !session.endTime && session.state === 'active') {
@@ -66,7 +66,7 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 			endTime: session.endTime
 		}, 'ai_session_check');
 
-		if (!sessionDuration || sessionDuration < 0.5) { // 0.5 minutes = 30 seconds
+		if (!sessionDuration || sessionDuration < 30) { // 30 seconds minimum
 			logger.warn({
 				sessionId,
 				sessionDuration,
@@ -89,23 +89,19 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 		}
 
 		// Analyze session pattern (T113)
-		const sessionDurationSeconds = sessionDuration * 60; // Convert to seconds
-		const averageTempo = session.rhythmData.averageKeysPerMinute || 0;
 		const averageBpm = session.averageBpm || 0; // Include average BPM
-		const totalKeystrokes = Math.round((averageTempo * sessionDuration)); // Estimate from average tempo
+		const totalKeystrokes = Math.round((session.rhythmData.averageKeysPerMinute || 0) * (sessionDuration / 60)); // Estimate from average tempo
 		
 		const analysis = analyzeSessionPattern({
-			duration: sessionDurationSeconds,
+			duration: sessionDuration, // Already in seconds
 			totalKeystrokes,
-			averageTempo,
-			averageBpm, // Include average BPM in analysis
+			averageBpm, // Use average BPM instead of tempo
 		});
 
 		// Generate Gemini AI recommendation (T111)
 		const recommendation = await generateSongRecommendation({
-			duration: analysis.duration,
-			avgTempo: analysis.avgTempo,
-			averageBpm: analysis.averageBpm, // Include average BPM
+			duration: analysis.duration, // Already in seconds
+			averageBpm: analysis.averageBpm, // Use average BPM
 			rhythmPattern: analysis.rhythmPattern,
 		});
 
@@ -187,9 +183,8 @@ router.get('/weekly-summary', checkJwt, async (_req: Request, res: Response) => 
 		// Map sessions to metrics format expected by Gemini
 		const sessionData = sessions.map((s) => {
 			return {
-				duration: (s.totalDurationMinutes || 0) * 60,
-				totalKeystrokes: s.keystrokeCount || 0,
-				averageTempo: s.averageTempo || 0,
+				duration: s.totalDurationSeconds || 0, // Already in seconds
+				averageBpm: s.averageBpm || 0, // Use average BPM
 				selectedSong: s.song || 'thousand-years',
 			};
 		});
