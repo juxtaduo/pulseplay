@@ -14,7 +14,6 @@ interface SongInsightsProps {
 	sessionId: string | null;
 	sessionDuration: number; // seconds
 	onClose?: () => void;
-	isPreview?: boolean; // Whether this is a preview during an active session
 }
 
 interface AIRecommendation {
@@ -25,7 +24,7 @@ interface AIRecommendation {
 	generatedAt: string;
 }
 
-export const SongInsights = ({ sessionId, sessionDuration, onClose, isPreview = false }: SongInsightsProps) => {
+export const SongInsights = ({ sessionId, sessionDuration, onClose }: SongInsightsProps) => {
 	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -61,11 +60,7 @@ export const SongInsights = ({ sessionId, sessionDuration, onClose, isPreview = 
 
 			if (response.status === 400) {
 				const errorData = await response.json();
-				if (isPreview && errorData.message?.includes('Session not completed')) {
-					setError('Complete your session to unlock AI insights based on your full rhythm pattern.');
-				} else {
-					setError(errorData.message || 'Session too short for AI insights');
-				}
+				setError(errorData.message || 'Session too short for AI insights');
 				return;
 			}
 
@@ -101,12 +96,8 @@ export const SongInsights = ({ sessionId, sessionDuration, onClose, isPreview = 
 						<Sparkles size={20} className="text-purple-400" />
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-							{isPreview ? 'AI Session Preview' : 'AI Song Insights'}
-						</h3>
-						<p className="text-xs text-slate-600 dark:text-slate-400">
-							{isPreview ? 'Complete your session for personalized recommendations' : 'Powered by Gemini'}
-						</p>
+						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
+						<p className="text-xs text-slate-600 dark:text-slate-400">Powered by Gemini</p>
 					</div>
 				</div>
 				{onClose && (

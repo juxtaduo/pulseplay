@@ -1,4 +1,4 @@
-import { Play, Pause, RotateCcw, Volume2, Piano, Music2, Mic2, Radio } from 'lucide-react';
+import { Play, Pause, RotateCcw, Square, Volume2, Piano, Music2, Mic2, Radio } from 'lucide-react';
 import type { Mood } from '../types';
 import type { InstrumentType } from '../lib/instruments';
 
@@ -17,6 +17,7 @@ interface ControlPanelProps {
 	onStart: (mood: Mood) => void;
 	onPauseResume: () => void;
 	onReset: () => void;
+	onStop?: () => void; // Stop and complete session
 	onVolumeChange: (volume: number) => void;
 	onInstrumentToggle?: (instrument: InstrumentType) => void; // Phase 6
 	error: string | null;
@@ -51,6 +52,7 @@ export const ControlPanel = ({
 	onStart,
 	onPauseResume,
 	onReset,
+	onStop,
 	onVolumeChange,
 	onInstrumentToggle,
 	error,
@@ -90,26 +92,39 @@ export const ControlPanel = ({
 		<div className="bg-white dark:bg-slate-800 rounded-xl p-6 space-y-6 border border-slate-200 dark:border-slate-700 transition-colors duration-200">
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-semibold text-slate-900 dark:text-white">Music Selection</h2>
-				<button
-					onClick={handlePlayPauseReset}
-					disabled={!currentMood && !isPlaying && !isPaused}
-					className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-						isPlaying
-							? 'bg-red-500 hover:bg-red-600'
-							: isPaused
-								? 'bg-orange-500 hover:bg-orange-600'
-								: 'bg-green-500 hover:bg-green-600'
-					} text-white`}
-					aria-label={
-						isPlaying 
-							? 'Pause music' 
-							: isPaused 
-								? 'Reset session' 
-								: 'Play music'
-					}
-				>
-					{isPlaying ? <Pause size={24} /> : isPaused ? <RotateCcw size={24} /> : <Play size={24} />}
-				</button>
+				<div className="flex items-center gap-3">
+					{/* Stop button - only show when playing or paused */}
+					{onStop && (isPlaying || isPaused) && (
+						<button
+							onClick={onStop}
+							className="p-3 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all"
+							aria-label="Stop and complete session"
+							title="Stop session and get AI insights"
+						>
+							<Square size={20} />
+						</button>
+					)}
+					<button
+						onClick={handlePlayPauseReset}
+						disabled={!currentMood && !isPlaying && !isPaused}
+						className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+							isPlaying
+								? 'bg-red-500 hover:bg-red-600'
+								: isPaused
+									? 'bg-orange-500 hover:bg-orange-600'
+									: 'bg-green-500 hover:bg-green-600'
+						} text-white`}
+						aria-label={
+							isPlaying 
+								? 'Pause music' 
+								: isPaused 
+									? 'Reset session' 
+									: 'Play music'
+						}
+					>
+						{isPlaying ? <Pause size={24} /> : isPaused ? <RotateCcw size={24} /> : <Play size={24} />}
+					</button>
+				</div>
 			</div>
 
 			{error && (

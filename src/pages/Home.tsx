@@ -233,6 +233,7 @@ export function Home() {
 						onStart={handleStart}
 						onPauseResume={handlePauseResume}
 						onReset={handleReset}
+						onStop={handleStop}
 						onVolumeChange={setVolume}
 						onInstrumentToggle={handleInstrumentToggle}
 						error={displayError}
@@ -241,14 +242,10 @@ export function Home() {
 
 				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} isPaused={isPaused} />
 
-				{/* AI Song Insights (Phase 7: T116, T117) - Shown when paused (preview) or completed (final) */}
-				{(!isPlaying && ((isPaused && sessionId && sessionDuration >= 30) || (completedSessionId && (completedSessionDuration || 0) >= 30))) && (
+				{/* AI Song Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
+				{!isPlaying && completedSessionId && (completedSessionDuration || 0) >= 30 && (
 					<div className="mt-8">
-						<SongInsights
-							sessionId={isPaused ? sessionId : completedSessionId}
-							sessionDuration={isPaused ? sessionDuration : (completedSessionDuration || 0)}
-							isPreview={isPaused}
-						/>
+						<SongInsights sessionId={completedSessionId} sessionDuration={completedSessionDuration || 0} />
 					</div>
 				)}
 
