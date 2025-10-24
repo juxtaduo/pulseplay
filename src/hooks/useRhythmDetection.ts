@@ -9,6 +9,7 @@ import {
 export interface RhythmData {
 	rhythmScore: number;
 	bpm: number;
+	averageBpm: number; // Average BPM for the entire session
 	intensity: 'low' | 'medium' | 'high';
 	keystrokeCount: number;
 	clickCount: number; // Mouse clicks count (added for T130)
@@ -38,6 +39,7 @@ export const useRhythmDetection = (
 	const [rhythmData, setRhythmData] = useState<RhythmData>({
 		rhythmScore: 0,
 		bpm: 0,
+		averageBpm: 0,
 		intensity: 'low',
 		keystrokeCount: 0,
 		clickCount: 0,
@@ -56,8 +58,9 @@ export const useRhythmDetection = (
 	const lastKeystrokeTime = useRef<number>(0);
 	const lastMouseMoveTime = useRef<number>(0); // Throttle mouse move events
 	const lastScrollTime = useRef<number>(0); // Throttle scroll events
+	const bpmHistory = useRef<number[]>([]); // Track BPM values over time for averaging
 
-  const calculateRhythm = useCallback(() => {
+	const calculateRhythm = useCallback(() => {
     const now = Date.now();
     
     // Combine all interaction types for more comprehensive rhythm score
@@ -72,10 +75,16 @@ export const useRhythmDetection = (
     );
 
 		if (recentInteractions.length < 2) {
+			// Even with low recent activity, update averageBpm if we have historical data
+			const historicalAverageBpm = bpmHistory.current.length > 0 
+				? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
+				: 0;
+			
 			setRhythmData((prev) => ({
 				...prev,
 				rhythmScore: 0,
 				bpm: 0,
+				averageBpm: historicalAverageBpm || prev.averageBpm, // Keep existing average if no historical data
 				intensity: 'low',
 				keysPerMinute: 0,
 			}));
@@ -96,6 +105,17 @@ export const useRhythmDetection = (
 		const rhythmScore = Math.min(100, 10000 / Math.max(averageInterval, 100));
 		const bpm = Math.round((60000 / Math.max(averageInterval, 50)) * 0.25);
 
+		// Track BPM values for averaging (keep last 50 values to avoid memory issues)
+		bpmHistory.current.push(bpm);
+		if (bpmHistory.current.length > 50) {
+			bpmHistory.current.shift();
+		}
+		
+		// Calculate average BPM from history
+		const averageBpm = bpmHistory.current.length > 0 
+			? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
+			: bpm; // If no history, use current BPM as average
+
 		// Calculate keys per minute (keyboard only)
 		const timeWindowMs = 60000; // 1 minute
 		const recentMinuteKeystrokes = keystrokeTimestamps.current.filter(
@@ -115,6 +135,7 @@ export const useRhythmDetection = (
 		setRhythmData({
 			rhythmScore: Math.round(rhythmScore),
 			bpm: Math.min(bpm, 180),
+			averageBpm,
 			intensity,
 			keystrokeCount: keystrokeTimestamps.current.length,
 			clickCount: clickTimestamps.current.length,
@@ -127,9 +148,7 @@ export const useRhythmDetection = (
 			averageInterval: Math.round(averageInterval),
 			keysPerMinute,
 		});
-	}, []);
-
-	const handleKeyDown = useCallback(() => {
+	}, []);	const handleKeyDown = useCallback(() => {
 		if (!isActive) return;
 
 		const now = Date.now();
@@ -280,6 +299,7 @@ export const useRhythmDetection = (
 			setRhythmData({
 				rhythmScore: 0,
 				bpm: 0,
+				averageBpm: 0,
 				intensity: 'low',
 				keystrokeCount: 0,
 				clickCount: 0,
@@ -334,11 +354,13 @@ export const useRhythmDetection = (
 		keystrokeTimestamps.current = [];
 		clickTimestamps.current = [];
 		mouseMovements.current = [];
+		bpmHistory.current = []; // Reset BPM history
 		lastKeystrokeTime.current = 0;
 		instrumentIndexRef.current = 0;
 		setRhythmData({
 			rhythmScore: 0,
 			bpm: 0,
+			averageBpm: 0,
 			intensity: 'low',
 			keystrokeCount: 0,
 			clickCount: 0,

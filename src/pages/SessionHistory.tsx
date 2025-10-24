@@ -16,7 +16,8 @@ interface Session {
 	song: Mood; // Backend uses 'song' field, not 'mood'
 	startTime: string;
 	endTime?: string;
-	totalDurationMinutes?: number;
+	totalDurationSeconds?: number;
+	averageBpm?: number; // Average BPM for the session
 	rhythmData: {
 		averageKeysPerMinute: number;
 		rhythmType: string;
@@ -287,8 +288,8 @@ export const SessionHistory = () => {
 												<div>
 													<div className="text-xs text-slate-500">Duration</div>
 													<div className="text-sm font-semibold text-slate-900 dark:text-white">
-														{session.totalDurationMinutes
-															? formatDuration(session.totalDurationMinutes * 60)
+														{session.totalDurationSeconds
+															? formatDuration(session.totalDurationSeconds)
 															: 'N/A'}
 													</div>
 												</div>
@@ -299,7 +300,7 @@ export const SessionHistory = () => {
 												<div>
 													<div className="text-xs text-slate-500">Avg BPM</div>
 													<div className="text-sm font-semibold text-slate-900 dark:text-white">
-														{Math.round(session.rhythmData.averageKeysPerMinute || 0)} keys/min
+														{Math.round(session.averageBpm || 0)}
 													</div>
 												</div>
 											</div>

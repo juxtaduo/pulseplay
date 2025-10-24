@@ -21,7 +21,7 @@ interface SessionState {
 export interface UseSessionPersistenceReturn {
 	sessionId: string | null;
 	startSession: (song: Song) => Promise<string | null>;
-	stopSession: () => Promise<void>;
+	stopSession: (finalRhythmData?: FrontendRhythmData) => Promise<void>;
 	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
 	error: string | null;
 }
@@ -132,7 +132,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 				const requestBody = {
 					rhythmData: backendRhythmData,
 					keystrokeCount: frontendRhythmData.keystrokeCount,
-					averageTempo: frontendRhythmData.keysPerMinute,
+					averageBpm: frontendRhythmData.averageBpm, // Include average BPM
 				};
 
 				console.log('[useSessionPersistence] Making PUT request:', {
@@ -183,7 +183,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	/**
 	 * Stop the current focus session
 	 */
-	const stopSession = useCallback(async () => {
+	const stopSession = useCallback(async (finalRhythmData?: FrontendRhythmData) => {
 		if (!state.sessionId || !isAuthenticated) {
 			console.warn('[useSessionPersistence] Cannot stop session: no active session or not authenticated');
 			return;
@@ -195,16 +195,36 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 
 			abortControllerRef.current = new AbortController();
 
+			const requestBody: any = {
+				state: 'completed',
+				// endTime is now automatically set by the backend for accuracy
+			};
+
+			// Include final rhythm data if provided (for average BPM)
+			if (finalRhythmData) {
+				const rhythmType = finalRhythmData.intensity === 'high' 
+					? 'energetic' 
+					: finalRhythmData.intensity === 'medium' 
+					? 'steady' 
+					: 'thoughtful';
+
+				requestBody.rhythmData = {
+					averageKeysPerMinute: finalRhythmData.keysPerMinute,
+					rhythmType,
+					peakIntensity: finalRhythmData.rhythmScore / 100, // Convert score to 0-1 range
+					samples: [] // We'll keep this empty for now, could add historical data later
+				};
+				requestBody.keystrokeCount = finalRhythmData.keystrokeCount;
+				requestBody.averageBpm = finalRhythmData.averageBpm; // Include average BPM
+			}
+
 			const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${token}`,
 				},
-				body: JSON.stringify({
-					state: 'completed',
-					// endTime is now automatically set by the backend for accuracy
-				}),
+				body: JSON.stringify(requestBody),
 				signal: abortControllerRef.current.signal,
 			});
 

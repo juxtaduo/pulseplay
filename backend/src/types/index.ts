@@ -50,9 +50,9 @@ export interface FocusSession {
 	song: Song;
 	startTime: Date;
 	endTime: Date | null;
-	totalDurationMinutes: number | null;
+	totalDurationSeconds: number | null;
 	keystrokeCount: number;
-	averageTempo: number;
+	averageBpm: number; // Average BPM for the entire session
 	rhythmData: RhythmData;
 	state: SessionState;
 	createdAt: Date;

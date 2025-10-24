@@ -124,8 +124,8 @@ export function Home() {
 		try {
 			// Stop audio engine (with fadeout)
 			stopAudio();
-			// Stop backend session
-			await stopSession();
+			// Stop backend session with final rhythm data
+			await stopSession(rhythmData);
 			// Now that session is completed, save the duration and ID for AI insights
 			setCompletedSessionDuration(sessionDuration);
 			setCompletedSessionId(sessionId);

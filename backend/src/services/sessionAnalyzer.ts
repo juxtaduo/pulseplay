@@ -25,7 +25,7 @@ type RhythmType = 'steady' | 'burst' | 'pause-heavy';
 export interface SessionAnalysisInput {
 	duration: number; // seconds
 	totalKeystrokes: number;
-	averageTempo: number; // keys/min
+	averageBpm: number; // Average BPM for the session
 	keystrokeTimestamps?: number[]; // Optional: for rhythm variance analysis
 }
 
@@ -33,8 +33,8 @@ export interface SessionAnalysisInput {
  * Analysis result with pattern classification
  */
 export interface SessionAnalysisResult {
-	duration: number; // minutes (converted)
-	avgTempo: number; // keys/min
+	duration: number; // seconds (converted)
+	averageBpm: number; // Average BPM for the session
 	rhythmPattern: 'steady' | 'erratic';
 	tempoCategory: 'slow' | 'medium' | 'fast';
 	activityLevel: 'low' | 'medium' | 'high';
@@ -46,14 +46,14 @@ export interface SessionAnalysisResult {
  * @returns Classification result
  */
 export function analyzeSessionPattern(sessionData: SessionAnalysisInput): SessionAnalysisResult {
-	const durationMinutes = Math.floor(sessionData.duration / 60);
-	const avgTempo = sessionData.averageTempo;
+	const durationSeconds = sessionData.duration;
+	const avgBpm = sessionData.averageBpm;
 
-	// Classify tempo category
+	// Classify tempo category based on BPM
 	let tempoCategory: 'slow' | 'medium' | 'fast';
-	if (avgTempo < 40) {
+	if (avgBpm < 40) {
 		tempoCategory = 'slow';
-	} else if (avgTempo < 80) {
+	} else if (avgBpm < 80) {
 		tempoCategory = 'medium';
 	} else {
 		tempoCategory = 'fast';
@@ -61,9 +61,9 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 
 	// Classify activity level (used for song suggestions)
 	let activityLevel: 'low' | 'medium' | 'high';
-	if (avgTempo < 40) {
+	if (avgBpm < 40) {
 		activityLevel = 'low';
-	} else if (avgTempo < 80) {
+	} else if (avgBpm < 80) {
 		activityLevel = 'medium';
 	} else {
 		activityLevel = 'high';
@@ -101,9 +101,9 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 			}, 'rhythm_pattern_analysis');
 		}
 	} else {
-		// Fallback: Use average tempo consistency
+		// Fallback: Use keystroke consistency
 		// If totalKeystrokes is very low relative to duration, assume erratic
-		const expectedKeystrokes = (avgTempo * durationMinutes);
+		const expectedKeystrokes = (avgBpm * durationSeconds) / 60; // Rough estimate
 		const actualKeystrokes = sessionData.totalKeystrokes;
 		const consistency = actualKeystrokes / expectedKeystrokes;
 
@@ -121,8 +121,8 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 	}
 
 	return {
-		duration: durationMinutes,
-		avgTempo,
+		duration: durationSeconds,
+		averageBpm: avgBpm,
 		rhythmPattern,
 		tempoCategory,
 		activityLevel,

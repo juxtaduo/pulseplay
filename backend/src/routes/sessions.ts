@@ -332,7 +332,7 @@ router.put('/:id', checkJwt, async (req: Request, res: Response) => {
 		}
 
 		// Extract update fields
-		const { state, endTime, rhythmData } = req.body;
+		const { state, endTime, rhythmData, keystrokeCount, averageBpm } = req.body;
 
 		// Validate state if provided
 		if (state) {
@@ -349,6 +349,8 @@ router.put('/:id', checkJwt, async (req: Request, res: Response) => {
 			state,
 			endTime: endTime ? new Date(endTime) : undefined,
 			rhythmData,
+			keystrokeCount,
+			averageBpm,
 		});
 
 		if (!updatedSession) {
