@@ -1,20 +1,22 @@
-import { Play, Pause, Volume2, Piano, Music2, Mic2, Radio } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2, Piano, Music2, Mic2, Radio } from 'lucide-react';
 import type { Mood } from '../types';
 import type { InstrumentType } from '../lib/instruments';
 
 /**
  * Control panel for ambient music player
- * Provides mood selection, play/pause, volume control, and instrument selection
+ * Provides mood selection, play/pause/reset, volume control, and instrument selection
  * @module components/ControlPanel
  */
 
 interface ControlPanelProps {
 	isPlaying: boolean;
+	isPaused: boolean;
 	currentMood: Mood | null;
 	volume: number; // 0-1 range
 	selectedInstruments?: InstrumentType[]; // Phase 6: Multi-instrument support
 	onStart: (mood: Mood) => void;
-	onStop: () => void;
+	onPauseResume: () => void;
+	onReset: () => void;
 	onVolumeChange: (volume: number) => void;
 	onInstrumentToggle?: (instrument: InstrumentType) => void; // Phase 6
 	error: string | null;
@@ -42,11 +44,13 @@ const INSTRUMENT_OPTIONS: {
 
 export const ControlPanel = ({
 	isPlaying,
+	isPaused,
 	currentMood,
 	volume,
 	selectedInstruments = [],
 	onStart,
-	onStop,
+	onPauseResume,
+	onReset,
 	onVolumeChange,
 	onInstrumentToggle,
 	error,
@@ -58,17 +62,22 @@ export const ControlPanel = ({
 		}
 		if (isPlaying) {
 			// Stop current mood and start new one
-			onStop();
+			onPauseResume(); // Pause first
 			setTimeout(() => onStart(mood), 100); // Small delay for fadeout
 		} else {
 			onStart(mood);
 		}
 	};
 
-	const handlePlayPause = () => {
+	const handlePlayPauseReset = () => {
 		if (isPlaying) {
-			onStop();
+			// Currently playing, so pause
+			onPauseResume();
+		} else if (isPaused) {
+			// Currently paused, so reset
+			onReset();
 		} else if (currentMood) {
+			// Not playing and not paused, so play
 			onStart(currentMood);
 		}
 		// If not playing and no mood selected, do nothing (user must select mood first)
@@ -82,16 +91,24 @@ export const ControlPanel = ({
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-semibold text-slate-900 dark:text-white">Music Selection</h2>
 				<button
-					onClick={handlePlayPause}
-					disabled={!currentMood && !isPlaying}
+					onClick={handlePlayPauseReset}
+					disabled={!currentMood && !isPlaying && !isPaused}
 					className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
 						isPlaying
 							? 'bg-red-500 hover:bg-red-600'
-							: 'bg-green-500 hover:bg-green-600'
+							: isPaused
+								? 'bg-orange-500 hover:bg-orange-600'
+								: 'bg-green-500 hover:bg-green-600'
 					} text-white`}
-					aria-label={isPlaying ? 'Pause music' : 'Play music'}
+					aria-label={
+						isPlaying 
+							? 'Pause music' 
+							: isPaused 
+								? 'Reset session' 
+								: 'Play music'
+					}
 				>
-					{isPlaying ? <Pause size={24} /> : <Play size={24} />}
+					{isPlaying ? <Pause size={24} /> : isPaused ? <RotateCcw size={24} /> : <Play size={24} />}
 				</button>
 			</div>
 
@@ -112,7 +129,8 @@ export const ControlPanel = ({
 						<button
 							key={moodOption.value}
 							onClick={() => handleMoodSelect(moodOption.value)}
-							className={`py-3 px-4 rounded-lg font-medium transition-all text-left ${
+							disabled={isPaused}
+							className={`py-3 px-4 rounded-lg font-medium transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed ${
 								currentMood === moodOption.value
 									? 'bg-blue-500 text-white ring-2 ring-blue-400'
 									: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
@@ -140,7 +158,8 @@ export const ControlPanel = ({
 								<button
 									key={instrument.value}
 									onClick={() => onInstrumentToggle(instrument.value)}
-									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 ${
+									disabled={isPaused}
+									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
 										isSelected
 											? 'bg-purple-500 text-white ring-2 ring-purple-400'
 											: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'

@@ -16,13 +16,14 @@ export function Home() {
 	const [completedSessionId, setCompletedSessionId] = useState<string | null>(null);
 	const [selectedInstruments, setSelectedInstruments] = useState<InstrumentType[]>([]);
 	const [enableInstrumentalSounds, setEnableInstrumentalSounds] = useState(false);
+	const [isPaused, setIsPaused] = useState(false); // Track if session is paused
 
 	// Audio engine hook (Web Audio API)
 	const { isPlaying, currentMood, volume, startAudio, stopAudio, setVolume, error: audioError } =
 		useAudioEngine();
 
 	// Rhythm detection hook with instrument support (Phase 5 & 6)
-	const { rhythmData, resetRhythm } = useRhythmDetection(isPlaying, {
+	const { rhythmData, resetRhythm } = useRhythmDetection(isPlaying && !isPaused, { // Only detect rhythm when playing and not paused
 		selectedInstruments,
 		enableInstrumentalSounds,
 		accessibilityMode: false, // TODO: Add accessibility toggle in UI
@@ -131,9 +132,40 @@ export function Home() {
 			setCompletedSessionId(sessionId);
 			// Reset rhythm data
 			resetRhythm();
+			// Reset paused state
+			setIsPaused(false);
 		} catch (err) {
 			console.error('[App] Failed to stop session:', err);
 		}
+	};
+
+	// Handle pausing/resuming a session
+	const handlePauseResume = async () => {
+		if (isPlaying) {
+			// Pause the session
+			setIsPaused(true);
+			stopAudio();
+		} else if (currentMood) {
+			// Resume the session
+			setIsPaused(false);
+			await startAudio(currentMood);
+		}
+	};
+
+	// Handle resetting the session
+	const handleReset = () => {
+		// Reset all session stats to 0
+		setSessionDuration(0);
+		setCompletedSessionDuration(null);
+		setCompletedSessionId(null);
+		resetRhythm();
+		
+		// Reset song and instrument selections
+		setSelectedInstruments([]);
+		setEnableInstrumentalSounds(false);
+		
+		// Reset paused state
+		setIsPaused(false);
 	};
 
 	// Handle instrument selection toggle (Phase 6: T091)
@@ -191,18 +223,20 @@ export function Home() {
 
 					<ControlPanel
 						isPlaying={isPlaying}
+						isPaused={isPaused}
 						currentMood={currentMood}
 						volume={volume}
 						selectedInstruments={selectedInstruments}
 						onStart={handleStart}
-						onStop={handleStop}
+						onPauseResume={handlePauseResume}
+						onReset={handleReset}
 						onVolumeChange={setVolume}
 						onInstrumentToggle={handleInstrumentToggle}
 						error={displayError}
 					/>
 				</div>
 
-				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} />
+				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} isPaused={isPaused} />
 
 				{/* AI Mood Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
 				{!isPlaying && completedSessionId && (completedSessionDuration || 0) >= 30 && (
