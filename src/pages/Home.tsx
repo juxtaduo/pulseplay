@@ -281,8 +281,8 @@ export function Home() {
 
 				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} isPaused={isPaused} isCompleted={isSessionStopped} />
 
-				{/* AI Song Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
-				{!isPlaying && (completedSessionDuration || 0) >= 30 && ((isAuthenticated && completedSessionId) || (!isAuthenticated && completedRhythmData)) && (
+				{/* AI Song Insights (Phase 7: T116, T117) - Show warning for sessions <30 seconds, insights for ≥30 seconds */}
+				{!isPlaying && (completedSessionDuration || 0) > 0 && ((isAuthenticated && completedSessionId) || (!isAuthenticated && completedRhythmData)) && (
 					<div className="mt-8">
 						<SongInsights 
 							sessionId={completedSessionId} 

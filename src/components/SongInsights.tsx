@@ -109,9 +109,28 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 		}
 	};
 
-	// Don't render if session is too short (reduced threshold for better UX)
+	// Show warning if session is too short, but still render the component
 	if (sessionDuration < 30) {
-		return null;
+		return (
+			<div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-6 backdrop-blur-sm">
+				<div className="flex items-start justify-between mb-4">
+					<div className="flex items-center gap-2">
+						<div className="p-2 bg-purple-500/20 rounded-lg">
+							<Sparkles size={20} className="text-purple-400" />
+						</div>
+						<div>
+							<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
+							<p className="text-xs text-slate-600 dark:text-slate-400">Powered by Gemini</p>
+						</div>
+					</div>
+				</div>
+				<div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+					<p className="text-sm text-yellow-400">
+						Session too short for AI insights. Complete a session of at least 30 seconds to get personalized song recommendations.
+					</p>
+				</div>
+			</div>
+		);
 	}
 
 	// Don't render if no sessionId (authenticated) and no rhythmData (unauthenticated)
