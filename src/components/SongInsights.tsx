@@ -1,6 +1,7 @@
 import { Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useTheme } from '../context/ThemeContext';
 import type { RhythmData } from '../hooks/useRhythmDetection';
 
 /**
@@ -28,9 +29,14 @@ interface AIRecommendation {
 
 export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }: SongInsightsProps) => {
 	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+	const { theme } = useTheme();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	const containerClassName = theme === 'dark' 
+		? 'bg-[rgb(55_22_81_/_40%)] border-2 border-[rgb(192_132_252_/_0.8)] rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-500/40 shadow-2xl shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-500/60 transition-all duration-300'
+		: 'bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 border-2 border-purple-300 rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-200/50 hover:shadow-2xl hover:shadow-purple-300/60 transition-all duration-300';
 
 	useEffect(() => {
 		// Only fetch recommendation if session is ≥30 seconds (reduced threshold for better UX)
@@ -112,11 +118,11 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 	// Show warning if session is too short, but still render the component
 	if (sessionDuration < 30) {
 		return (
-			<div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-6 backdrop-blur-sm">
+			<div className={containerClassName}>
 				<div className="flex items-start justify-between mb-4">
 					<div className="flex items-center gap-2">
-						<div className="p-2 bg-purple-500/20 rounded-lg">
-							<Sparkles size={20} className="text-purple-400" />
+						<div className="p-2 bg-gradient-to-r from-purple-200 to-violet-200 dark:bg-gradient-to-r dark:from-purple-600/80 dark:to-violet-600/80 rounded-lg shadow-md">
+							<Sparkles size={20} className="text-purple-700 dark:text-purple-200" />
 						</div>
 						<div>
 							<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
@@ -124,8 +130,8 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 						</div>
 					</div>
 				</div>
-				<div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-					<p className="text-sm text-yellow-400">
+				<div className="bg-yellow-50 dark:bg-[rgb(113_63_18_/_47%)] border border-yellow-200 dark:border-yellow-500/30 rounded-lg p-4">
+					<p className="text-sm text-yellow-800 dark:text-yellow-400">
 						Session too short for AI insights. Complete a session of at least 30 seconds to get personalized song recommendations.
 					</p>
 				</div>
@@ -139,11 +145,11 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 	}
 
 	return (
-		<div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-6 backdrop-blur-sm">
+		<div className={containerClassName}>
 			<div className="flex items-start justify-between mb-4">
 				<div className="flex items-center gap-2">
-					<div className="p-2 bg-purple-500/20 rounded-lg">
-						<Sparkles size={20} className="text-purple-400" />
+					<div className="p-2 bg-gradient-to-r from-purple-200 to-violet-200 dark:bg-gradient-to-r dark:from-purple-600/80 dark:to-violet-600/80 rounded-lg shadow-md">
+						<Sparkles size={20} className="text-purple-700 dark:text-purple-200" />
 					</div>
 					<div>
 						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
@@ -163,22 +169,22 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 
 			{loading && (
 				<div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-					<div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+					<div className="w-5 h-5 border-2 border-purple-400 dark:border-purple-400 border-t-transparent rounded-full animate-spin" />
 					<span className="text-sm">Analyzing your session rhythm...</span>
 				</div>
 			)}
 
 			{error && (
-				<div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-					<p className="text-sm text-yellow-400">{error}</p>
+				<div className="bg-yellow-50 dark:bg-[rgb(113_63_18_/_47%)] border border-yellow-200 dark:border-yellow-500/30 rounded-lg p-4">
+					<p className="text-sm text-yellow-800 dark:text-yellow-400">{error}</p>
 				</div>
 			)}
 
 			{recommendation && !loading && !error && (
 				<div className="space-y-4">
 					{/* Suggested Mood */}
-					<div className="flex items-center gap-3">
-						<TrendingUp size={18} className="text-purple-400 flex-shrink-0" />
+					<div className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/40 dark:to-violet-900/40 rounded-lg p-4 border border-purple-200/60 dark:border-purple-500/50 shadow-md dark:shadow-purple-900/30">
+						<TrendingUp size={18} className="text-purple-600 dark:text-purple-300 flex-shrink-0" />
 						<div>
 							<div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Suggested for next session:</div>
 							<div className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
@@ -188,14 +194,14 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 					</div>
 
 					{/* AI Rationale */}
-					<div className="bg-white dark:bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-						<p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{recommendation.rationale}</p>
+					<div className="bg-white/90 dark:bg-gradient-to-r dark:from-slate-800/80 dark:to-slate-700/80 rounded-lg p-4 border-2 border-purple-200/60 dark:border-purple-400/60 shadow-lg shadow-purple-100/50 dark:shadow-purple-900/50">
+						<p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{recommendation.rationale}</p>
 					</div>
 
 					{/* Confidence Score */}
 					<div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
 						<div className="flex items-center gap-2">
-							<Clock size={14} />
+							<Clock size={14} className="text-slate-600 dark:text-slate-400" />
 							<span>Generated just now</span>
 						</div>
 						<div>

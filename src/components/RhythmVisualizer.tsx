@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { RhythmData } from '../hooks/useRhythmDetection';
+import { useTheme } from '../context/ThemeContext';
 
 interface RhythmVisualizerProps {
   rhythmData: RhythmData;
@@ -9,6 +10,7 @@ interface RhythmVisualizerProps {
 export const RhythmVisualizer = ({ rhythmData, isPlaying }: RhythmVisualizerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,7 +30,8 @@ export const RhythmVisualizer = ({ rhythmData, isPlaying }: RhythmVisualizerProp
       ctx.clearRect(0, 0, width, height);
 
       if (!isPlaying) {
-        ctx.fillStyle = 'rgba(100, 100, 120, 0.1)';
+        const circleOpacity = theme === 'dark' ? 0.3 : 0.1;
+        ctx.fillStyle = `rgba(100, 100, 120, ${circleOpacity})`;
         ctx.beginPath();
         ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
         ctx.fill();
@@ -87,7 +90,7 @@ export const RhythmVisualizer = ({ rhythmData, isPlaying }: RhythmVisualizerProp
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [rhythmData, isPlaying]);
+  }, [rhythmData, isPlaying, theme]);
 
   return (
     <div className="relative">
@@ -99,7 +102,7 @@ export const RhythmVisualizer = ({ rhythmData, isPlaying }: RhythmVisualizerProp
       />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center">
-          <div className="text-4xl font-bold text-slate-600 dark:text-white">
+          <div className="text-4xl font-bold text-slate-700 dark:text-slate-100">
             {rhythmData.bpm}
           </div>
           <div className="text-sm text-slate-500 dark:text-slate-300 uppercase tracking-wider">

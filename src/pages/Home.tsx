@@ -234,11 +234,11 @@ export function Home() {
 	const displayError = audioError;
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900">
 			<main className="max-w-7xl mx-auto px-4 py-8">
 				{displayError && (
-					<div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-						<p className="text-red-400 text-sm">{displayError}</p>
+					<div className="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg p-4">
+						<p className="text-red-800 dark:text-red-400 text-sm">{displayError}</p>
 					</div>
 				)}
 
@@ -254,8 +254,8 @@ export function Home() {
 						<RhythmVisualizer rhythmData={rhythmData} isPlaying={isPlaying} />
 						{currentMood && (
 							<div className="mt-6 text-center">
-								<div className="text-slate-600 dark:text-slate-400 text-sm mb-2">Current Song</div>
-								<div className="text-slate-900 dark:text-white text-2xl font-semibold capitalize">
+								<div className="text-slate-500 dark:text-slate-400 text-sm mb-2">Current Song</div>
+								<div className="text-slate-800 dark:text-white text-2xl font-semibold capitalize">
 									{currentMood.replace(/-/g, ' ')}
 								</div>
 							</div>
