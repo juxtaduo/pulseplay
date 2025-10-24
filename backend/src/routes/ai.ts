@@ -48,13 +48,33 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 			session.totalDurationSeconds = sessionDuration;
 			await session.save();
 			logger.info({ sessionId, calculatedDuration: sessionDuration }, 'session_duration_recalculated');
-		} else if (!sessionDuration && !session.endTime && session.state === 'active') {
-			// Session is still active and has no endTime - this shouldn't happen for completed sessions
-			logger.warn({ sessionId, sessionState: session.state }, 'ai_called_on_active_session');
-			return res.status(400).json({
-				error: 'Session not completed',
-				message: 'Cannot generate AI insights for active sessions. Please complete your session first.',
-			});
+		} else if (!sessionDuration && !session.endTime) {
+			// Session has no endTime - check if it's been running long enough to be considered completed
+			const now = new Date();
+			const runningDurationMs = now.getTime() - session.startTime.getTime();
+			const runningDuration = Math.round(runningDurationMs / 1000);
+			
+			if (runningDuration >= 30) {
+				// Session has been running for 30+ seconds, treat as completed
+				session.endTime = now;
+				session.state = 'completed';
+				session.totalDurationSeconds = runningDuration;
+				await session.save();
+				sessionDuration = runningDuration;
+				logger.info({ sessionId, autoCompleted: true, duration: runningDuration }, 'session_auto_completed_for_ai');
+			} else {
+				// Session too short
+				logger.warn({
+					sessionId,
+					sessionState: session.state,
+					runningDuration,
+					startTime: session.startTime
+				}, 'ai_session_too_short_no_endtime');
+				return res.status(400).json({
+					error: 'Session too short for AI insights',
+					message: 'AI recommendations require sessions of at least 30 seconds',
+				});
+			}
 		}
 
 		logger.info({
