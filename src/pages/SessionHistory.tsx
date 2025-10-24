@@ -179,18 +179,18 @@ export const SessionHistory = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-8 px-4">
+		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-8 px-4">
 			<div className="max-w-6xl mx-auto">
 				{/* Header */}
 				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Session History</h1>
+					<h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">Session History</h1>
 					<p className="text-slate-600 dark:text-slate-400">
 						View and manage your past focus sessions ({totalSessions} total)
 					</p>
 				</div>
 
 				{/* Controls */}
-				<div className="bg-white dark:bg-slate-800 rounded-xl p-6 mb-6">
+				<div className="bg-white/80 dark:bg-slate-800 rounded-xl p-6 mb-6 border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm">
 					<div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
 						{/* Mood Filter (T136) */}
 						<div className="flex items-center gap-3">
@@ -201,7 +201,7 @@ export const SessionHistory = () => {
 									setSelectedSong(e.target.value as Mood | 'all');
 									setCurrentPage(1);
 								}}
-								className="bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+								className="bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-800 dark:text-white rounded-lg px-4 py-2 border border-slate-200/60 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 shadow-sm"
 							>
 								{MOOD_OPTIONS.map((option) => (
 									<option key={option.value} value={option.value}>
@@ -216,7 +216,7 @@ export const SessionHistory = () => {
 							{/* Export Button (T137) */}
 							<button
 								onClick={handleExport}
-								className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white px-4 py-2 rounded-lg transition-colors"
+								className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
 							>
 								<Download size={18} />
 								<span>Export Data</span>
@@ -225,7 +225,7 @@ export const SessionHistory = () => {
 							{/* Delete All Button */}
 							<button
 								onClick={handleDeleteAll}
-								className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-slate-900 dark:text-white px-4 py-2 rounded-lg transition-colors"
+								className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
 							>
 								<Trash2 size={18} />
 								<span>Delete All</span>
@@ -250,7 +250,7 @@ export const SessionHistory = () => {
 
 				{/* Sessions List */}
 				{!loading && sessions.length === 0 && (
-					<div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center">
+					<div className="bg-white/80 dark:bg-slate-800 rounded-xl p-12 text-center border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm">
 						<p className="text-slate-600 dark:text-slate-400 text-lg">No sessions found</p>
 						<p className="text-slate-500 text-sm mt-2">
 							Start a focus session to see your history here
@@ -263,14 +263,14 @@ export const SessionHistory = () => {
 						{sessions.map((session) => (
 							<div
 								key={session.sessionId}
-								className="bg-white dark:bg-slate-800 rounded-xl p-6 hover:bg-slate-750 transition-colors"
+								className="bg-white/80 dark:bg-slate-800 rounded-xl p-6 hover:bg-white/90 dark:hover:bg-slate-750 transition-all border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm hover:shadow-xl"
 							>
 								<div className="flex flex-col md:flex-row gap-4 justify-between">
 									{/* Session Info */}
 									<div className="flex-1">
 										<div className="flex items-center gap-3 mb-3">
 											<span
-												className={`px-3 py-1 rounded-full text-xs font-semibold border ${getSongColor(
+												className={`px-3 py-1 rounded-full text-xs font-semibold border shadow-sm ${getSongColor(
 													session.song
 												)}`}
 											>
@@ -284,10 +284,10 @@ export const SessionHistory = () => {
 										{/* Stats Grid */}
 										<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 											<div className="flex items-center gap-2">
-												<Clock size={16} className="text-slate-600 dark:text-slate-400" />
+												<Clock size={16} className="text-emerald-600 dark:text-emerald-400" />
 												<div>
 													<div className="text-xs text-slate-500">Duration</div>
-													<div className="text-sm font-semibold text-slate-900 dark:text-white">
+													<div className="text-sm font-semibold text-slate-800 dark:text-white">
 														{session.totalDurationSeconds
 															? formatDuration(session.totalDurationSeconds)
 															: 'N/A'}
@@ -296,30 +296,30 @@ export const SessionHistory = () => {
 											</div>
 
 											<div className="flex items-center gap-2">
-												<TrendingUp size={16} className="text-slate-600 dark:text-slate-400" />
+												<TrendingUp size={16} className="text-blue-600 dark:text-blue-400" />
 												<div>
 													<div className="text-xs text-slate-500">Avg BPM</div>
-													<div className="text-sm font-semibold text-slate-900 dark:text-white">
+													<div className="text-sm font-semibold text-slate-800 dark:text-white">
 														{Math.round(session.averageBpm || 0)}
 													</div>
 												</div>
 											</div>
 
 											<div className="flex items-center gap-2">
-												<Activity size={16} className="text-slate-600 dark:text-slate-400" />
+												<Activity size={16} className="text-purple-600 dark:text-purple-400" />
 												<div>
 													<div className="text-xs text-slate-500">Rhythm</div>
-													<div className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
+													<div className="text-sm font-semibold text-slate-800 dark:text-white capitalize">
 														{session.rhythmData.rhythmType || 'N/A'}
 													</div>
 												</div>
 											</div>
 
 											<div className="flex items-center gap-2">
-												<Calendar size={16} className="text-slate-600 dark:text-slate-400" />
+												<Calendar size={16} className="text-amber-600 dark:text-amber-400" />
 												<div>
 													<div className="text-xs text-slate-500">Status</div>
-													<div className="text-sm font-semibold text-slate-900 dark:text-white capitalize">
+													<div className="text-sm font-semibold text-slate-800 dark:text-white capitalize">
 														{session.state}
 													</div>
 												</div>
@@ -338,19 +338,19 @@ export const SessionHistory = () => {
 						<button
 							onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
 							disabled={currentPage === 1}
-							className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition-colors"
+							className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-800 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all shadow-sm disabled:shadow-none"
 						>
 							Previous
 						</button>
 
-						<span className="text-slate-600 dark:text-slate-400">
+						<span className="text-slate-600 dark:text-slate-400 font-medium">
 							Page {currentPage} of {totalPages}
 						</span>
 
 						<button
 							onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
 							disabled={currentPage === totalPages}
-							className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600 transition-colors"
+							className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-800 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all shadow-sm disabled:shadow-none"
 						>
 							Next
 						</button>

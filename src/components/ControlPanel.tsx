@@ -100,20 +100,20 @@ export const ControlPanel = ({
 	const displayVolume = Math.round(volume * 100);
 
 	return (
-		<div className="bg-white dark:bg-slate-800 rounded-xl p-6 space-y-6 border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+		<div className="bg-white/80 dark:bg-slate-800 rounded-xl p-6 space-y-6 border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm transition-colors duration-200">
 			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-semibold text-slate-900 dark:text-white">Music Selection</h2>
+				<h2 className="text-xl font-semibold text-slate-800 dark:text-white">Music Selection</h2>
 				<div className="flex items-center gap-3">
 					{/* Play/Pause button */}
 					<button
 						onClick={handlePlayPause}
 						disabled={(!currentMood && !isPlaying && !isPaused) || isCompleted}
-						className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+						className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md ${
 							isPlaying
-								? 'bg-orange-500 hover:bg-orange-600'
+								? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600'
 								: isPaused
-									? 'bg-green-500 hover:bg-green-600'
-									: 'bg-green-500 hover:bg-green-600'
+									? 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600'
+									: 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600'
 						} text-white`}
 						aria-label={
 							isPlaying 
@@ -137,7 +137,7 @@ export const ControlPanel = ({
 						<button
 							onClick={onStop}
 							disabled={isCompleted}
-							className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+							className="p-4 rounded-full bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
 							aria-label="Stop and complete session"
 							title={isCompleted ? "Session completed" : "Stop session and get AI insights"}
 						>
@@ -149,7 +149,7 @@ export const ControlPanel = ({
 						<button
 							onClick={handleReset}
 							disabled={!isPlaying && !isPaused && !currentMood && !isCompleted}
-							className="p-4 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+							className="p-4 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
 							aria-label="Reset session"
 							title={isCompleted ? "Reset to start new session" : "Reset"}
 						>
@@ -158,15 +158,15 @@ export const ControlPanel = ({
 					)}
 				</div>
 			</div>			{error && (
-				<div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-					<p className="text-sm text-red-400 dark:text-red-400">{error}</p>
+				<div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg p-3">
+					<p className="text-sm text-red-800 dark:text-red-400">{error}</p>
 				</div>
 			)}
 
 			<div>
 				<label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
 					Select Song {!currentMood && !isPlaying && (
-						<span className="text-xs text-blue-500 dark:text-blue-400 font-normal">(click to start music)</span>
+						<span className="text-xs text-blue-600 dark:text-blue-400 font-normal">(click to start music)</span>
 					)}
 				</label>
 					<div className="grid grid-cols-2 gap-2">
@@ -175,10 +175,10 @@ export const ControlPanel = ({
 							key={moodOption.value}
 							onClick={() => handleMoodSelect(moodOption.value)}
 							disabled={isPaused || isCompleted || (isPlaying && currentMood !== moodOption.value)}
-							className={`py-3 px-4 rounded-lg font-medium transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed ${
+							className={`py-3 px-4 rounded-lg font-medium transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-sm ${
 								currentMood === moodOption.value
-									? 'bg-blue-500 text-white ring-2 ring-blue-400'
-									: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+									? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white ring-2 ring-blue-300 shadow-md'
+									: 'bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
 							}`}
 							aria-pressed={currentMood === moodOption.value}
 						>
@@ -204,10 +204,10 @@ export const ControlPanel = ({
 									key={instrument.value}
 									onClick={() => onInstrumentToggle(instrument.value)}
 									disabled={isPaused || isCompleted}
-									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm ${
 										isSelected
-											? 'bg-purple-500 text-white ring-2 ring-purple-400'
-											: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+											? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white ring-2 ring-purple-300 shadow-md'
+											: 'bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
 									}`}
 									aria-pressed={isSelected}
 									aria-label={`${isSelected ? 'Deselect' : 'Select'} ${instrument.label}`}
@@ -222,7 +222,7 @@ export const ControlPanel = ({
 						})}
 					</div>
 					{selectedInstruments.length >= 3 && (
-						<p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+						<p className="text-xs text-amber-700 dark:text-yellow-400 mt-2">
 							⚠ 3+ instruments may blend harmonics during fast typing
 						</p>
 					)}
@@ -235,7 +235,7 @@ export const ControlPanel = ({
 					<span className="text-slate-600 dark:text-slate-400">{displayVolume}%</span>
 				</label>
 				<div className="flex items-center gap-3">
-					<Volume2 size={20} className="text-slate-600 dark:text-slate-400" />
+					<Volume2 size={20} className="text-slate-500 dark:text-slate-400" />
 					<input
 						type="range"
 						min="0"
@@ -243,7 +243,7 @@ export const ControlPanel = ({
 						value={displayVolume}
 						onChange={(e) => onVolumeChange(Number(e.target.value) / 100)}
 						disabled={isCompleted}
-						className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+						className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
 						aria-label="Volume slider"
 					/>
 				</div>

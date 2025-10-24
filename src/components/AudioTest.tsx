@@ -94,10 +94,10 @@ export function AudioTest() {
 		<button
 			onClick={testDirectAudio}
 			disabled={isPlaying}
-			className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+			className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all shadow-md ${
 				isPlaying
-					? 'bg-gray-600 cursor-not-allowed'
-					: 'bg-yellow-500 hover:bg-yellow-400 text-black'
+					? 'bg-gray-400 cursor-not-allowed text-gray-700'
+					: 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-900'
 			}`}
 		>
 			<Play size={20} />

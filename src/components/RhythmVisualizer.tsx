@@ -99,7 +99,7 @@ export const RhythmVisualizer = ({ rhythmData, isPlaying }: RhythmVisualizerProp
       />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center">
-          <div className="text-4xl font-bold text-slate-600 dark:text-white">
+          <div className="text-4xl font-bold text-slate-700 dark:text-white">
             {rhythmData.bpm}
           </div>
           <div className="text-sm text-slate-500 dark:text-slate-300 uppercase tracking-wider">

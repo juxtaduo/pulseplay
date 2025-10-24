@@ -35,16 +35,16 @@ function App() {
 		<ThemeProvider>
 		<ErrorBoundary>
 		<Router>
-			<div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-200">
-				<header className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
+			<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-200">
+				<header className="bg-white/90 dark:bg-slate-800/50 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-700 shadow-sm transition-colors duration-200">
 					<div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
 						<div className="flex items-center gap-6">
 							<Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-								<div className="p-2 bg-blue-500 dark:bg-blue-500 rounded-lg">
+								<div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md">
 									<img src={gramophoneIcon} alt="PulsePlay" className="w-6 h-6" />
 								</div>
 								<div>
-									<h1 className="text-2xl font-bold text-slate-900 dark:text-white">PulsePlay</h1>
+									<h1 className="text-2xl font-bold text-slate-800 dark:text-white">PulsePlay</h1>
 									<p className="text-sm text-slate-600 dark:text-slate-400">Moves with rhythm</p>
 								</div>
 							</Link>
@@ -52,14 +52,14 @@ function App() {
 							<nav className="flex gap-4">
 								<Link
 									to="/"
-									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200/50 dark:bg-slate-700/50 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors text-slate-900 dark:text-white text-sm font-medium"
+									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/50 dark:to-slate-600/50 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-700 dark:hover:to-slate-600 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-sm border border-slate-200/60 dark:border-slate-600"
 								>
 									<Music size={16} />
 									<span>Session</span>
 								</Link>
 								<Link
 									to="/history"
-									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200/50 dark:bg-slate-700/50 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors text-slate-900 dark:text-white text-sm font-medium"
+									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/50 dark:to-slate-600/50 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-700 dark:hover:to-slate-600 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-sm border border-slate-200/60 dark:border-slate-600"
 								>
 									<History size={16} />
 									<span>Session History</span>
@@ -76,13 +76,13 @@ function App() {
 				{/* Browser Compatibility Warning */}
 				{showCompatWarning && browserCheck && !browserCheck.isSupported && (
 					<div className="max-w-7xl mx-auto px-4 py-4">
-						<div className="bg-yellow-500/10 dark:bg-yellow-500/10 border border-yellow-500/30 dark:border-yellow-500/30 rounded-lg p-6">
+						<div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-500/10 dark:to-amber-500/10 border border-yellow-200 dark:border-yellow-500/30 rounded-xl p-6 shadow-sm">
 							<div className="flex items-start gap-4">
 								<div className="flex-shrink-0">
 									<AlertTriangle size={24} className="text-yellow-600 dark:text-yellow-400" />
 								</div>
 								<div className="flex-1">
-									<h3 className="text-lg font-semibold text-yellow-700 dark:text-yellow-400 mb-2">
+									<h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-400 mb-2">
 										Browser Compatibility Warning
 									</h3>
 									<p className="text-slate-700 dark:text-slate-300 text-sm mb-3">
@@ -96,7 +96,7 @@ function App() {
 									<div className="flex gap-3">
 										<button
 											onClick={() => setShowCompatWarning(false)}
-											className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors"
+											className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg text-sm font-medium transition-all shadow-sm"
 										>
 											Dismiss
 										</button>
@@ -104,7 +104,7 @@ function App() {
 											href="https://browsehappy.com/"
 											target="_blank"
 											rel="noopener noreferrer"
-											className="px-4 py-2 bg-slate-300 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-white rounded-lg text-sm font-medium transition-colors"
+											className="px-4 py-2 bg-gradient-to-r from-slate-200 to-slate-300 hover:from-slate-300 hover:to-slate-400 dark:from-slate-700 dark:to-slate-600 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-800 dark:text-white rounded-lg text-sm font-medium transition-all shadow-sm"
 										>
 											Update Browser
 										</a>
@@ -120,8 +120,14 @@ function App() {
 					<Route path="/history" element={<SessionHistory />} />
 				</Routes>
 
-				<footer className="max-w-7xl mx-auto px-4 py-6 text-center text-slate-500 dark:text-slate-500 text-sm">
-					- Rhythm that moves with you -
+				<footer className="max-w-7xl mx-auto px-4 py-8 mt-12">
+					<div className="text-center">
+						<div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-full shadow-sm border border-slate-200/60 dark:border-slate-600">
+							<div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
+							<span className="text-slate-600 dark:text-slate-400 text-sm font-medium">Rhythm that moves with you</span>
+							<div className="w-2 h-2 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full animate-pulse"></div>
+						</div>
+					</div>
 				</footer>
 			</div>
 		</Router>
