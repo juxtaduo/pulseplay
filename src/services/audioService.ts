@@ -56,8 +56,6 @@ export class AudioEngine {
 	private drumLoopInterval: NodeJS.Timeout | null = null;
 	private vinylNoiseNode: AudioBufferSourceNode | null = null;
 	private currentScaleIndex = 0; // Track position in scale for melodic progression
-	private melodyIndex = 0; // Track position in melody sequence
-	private jazzChordIndex = 0; // Track current jazz chord in progression
 	private jazzChordOscillators: OscillatorNode[] = []; // Active jazz chord oscillators
 	private jazzProgressionInterval: NodeJS.Timeout | null = null; // Jazz chord change timer
 	private activePianoOscillators: { osc: OscillatorNode; gain: GainNode }[] = []; // Track active piano notes to prevent overlap
@@ -109,64 +107,6 @@ export class AudioEngine {
 		784, // G5
 		932, // Bb5
 	];
-
-	// Original melodic piano ballad (inspired by emotional piano pieces)
-	// 32-note melody in C minor, slow and expressive
-	private readonly melodySequence = [
-		523, // C5
-		622, // Eb5
-		698, // F5
-		784, // G5
-		698, // F5
-		622, // Eb5
-		523, // C5
-		466, // Bb4
-		
-		392, // G4
-		466, // Bb4
-		523, // C5
-		622, // Eb5
-		523, // C5
-		466, // Bb4
-		392, // G4
-		349, // F4
-		
-		523, // C5
-		622, // Eb5
-		698, // F5
-		784, // G5
-		932, // Bb5
-		784, // G5
-		698, // F5
-		622, // Eb5
-		
-		523, // C5
-		466, // Bb4
-		392, // G4
-		349, // F4
-		392, // G4
-		466, // Bb4
-		523, // C5
-		523, // C5 (resolution)
-	];
-
-	// Jazz chord progression (ii-V-I in Bb major, classic jazz turnaround)
-	// Each chord represented as [root, third, fifth, seventh]
-	private readonly jazzChordProgression = [
-		{ name: 'Cm7', notes: [262, 311, 392, 466] },      // Cm7 (ii)
-		{ name: 'F7', notes: [175, 220, 262, 311] },       // F7 (V)
-		{ name: 'BbMaj7', notes: [233, 294, 349, 440] },   // BbMaj7 (I)
-		{ name: 'Gm7', notes: [196, 233, 294, 349] },      // Gm7 (vi) - adds movement
-	];
-
-	// Scale notes that fit each jazz chord (for keystroke harmonization)
-	// Extended to 2 octaves for more variety
-	private readonly jazzChordScales = {
-		'Cm7': [131, 147, 156, 175, 196, 220, 233, 262, 294, 311, 349, 392, 440, 466, 523],     // C Dorian (2 octaves)
-		'F7': [87, 98, 110, 123, 131, 147, 156, 175, 196, 220, 247, 262, 294, 311, 349],        // F Mixolydian (2 octaves)
-		'BbMaj7': [117, 131, 147, 156, 175, 196, 220, 233, 262, 294, 311, 349, 392, 440, 466],  // Bb Major (2 octaves)
-		'Gm7': [98, 110, 117, 131, 147, 165, 175, 196, 220, 233, 262, 294, 330, 349, 392],      // G Dorian (2 octaves)
-	};
 
 	constructor() {
 		this.ctx = getAudioContext();
@@ -228,219 +168,10 @@ export class AudioEngine {
 		console.log(`[AudioEngine] AudioContext state: ${this.ctx.state}`);
 	}
 
-	/**
-	 * Create lofi hip-hop beat with drums only (no continuous chords/bass)
-	 * @private
-	 */
-	private createLofiBeat(config: AudioConfig): void {
-		// Start the drum loop
-		this.startDrumLoop(config.tempo);
-		
-		// NOTE: Removed continuous jazz chords and bass line per user request
-		// Only keeping drums + vinyl crackle for clean lofi vibe
-	}
-
-	/**
-	 * Start lofi drum loop (kick, snare, hi-hat)
-	 * @private
-	 */
-	private startDrumLoop(tempo: number): void {
-		const beatDuration = 60 / tempo; // seconds per beat
-		let beatCount = 0;
-
-		const playBeat = () => {
-			const now = this.ctx.currentTime;
-			
-			// Kick drum on beats 1 and 3 (4/4 time)
-			if (beatCount % 4 === 0 || beatCount % 4 === 2) {
-				this.playKick(now);
-			}
-			
-			// Snare on beats 2 and 4
-			if (beatCount % 4 === 1 || beatCount % 4 === 3) {
-				this.playSnare(now);
-			}
-			
-			// Hi-hat on every beat
-			this.playHiHat(now);
-			
-			beatCount++;
-		};
-
-		// Start immediately
-		playBeat();
-		
-		// Schedule recurring beats
-		this.drumLoopInterval = setInterval(playBeat, beatDuration * 1000);
-	}
-
-	/**
-	 * Play kick drum sound
-	 * @private
-	 */
-	private playKick(startTime: number): void {
-		const osc = this.ctx.createOscillator();
-		const gain = this.ctx.createGain();
-		
-		// Kick = pitched down sine wave (60Hz -> 40Hz)
-		osc.type = 'sine';
-		osc.frequency.setValueAtTime(60, startTime);
-		osc.frequency.exponentialRampToValueAtTime(40, startTime + 0.05);
-		
-		// Punchy envelope
-		gain.gain.setValueAtTime(0.8, startTime);
-		gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
-		
-		osc.connect(gain);
-		gain.connect(this.masterGain);
-		
-		osc.start(startTime);
-		osc.stop(startTime + 0.3);
-	}
-
-	/**
-	 * Play snare drum sound
-	 * @private
-	 */
-	private playSnare(startTime: number): void {
-		// Snare = white noise + tone
-		const noise = this.ctx.createBufferSource();
-		const noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.2, this.ctx.sampleRate);
-		const data = noiseBuffer.getChannelData(0);
-		
-		// Generate white noise
-		for (let i = 0; i < data.length; i++) {
-			data[i] = Math.random() * 2 - 1;
-		}
-		noise.buffer = noiseBuffer;
-		
-		const noiseGain = this.ctx.createGain();
-		const noiseFilter = this.ctx.createBiquadFilter();
-		noiseFilter.type = 'highpass';
-		noiseFilter.frequency.value = 1000;
-		
-		// Snappy envelope
-		noiseGain.gain.setValueAtTime(0.3, startTime);
-		noiseGain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
-		
-		noise.connect(noiseFilter);
-		noiseFilter.connect(noiseGain);
-		noiseGain.connect(this.masterGain);
-		
-		noise.start(startTime);
-		noise.stop(startTime + 0.15);
-		
-		// Add tonal component
-		const osc = this.ctx.createOscillator();
-		const oscGain = this.ctx.createGain();
-		osc.type = 'triangle';
-		osc.frequency.value = 200;
-		
-		oscGain.gain.setValueAtTime(0.1, startTime);
-		oscGain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.1);
-		
-		osc.connect(oscGain);
-		oscGain.connect(this.masterGain);
-		
-		osc.start(startTime);
-		osc.stop(startTime + 0.1);
-	}
-
-	/**
-	 * Play hi-hat sound
-	 * @private
-	 */
-	private playHiHat(startTime: number): void {
-		const noise = this.ctx.createBufferSource();
-		const noiseBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate);
-		const data = noiseBuffer.getChannelData(0);
-		
-		// Generate white noise
-		for (let i = 0; i < data.length; i++) {
-			data[i] = Math.random() * 2 - 1;
-		}
-		noise.buffer = noiseBuffer;
-		
-		const gain = this.ctx.createGain();
-		const filter = this.ctx.createBiquadFilter();
-		filter.type = 'highpass';
-		filter.frequency.value = 7000; // High frequency for metallic sound
-		
-		// Quick, crisp envelope
-		gain.gain.setValueAtTime(0.15, startTime);
-		gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.05);
-		
-		noise.connect(filter);
-		filter.connect(gain);
-		gain.connect(this.masterGain);
-		
-		noise.start(startTime);
-		noise.stop(startTime + 0.05);
-	}
-
 	// REMOVED: createJazzChords() - continuous chord progression removed per user request
 	// REMOVED: createBassLine() - continuous bass line removed per user request
 	// These created the constant drone sound that was distracting
 	// Now only using drums + vinyl crackle for clean lofi vibe
-
-	/**
-	 * Start jazz chord progression with smooth voice leading
-	 * Changes chords every 4 beats (measures)
-	 * @private
-	 */
-	private startJazzProgression(tempo: number): void {
-		const beatsPerMeasure = 4;
-		const measureDuration = (60 / tempo) * beatsPerMeasure; // seconds per measure
-		
-		const playNextChord = () => {
-			// Stop previous chord
-			this.stopJazzChord();
-			
-			// Get current chord from progression
-			const chord = this.jazzChordProgression[this.jazzChordIndex];
-			console.log(`[AudioEngine] Jazz chord: ${chord.name}`);
-			
-			// Play the chord
-			this.playJazzChord(chord.notes);
-			
-			// Advance to next chord
-			this.jazzChordIndex = (this.jazzChordIndex + 1) % this.jazzChordProgression.length;
-		};
-		
-		// Start immediately with first chord
-		playNextChord();
-		
-		// Schedule chord changes
-		this.jazzProgressionInterval = setInterval(playNextChord, measureDuration * 1000);
-	}
-
-	/**
-	 * Play a jazz chord (4-note voicing)
-	 * @private
-	 */
-	private playJazzChord(notes: number[]): void {
-		const now = this.ctx.currentTime;
-		
-		// Create oscillator for each note in the chord
-		for (const freq of notes) {
-			const osc = this.ctx.createOscillator();
-			const gain = this.ctx.createGain();
-			
-			// Use sine wave for warm jazz tone
-			osc.type = 'sine';
-			osc.frequency.setValueAtTime(freq, now);
-			
-			// Soft volume per note, overall chord is balanced
-			gain.gain.setValueAtTime(0, now);
-			gain.gain.linearRampToValueAtTime(0.08, now + 0.05); // Gentle attack
-			
-			osc.connect(gain);
-			gain.connect(this.masterGain);
-			
-			osc.start(now);
-			this.jazzChordOscillators.push(osc);
-		}
-	}
 
 	/**
 	 * Stop current jazz chord with fadeout
@@ -526,50 +257,6 @@ export class AudioEngine {
 	}
 
 	/**
-	 * Start vinyl crackle/noise for lofi texture
-	 * @private
-	 */
-	private startVinylNoise(): void {
-		// Create pink noise buffer (softer than white noise)
-		const bufferSize = this.ctx.sampleRate * 2; // 2 seconds of noise, looped
-		const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-		const data = buffer.getChannelData(0);
-		
-		// Generate pink noise (1/f noise)
-		let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-		for (let i = 0; i < bufferSize; i++) {
-			const white = Math.random() * 2 - 1;
-			b0 = 0.99886 * b0 + white * 0.0555179;
-			b1 = 0.99332 * b1 + white * 0.0750759;
-			b2 = 0.96900 * b2 + white * 0.1538520;
-			b3 = 0.86650 * b3 + white * 0.3104856;
-			b4 = 0.55000 * b4 + white * 0.5329522;
-			b5 = -0.7616 * b5 - white * 0.0168980;
-			data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-			data[i] *= 0.11; // (roughly) compensate for gain
-			b6 = white * 0.115926;
-		}
-		
-		const noise = this.ctx.createBufferSource();
-		noise.buffer = buffer;
-		noise.loop = true;
-		
-		const noiseGain = this.ctx.createGain();
-		noiseGain.gain.value = 0.02; // Very subtle
-		
-		const noiseFilter = this.ctx.createBiquadFilter();
-		noiseFilter.type = 'lowpass';
-		noiseFilter.frequency.value = 3000; // Remove harsh highs
-		
-		noise.connect(noiseFilter);
-		noiseFilter.connect(noiseGain);
-		noiseGain.connect(this.masterGain);
-		
-		noise.start();
-		this.vinylNoiseNode = noise;
-	}
-
-	/**
 	 * Stop all audio with fadeout
 	 */
 	stop(): void {
@@ -599,7 +286,6 @@ export class AudioEngine {
 			this.vinylNoiseNode.stop();
 			this.vinylNoiseNode = null;
 		}
-		if (!this.isPlaying) return;
 
 		const now = this.ctx.currentTime;
 		const fadeOutDuration = 2; // 2 seconds
@@ -608,6 +294,17 @@ export class AudioEngine {
 		this.masterGain.gain.cancelScheduledValues(now);
 		this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
 		this.masterGain.gain.exponentialRampToValueAtTime(0.001, now + fadeOutDuration);
+
+		// Stop active piano notes
+		this.activePianoOscillators.forEach(({ osc }) => {
+			try {
+				osc.stop();
+				osc.disconnect();
+			} catch (e) {
+				// Already stopped
+			}
+		});
+		this.activePianoOscillators = [];
 
 		// Stop and disconnect all oscillators after fadeout
 		setTimeout(() => {
@@ -712,35 +409,6 @@ export class AudioEngine {
 	private getNextScaleNote(): number {
 		const note = this.pentatonicScale[this.currentScaleIndex];
 		this.currentScaleIndex = (this.currentScaleIndex + 1) % this.pentatonicScale.length;
-		return note;
-	}
-
-	/**
-	 * Get next note from melody sequence (for melodic-flow mood)
-	 * Loops back to start when reaching the end
-	 * @private
-	 */
-	private getNextMelodyNote(): number {
-		const note = this.melodySequence[this.melodyIndex];
-		this.melodyIndex = (this.melodyIndex + 1) % this.melodySequence.length;
-		console.log(`[AudioEngine] Melody note ${this.melodyIndex}/${this.melodySequence.length}: ${note}Hz`);
-		return note;
-	}
-
-	/**
-	 * Get next harmonized note for jazz-harmony mood
-	 * Returns a note from the current chord's scale
-	 * @private
-	 */
-	private getNextJazzNote(): number {
-		const currentChord = this.jazzChordProgression[this.jazzChordIndex];
-		const scale = this.jazzChordScales[currentChord.name as keyof typeof this.jazzChordScales];
-		
-		// Pick a note from the scale that harmonizes with current chord
-		const note = scale[this.currentScaleIndex % scale.length];
-		this.currentScaleIndex = (this.currentScaleIndex + 1) % scale.length;
-		
-		console.log(`[AudioEngine] Jazz note from ${currentChord.name}: ${note}Hz`);
 		return note;
 	}
 
