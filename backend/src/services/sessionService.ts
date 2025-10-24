@@ -134,16 +134,15 @@ export async function updateSession(
 	if (updates.state) {
 		session.state = updates.state;
 		
-		// If session is being completed, set endTime to current server time
-		// This ensures accurate duration calculation regardless of client-server latency
-		if (updates.state === 'completed' && !session.endTime) {
-			session.endTime = new Date();
+		// If session is being completed, set endTime
+		if (updates.state === 'completed') {
+			// Use provided endTime if available, otherwise use server time
+			session.endTime = updates.endTime || new Date();
 		}
 	}
 
 	if (updates.endTime && updates.state !== 'completed') {
 		// Only allow manual endTime setting if not completing the session
-		// When completing, we use server time for accuracy
 		session.endTime = updates.endTime;
 	}
 	

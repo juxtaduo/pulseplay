@@ -131,6 +131,9 @@ export function Home() {
 	// Handle stopping a session
 	const handleStop = async () => {
 		try {
+			// Capture the exact time when user clicks stop for accurate duration calculation
+			const stopTime = new Date();
+			
 			// Save current session info before stopping
 			const currentSessionId = sessionId;
 			const currentSessionDuration = sessionDuration;
@@ -144,7 +147,7 @@ export function Home() {
 			
 			// For authenticated users, stop backend session first, then show AI insights
 			if (isAuthenticated) {
-				await stopSession(rhythmData);
+				await stopSession(rhythmData, stopTime);
 				// Only set completed session data after backend call succeeds
 				setCompletedSessionDuration(currentSessionDuration);
 				setCompletedSessionId(currentSessionId);

@@ -150,10 +150,17 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 				return sessionJson;
 			}
 			
-			// Calculate duration for active/paused sessions
-			const now = new Date();
-			const durationMs = now.getTime() - session.startTime.getTime();
-			sessionJson.totalDurationSeconds = Math.round(durationMs / 1000);
+			// Calculate duration based on session state
+			if (sessionJson.state === 'completed' && sessionJson.endTime) {
+				// For completed sessions, calculate from startTime to endTime
+				const durationMs = sessionJson.endTime.getTime() - sessionJson.startTime.getTime();
+				sessionJson.totalDurationSeconds = Math.round(durationMs / 1000);
+			} else {
+				// For active/paused sessions, calculate from startTime to now
+				const now = new Date();
+				const durationMs = now.getTime() - session.startTime.getTime();
+				sessionJson.totalDurationSeconds = Math.round(durationMs / 1000);
+			}
 			
 			return sessionJson;
 		});
