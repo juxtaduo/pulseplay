@@ -177,8 +177,8 @@ export const ControlPanel = ({
 							disabled={isPaused || isCompleted || (isPlaying && currentMood !== moodOption.value)}
 							className={`py-3 px-4 rounded-lg font-medium transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-sm ${
 								currentMood === moodOption.value
-									? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white ring-2 ring-blue-300 shadow-md'
-									: 'bg-slate-50 dark:bg-[rgb(27_30_54_/_96%)] text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600/50'
+									? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-md dark:bg-blue-600 dark:text-white dark:ring-blue-400'
+									: 'bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:hover:bg-blue-900 dark:border-blue-700'
 							}`}
 							aria-pressed={currentMood === moodOption.value}
 						>
@@ -206,8 +206,8 @@ export const ControlPanel = ({
 									disabled={isPaused || isCompleted}
 									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm ${
 										isSelected
-											? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white ring-2 ring-purple-300 shadow-md'
-											: 'bg-slate-50 dark:bg-[rgb(27_30_54_/_96%)] text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600/50'
+											? 'bg-purple-500 text-white ring-2 ring-purple-300 shadow-md dark:bg-purple-600 dark:text-white dark:ring-purple-400'
+											: 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 dark:bg-purple-950 dark:text-purple-200 dark:hover:bg-purple-900 dark:border-purple-700'
 									}`}
 									aria-pressed={isSelected}
 									aria-label={`${isSelected ? 'Deselect' : 'Select'} ${instrument.label}`}
