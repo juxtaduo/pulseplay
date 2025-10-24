@@ -36,7 +36,13 @@ function App() {
 		<ErrorBoundary>
 		<Router>
 			<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900 transition-colors duration-200">
-				<header className="bg-white/90 dark:bg-[#242643] backdrop-blur-md border-b border-slate-200/60 dark:border-slate-600/60 shadow-sm transition-colors duration-200">
+				<header className="
+  bg-gradient-to-r from-white/95 via-rose-50/80 to-pink-50/70
+  dark:!bg-none dark:!from-transparent dark:!via-transparent dark:!to-transparent
+  dark:!bg-[#242643]
+  backdrop-blur-md border-b border-slate-200/60 dark:border-slate-600/60
+  shadow-sm transition-colors duration-200
+">
 					<div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
 						<div className="flex items-center gap-6">
 							<Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -52,14 +58,14 @@ function App() {
 							<nav className="flex gap-4">
 								<Link
 									to="/"
-									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/60 dark:to-slate-600/60 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-md dark:shadow-lg dark:shadow-slate-600/30 border border-slate-200/60 dark:border-slate-500/60 dark:ring-1 dark:ring-slate-400/20"
+									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 hover:from-rose-200 hover:via-pink-200 hover:to-purple-200 dark:from-rose-900/30 dark:via-pink-900/30 dark:to-purple-900/30 dark:hover:from-rose-800/70 dark:hover:via-pink-800/70 dark:hover:to-purple-800/70 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60 dark:shadow-lg dark:shadow-rose-900/40 dark:hover:shadow-xl dark:hover:shadow-rose-800/50 border border-rose-200/60 hover:border-rose-300/80 dark:border-rose-700/20 dark:hover:border-rose-600/80 dark:ring-2 dark:ring-rose-700/30 dark:hover:ring-rose-600/50"
 								>
 									<Music size={16} />
 									<span>Session</span>
 								</Link>
 								<Link
 									to="/history"
-									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/60 dark:to-slate-600/60 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-md dark:shadow-lg dark:shadow-slate-600/30 border border-slate-200/60 dark:border-slate-500/60 dark:ring-1 dark:ring-slate-400/20"
+									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 hover:from-rose-200 hover:via-pink-200 hover:to-purple-200 dark:from-rose-900/30 dark:via-pink-900/30 dark:to-purple-900/30 dark:hover:from-rose-800/70 dark:hover:via-pink-800/70 dark:hover:to-purple-800/70 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60 dark:shadow-lg dark:shadow-rose-900/40 dark:hover:shadow-xl dark:hover:shadow-rose-800/50 border border-rose-200/60 hover:border-rose-300/80 dark:border-rose-700/20 dark:hover:border-rose-600/80 dark:ring-2 dark:ring-rose-700/30 dark:hover:ring-rose-600/50"
 								>
 									<History size={16} />
 									<span>Session History</span>
