@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Download, Trash2, Filter, Clock, Activity, TrendingUp, Calendar } from 'lucide-react';
+import { Download, Trash2, Filter, Clock, Activity, TrendingUp, Calendar, ChevronDown } from 'lucide-react';
 import { formatDuration, formatRelativeTime } from '../utils/timeFormatter';
 import type { Mood } from '../types';
 
@@ -45,6 +46,9 @@ export const SessionHistory = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalSessions, setTotalSessions] = useState(0);
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	const MOOD_OPTIONS: { value: Mood | 'all'; label: string }[] = [
 		{ value: 'all', label: 'All Songs' },
@@ -56,8 +60,34 @@ export const SessionHistory = () => {
 
 	// Fetch session history (T135)
 	useEffect(() => {
-		fetchSessions();
-	}, [selectedSong, currentPage]);
+		const handleClickOutside = (event: MouseEvent) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+				setIsDropdownOpen(false);
+			}
+		};
+
+		if (isDropdownOpen) {
+			document.addEventListener('mousedown', handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [isDropdownOpen]);
+
+	// Close dropdown when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+				setIsDropdownOpen(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
 
 	const fetchSessions = async () => {
 		setLoading(true);
@@ -195,20 +225,27 @@ export const SessionHistory = () => {
 						{/* Mood Filter (T136) */}
 						<div className="flex items-center gap-3">
 							<Filter size={20} className="text-slate-600 dark:text-slate-400" />
-							<select
-								value={selectedSong}
-								onChange={(e) => {
-									setSelectedSong(e.target.value as Mood | 'all');
-									setCurrentPage(1);
-								}}
-								className="bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/60 dark:to-slate-600/60 text-slate-800 dark:text-white rounded-lg px-4 py-2 border border-slate-200/60 dark:border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 shadow-sm"
-							>
-								{MOOD_OPTIONS.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
+							<div className="relative z-[1001]" ref={dropdownRef}>
+								<button
+									onClick={() => {
+										if (!isDropdownOpen && dropdownRef.current) {
+											const rect = dropdownRef.current.getBoundingClientRect();
+											setDropdownPosition({
+												top: rect.bottom + window.scrollY,
+												left: rect.left + window.scrollX,
+												width: rect.width
+											});
+										}
+										setIsDropdownOpen(!isDropdownOpen);
+									}}
+									className="bg-slate-100 dark:bg-[#485466] text-slate-800 dark:text-white rounded-lg px-4 py-2 border border-slate-200/60 dark:border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 shadow-sm flex items-center gap-2 min-w-[180px] justify-between"
+								>
+									<span>
+										{MOOD_OPTIONS.find(option => option.value === selectedSong)?.label || 'All Songs'}
+									</span>
+									<ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+								</button>
+							</div>
 						</div>
 
 						{/* Actions */}
@@ -233,6 +270,37 @@ export const SessionHistory = () => {
 						</div>
 					</div>
 				</div>
+
+				{/* Dropdown Portal */}
+				{isDropdownOpen && createPortal(
+					<div 
+						className="fixed bg-white dark:bg-[#485466] border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-[9999] isolate"
+						style={{
+							top: dropdownPosition.top,
+							left: dropdownPosition.left,
+							width: dropdownPosition.width
+						}}
+					>
+						{MOOD_OPTIONS.map((option) => (
+							<button
+								key={option.value}
+								onClick={() => {
+									setSelectedSong(option.value as Mood | 'all');
+									setCurrentPage(1);
+									setIsDropdownOpen(false);
+								}}
+								className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+									selectedSong === option.value 
+										? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' 
+										: 'text-slate-800 dark:text-slate-200'
+								}`}
+							>
+								{option.label}
+							</button>
+						))}
+					</div>,
+					document.body
+				)}
 
 				{/* Error Message */}
 				{error && (
