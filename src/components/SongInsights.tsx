@@ -194,7 +194,7 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 					</div>
 
 					{/* AI Rationale */}
-					<div className="bg-white/90 dark:bg-gradient-to-r dark:from-slate-800/80 dark:to-slate-700/80 rounded-lg p-4 border-2 border-purple-200/60 dark:border-purple-400/60 shadow-lg shadow-purple-100/50 dark:shadow-purple-900/50">
+					<div className="bg-white/90 dark:bg-gradient-to-r dark:from-purple-900/40 dark:to-violet-900/40 rounded-lg p-4 border-2 border-purple-200/60 dark:border-purple-500/50 shadow-lg shadow-purple-100/50 dark:shadow-purple-900/50">
 						<p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{recommendation.rationale}</p>
 					</div>
 
