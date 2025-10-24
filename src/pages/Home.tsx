@@ -145,26 +145,26 @@ export function Home() {
 			// Stop audio engine (with fadeout) but keep mood for UI display
 			stopAudio(false); // Don't clear mood when stopping
 			
-			// For authenticated users, stop backend session first, then show AI insights
-			if (isAuthenticated) {
-				await stopSession(rhythmData, stopTime);
-				// Only set completed session data after backend call succeeds
-				setCompletedSessionDuration(currentSessionDuration);
-				setCompletedSessionId(currentSessionId);
-				setCompletedRhythmData(currentRhythmData);
-			} else {
-				// For unauthenticated users, set completed data immediately
-				setCompletedSessionDuration(currentSessionDuration);
-				setCompletedSessionId(currentSessionId);
-				setCompletedRhythmData(currentRhythmData);
+			// For authenticated users, try to stop backend session but don't fail UI if it fails
+			if (isAuthenticated && currentSessionId) {
+				try {
+					await stopSession(rhythmData, stopTime, currentSessionDuration);
+				} catch (stopError) {
+					console.warn('[Home] Failed to stop backend session, but continuing with UI completion:', stopError);
+				}
 			}
+			
+			// Always set completed session data for UI consistency
+			setCompletedSessionDuration(currentSessionDuration);
+			setCompletedSessionId(currentSessionId);
+			setCompletedRhythmData(currentRhythmData);
 			
 			// Reset paused state
 			setIsPaused(false);
 			// Note: Keep rhythm data, song selections, and instrument selections for display and AI insights
 		} catch (err) {
 			console.error('[App] Failed to stop session:', err);
-			// If stopping fails, reset the stopped state and clear completed data
+			// If stopping fails completely, reset the stopped state and clear completed data
 			setIsSessionStopped(false);
 			setCompletedSessionDuration(null);
 			setCompletedSessionId(null);

@@ -21,7 +21,7 @@ interface SessionState {
 export interface UseSessionPersistenceReturn {
 	sessionId: string | null;
 	startSession: (song: Song) => Promise<string | null>;
-	stopSession: (finalRhythmData?: FrontendRhythmData, endTime?: Date) => Promise<void>;
+	stopSession: (finalRhythmData?: FrontendRhythmData, endTime?: Date, sessionDuration?: number) => Promise<void>;
 	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
 	error: string | null;
 }
@@ -183,7 +183,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	/**
 	 * Stop the current focus session
 	 */
-	const stopSession = useCallback(async (finalRhythmData?: FrontendRhythmData, endTime?: Date) => {
+	const stopSession = useCallback(async (finalRhythmData?: FrontendRhythmData, endTime?: Date, sessionDuration?: number) => {
 		if (!state.sessionId || !isAuthenticated) {
 			console.warn('[useSessionPersistence] Cannot stop session: no active session or not authenticated');
 			return;
@@ -203,6 +203,11 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 			// Include endTime if provided
 			if (endTime) {
 				requestBody.endTime = endTime.toISOString();
+			}
+
+			// Include sessionDuration if provided (use frontend duration instead of calculating)
+			if (sessionDuration !== undefined) {
+				requestBody.totalDurationSeconds = sessionDuration;
 			}
 
 			// Include final rhythm data if provided (for average BPM)

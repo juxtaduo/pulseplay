@@ -18,6 +18,7 @@ export interface UpdateSessionInput {
 	rhythmData?: Partial<RhythmData>;
 	keystrokeCount?: number;
 	averageBpm?: number;
+	totalDurationSeconds?: number;
 }
 
 /**
@@ -144,6 +145,11 @@ export async function updateSession(
 	if (updates.endTime && updates.state !== 'completed') {
 		// Only allow manual endTime setting if not completing the session
 		session.endTime = updates.endTime;
+	}
+	
+	// Update totalDurationSeconds if provided (use frontend duration)
+	if (updates.totalDurationSeconds !== undefined) {
+		session.totalDurationSeconds = updates.totalDurationSeconds;
 	}
 	
 	// Update keystrokeCount and averageBpm if provided
