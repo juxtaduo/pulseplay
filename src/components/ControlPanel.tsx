@@ -100,7 +100,7 @@ export const ControlPanel = ({
 	const displayVolume = Math.round(volume * 100);
 
 	return (
-		<div className="bg-white/80 dark:bg-slate-800 rounded-xl p-6 space-y-6 border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm transition-colors duration-200">
+		<div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 space-y-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm transition-colors duration-200">
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-semibold text-slate-800 dark:text-white">Music Selection</h2>
 				<div className="flex items-center gap-3">
@@ -178,7 +178,7 @@ export const ControlPanel = ({
 							className={`py-3 px-4 rounded-lg font-medium transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-sm ${
 								currentMood === moodOption.value
 									? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white ring-2 ring-blue-300 shadow-md'
-									: 'bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
+									: 'bg-slate-50 dark:bg-gradient-to-r dark:from-slate-700/50 dark:to-slate-600/50 text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:from-slate-600 dark:hover:to-slate-500 border border-slate-200 dark:border-slate-600/50'
 							}`}
 							aria-pressed={currentMood === moodOption.value}
 						>
@@ -207,7 +207,7 @@ export const ControlPanel = ({
 									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm ${
 										isSelected
 											? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white ring-2 ring-purple-300 shadow-md'
-											: 'bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
+											: 'bg-slate-50 dark:bg-gradient-to-r dark:from-slate-700/50 dark:to-slate-600/50 text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:from-slate-600 dark:hover:to-slate-500 border border-slate-200 dark:border-slate-600/50'
 									}`}
 									aria-pressed={isSelected}
 									aria-label={`${isSelected ? 'Deselect' : 'Select'} ${instrument.label}`}

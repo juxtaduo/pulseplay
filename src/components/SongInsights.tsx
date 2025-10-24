@@ -112,11 +112,11 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 	// Show warning if session is too short, but still render the component
 	if (sessionDuration < 30) {
 		return (
-			<div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 border border-purple-200 dark:border-purple-500/30 rounded-xl p-6 backdrop-blur-sm">
+			<div className="bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 dark:from-purple-900/60 dark:via-violet-900/60 dark:to-indigo-900/60 border-2 border-purple-300 dark:border-purple-400/80 rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-200/50 dark:shadow-purple-500/40 dark:shadow-2xl dark:shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-300/60 dark:hover:shadow-purple-500/60 transition-all duration-300">
 				<div className="flex items-start justify-between mb-4">
 					<div className="flex items-center gap-2">
-						<div className="p-2 bg-purple-100 dark:bg-purple-500/20 rounded-lg">
-							<Sparkles size={20} className="text-purple-600 dark:text-purple-400" />
+						<div className="p-2 bg-gradient-to-r from-purple-200 to-violet-200 dark:bg-gradient-to-r dark:from-purple-600/80 dark:to-violet-600/80 rounded-lg shadow-md">
+							<Sparkles size={20} className="text-purple-700 dark:text-purple-200" />
 						</div>
 						<div>
 							<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
@@ -139,11 +139,11 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 	}
 
 	return (
-		<div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 border border-purple-200 dark:border-purple-500/30 rounded-xl p-6 backdrop-blur-sm">
+		<div className="bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 dark:from-purple-900/60 dark:via-violet-900/60 dark:to-indigo-900/60 border-2 border-purple-300 dark:border-purple-400/80 rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-200/50 dark:shadow-purple-500/40 dark:shadow-2xl dark:shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-300/60 dark:hover:shadow-purple-500/60 transition-all duration-300">
 			<div className="flex items-start justify-between mb-4">
 				<div className="flex items-center gap-2">
-					<div className="p-2 bg-purple-100 dark:bg-purple-500/20 rounded-lg">
-						<Sparkles size={20} className="text-purple-600 dark:text-purple-400" />
+					<div className="p-2 bg-gradient-to-r from-purple-200 to-violet-200 dark:bg-gradient-to-r dark:from-purple-600/80 dark:to-violet-600/80 rounded-lg shadow-md">
+						<Sparkles size={20} className="text-purple-700 dark:text-purple-200" />
 					</div>
 					<div>
 						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
@@ -177,8 +177,8 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 			{recommendation && !loading && !error && (
 				<div className="space-y-4">
 					{/* Suggested Mood */}
-					<div className="flex items-center gap-3">
-						<TrendingUp size={18} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
+					<div className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/40 dark:to-violet-900/40 rounded-lg p-4 border border-purple-200/60 dark:border-purple-500/50 shadow-md dark:shadow-purple-900/30">
+						<TrendingUp size={18} className="text-purple-600 dark:text-purple-300 flex-shrink-0" />
 						<div>
 							<div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Suggested for next session:</div>
 							<div className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
@@ -188,8 +188,8 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 					</div>
 
 					{/* AI Rationale */}
-					<div className="bg-white dark:bg-slate-800/50 rounded-lg p-4 border border-slate-300 dark:border-slate-700">
-						<p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{recommendation.rationale}</p>
+					<div className="bg-white/90 dark:bg-gradient-to-r dark:from-slate-800/80 dark:to-slate-700/80 rounded-lg p-4 border-2 border-purple-200/60 dark:border-purple-400/60 shadow-lg shadow-purple-100/50 dark:shadow-purple-900/50">
+						<p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{recommendation.rationale}</p>
 					</div>
 
 					{/* Confidence Score */}

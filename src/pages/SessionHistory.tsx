@@ -179,7 +179,7 @@ export const SessionHistory = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-8 px-4">
+		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900 py-8 px-4">
 			<div className="max-w-6xl mx-auto">
 				{/* Header */}
 				<div className="mb-8">
@@ -190,7 +190,7 @@ export const SessionHistory = () => {
 				</div>
 
 				{/* Controls */}
-				<div className="bg-white/80 dark:bg-slate-800 rounded-xl p-6 mb-6 border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm">
+				<div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 mb-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm">
 					<div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
 						{/* Mood Filter (T136) */}
 						<div className="flex items-center gap-3">
@@ -201,7 +201,7 @@ export const SessionHistory = () => {
 									setSelectedSong(e.target.value as Mood | 'all');
 									setCurrentPage(1);
 								}}
-								className="bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-800 dark:text-white rounded-lg px-4 py-2 border border-slate-200/60 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 shadow-sm"
+								className="bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/60 dark:to-slate-600/60 text-slate-800 dark:text-white rounded-lg px-4 py-2 border border-slate-200/60 dark:border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 shadow-sm"
 							>
 								{MOOD_OPTIONS.map((option) => (
 									<option key={option.value} value={option.value}>
@@ -236,8 +236,20 @@ export const SessionHistory = () => {
 
 				{/* Error Message */}
 				{error && (
-					<div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
-						<p className="text-red-400 text-sm">{error}</p>
+					<div className="bg-gradient-to-r from-red-100 via-rose-100 to-pink-100 dark:from-red-900/60 dark:via-rose-900/60 dark:to-pink-900/60 border-2 border-red-400 dark:border-red-500/80 rounded-xl p-6 mb-6 shadow-xl shadow-red-200/50 dark:shadow-red-500/40 dark:shadow-2xl dark:shadow-red-600/30 hover:shadow-2xl hover:shadow-red-300/60 dark:hover:shadow-red-500/60 transition-all duration-300 backdrop-blur-sm">
+						<div className="flex items-start gap-4">
+							<div className="flex-shrink-0">
+								<div className="p-2 bg-gradient-to-r from-red-500 to-rose-500 rounded-lg shadow-md">
+									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+									</svg>
+								</div>
+							</div>
+							<div className="flex-1">
+								<h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Authentication Required</h3>
+								<p className="text-red-700 dark:text-red-300 text-sm leading-relaxed">{error}</p>
+							</div>
+						</div>
 					</div>
 				)}
 
@@ -263,7 +275,7 @@ export const SessionHistory = () => {
 						{sessions.map((session) => (
 							<div
 								key={session.sessionId}
-								className="bg-white/80 dark:bg-slate-800 rounded-xl p-6 hover:bg-white/90 dark:hover:bg-slate-750 transition-all border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm hover:shadow-xl"
+								className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 hover:bg-white/90 dark:hover:bg-slate-750 transition-all border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm hover:shadow-xl"
 							>
 								<div className="flex flex-col md:flex-row gap-4 justify-between">
 									{/* Session Info */}
@@ -338,7 +350,7 @@ export const SessionHistory = () => {
 						<button
 							onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
 							disabled={currentPage === 1}
-							className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-800 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all shadow-sm disabled:shadow-none"
+							className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/60 dark:to-slate-600/60 text-slate-800 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all shadow-sm disabled:shadow-none"
 						>
 							Previous
 						</button>
@@ -350,7 +362,7 @@ export const SessionHistory = () => {
 						<button
 							onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
 							disabled={currentPage === totalPages}
-							className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-800 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all shadow-sm disabled:shadow-none"
+							className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/60 dark:to-slate-600/60 text-slate-800 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all shadow-sm disabled:shadow-none"
 						>
 							Next
 						</button>

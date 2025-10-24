@@ -30,7 +30,7 @@ export const AuthButton = () => {
 	// If Auth0 is not available, show development mode
 	if (!auth0Available) {
 		return (
-			<div className="flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30 border border-yellow-200 dark:border-yellow-600 rounded-full px-4 py-2 shadow-sm">
+			<div className="flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/50 dark:to-yellow-800/50 border border-yellow-200 dark:border-yellow-600/50 rounded-full px-4 py-2 shadow-sm">
 				<User size={18} className="text-yellow-700 dark:text-yellow-400" />
 				<span className="text-sm text-yellow-800 dark:text-yellow-300 font-medium">
 					Dev Mode
@@ -65,7 +65,7 @@ export const AuthButton = () => {
 	if (isAuthenticated && user) {
 		return (
 			<div className="flex items-center gap-3">
-				<div className="flex items-center gap-2 bg-white/90 dark:bg-slate-800 rounded-full px-4 py-2 shadow-sm border border-slate-200/60 dark:border-slate-600">
+				<div className="flex items-center gap-2 bg-white/90 dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 rounded-full px-4 py-2 shadow-sm border border-slate-200/60 dark:border-slate-600/60">
 					<User size={18} className="text-slate-600 dark:text-slate-400" />
 					<span className="text-sm text-slate-700 dark:text-slate-300">
 						{user.name || user.email?.split('@')[0] || 'User'}
@@ -73,7 +73,7 @@ export const AuthButton = () => {
 				</div>
 				<button
 					onClick={handleLogout}
-					className="p-2 bg-white/90 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200/60 dark:border-slate-600"
+					className="p-2 bg-white/90 dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 hover:bg-slate-100 dark:hover:from-slate-700 dark:hover:to-slate-600 rounded-full transition-all text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200/60 dark:border-slate-600/60"
 					title="Sign Out"
 					aria-label="Sign out"
 				>

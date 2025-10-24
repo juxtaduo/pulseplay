@@ -76,27 +76,27 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive, isPaused, 
 				{/* Row 1: Keyboard & General Stats */}
 				
 				{/* Duration */}
-				<div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 rounded-lg p-4 border border-blue-100 dark:border-slate-700 shadow-sm">
+				<div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-100 dark:border-blue-500/30 shadow-sm">
 					<div className="flex items-center gap-2 mb-2">
-						<Clock size={18} className="text-blue-600 dark:text-slate-400" />
+						<Clock size={18} className="text-blue-600 dark:text-blue-400" />
 						<span className="text-xs text-slate-600 dark:text-slate-400">Duration</span>
 					</div>
 					<div className="text-2xl font-bold text-slate-800 dark:text-white">{formatDuration(displaySessionDuration)}</div>
 				</div>
 
 				{/* Keystrokes */}
-				<div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-900 rounded-lg p-4 border border-emerald-100 dark:border-slate-700 shadow-sm">
+				<div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-lg p-4 border border-emerald-100 dark:border-emerald-500/30 shadow-sm">
 					<div className="flex items-center gap-2 mb-2">
-						<Activity size={18} className="text-emerald-600 dark:text-slate-400" />
+						<Activity size={18} className="text-emerald-600 dark:text-emerald-400" />
 						<span className="text-xs text-slate-600 dark:text-slate-400">Keystrokes</span>
 					</div>
 					<div className="text-2xl font-bold text-slate-800 dark:text-white">{displayRhythmData.keystrokeCount}</div>
 				</div>
 
 				{/* Keys Per Minute (T138) */}
-				<div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-slate-800 dark:to-slate-900 rounded-lg p-4 border border-purple-100 dark:border-slate-700 shadow-sm">
+				<div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/30 dark:to-violet-900/30 rounded-lg p-4 border border-purple-100 dark:border-purple-500/30 shadow-sm">
 					<div className="flex items-center gap-2 mb-2">
-						<TrendingUp size={18} className="text-purple-600 dark:text-slate-400" />
+						<TrendingUp size={18} className="text-purple-600 dark:text-purple-400" />
 						<span className="text-xs text-slate-600 dark:text-slate-400">Keys/Min</span>
 					</div>
 					<div className="text-2xl font-bold text-slate-800 dark:text-white">{keysPerMinute}</div>
@@ -105,27 +105,27 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive, isPaused, 
 				{/* Row 2: Mouse Stats */}
 
 				{/* Mouse Clicks */}
-				<div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-slate-800 dark:to-slate-900 rounded-lg p-4 border border-rose-100 dark:border-slate-700 shadow-sm">
+				<div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30 rounded-lg p-4 border border-rose-100 dark:border-rose-500/30 shadow-sm">
 					<div className="flex items-center gap-2 mb-2">
-						<Mouse size={18} className="text-rose-600 dark:text-slate-400" />
+						<Mouse size={18} className="text-rose-600 dark:text-rose-400" />
 						<span className="text-xs text-slate-600 dark:text-slate-400">Clicks</span>
 					</div>
 					<div className="text-2xl font-bold text-slate-800 dark:text-white">{displayRhythmData.clickCount}</div>
 				</div>
 
 				{/* Mouse Moves */}
-				<div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-900 rounded-lg p-4 border border-amber-100 dark:border-slate-700 shadow-sm">
+				<div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg p-4 border border-amber-100 dark:border-amber-500/30 shadow-sm">
 					<div className="flex items-center gap-2 mb-2">
-						<Mouse size={18} className="text-amber-600 dark:text-slate-400" />
+						<Mouse size={18} className="text-amber-600 dark:text-amber-400" />
 						<span className="text-xs text-slate-600 dark:text-slate-400">Mouse Moves</span>
 					</div>
 					<div className="text-2xl font-bold text-slate-800 dark:text-white">{displayRhythmData.mouseMoveCount}</div>
 				</div>
 
 				{/* Scrolls */}
-				<div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 rounded-lg p-4 border border-cyan-100 dark:border-slate-700 shadow-sm">
+				<div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/30 rounded-lg p-4 border border-cyan-100 dark:border-cyan-500/30 shadow-sm">
 					<div className="flex items-center gap-2 mb-2">
-						<Mouse size={18} className="text-cyan-600 dark:text-slate-400" />
+						<Mouse size={18} className="text-cyan-600 dark:text-cyan-400" />
 						<span className="text-xs text-slate-600 dark:text-slate-400">Scrolls</span>
 					</div>
 					<div className="text-2xl font-bold text-slate-800 dark:text-white">{displayRhythmData.scrollCount}</div>
@@ -134,7 +134,7 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive, isPaused, 
 
 			{/* Rhythm Score */}
 			{isActive && displayRhythmData.rhythmScore > 0 && (
-				<div className="mt-4 p-4 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800 dark:to-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+				<div className="mt-4 p-4 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600/50 shadow-sm">
 					<div className="flex items-center justify-between mb-2">
 						<span className="text-sm text-slate-600 dark:text-slate-400">Rhythm Score</span>
 						<span className={`text-sm font-semibold capitalize ${getIntensityColor(displayRhythmData.intensity)}`}>
