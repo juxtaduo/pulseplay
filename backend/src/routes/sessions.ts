@@ -141,6 +141,23 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 		const total = sortedSessions.length;
 		const totalPages = Math.ceil(total / limit);
 
+		// Calculate duration for sessions that don't have it stored
+		const sessionsWithDuration = paginatedSessions.map(session => {
+			const sessionJson = session.toJSON();
+			
+			// If totalDurationSeconds is already set, use it (now comes from frontend for completed sessions)
+			if (sessionJson.totalDurationSeconds) {
+				return sessionJson;
+			}
+			
+			// For active/paused sessions without stored duration, calculate from startTime to now
+			const now = new Date();
+			const durationMs = now.getTime() - session.startTime.getTime();
+			sessionJson.totalDurationSeconds = Math.round(durationMs / 1000);
+			
+			return sessionJson;
+		});
+
 		logger.info({
 			userIdHash,
 			page,
@@ -150,7 +167,7 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 		}, 'session_history_retrieved');
 
 		return res.status(200).json({
-			sessions: paginatedSessions.map(s => s.toJSON()),
+			sessions: sessionsWithDuration,
 			pagination: {
 				page,
 				limit,
@@ -332,7 +349,7 @@ router.put('/:id', checkJwt, async (req: Request, res: Response) => {
 		}
 
 		// Extract update fields
-		const { state, endTime, rhythmData, keystrokeCount, averageBpm } = req.body;
+		const { state, endTime, rhythmData, keystrokeCount, averageBpm, totalDurationSeconds } = req.body;
 
 		// Validate state if provided
 		if (state) {
@@ -351,6 +368,7 @@ router.put('/:id', checkJwt, async (req: Request, res: Response) => {
 			rhythmData,
 			keystrokeCount,
 			averageBpm,
+			totalDurationSeconds,
 		});
 
 		if (!updatedSession) {

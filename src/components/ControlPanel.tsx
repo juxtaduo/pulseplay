@@ -1,23 +1,27 @@
-import { Play, Pause, Volume2, Piano, Music2, Mic2, Radio } from 'lucide-react';
+import { Play, Pause, RotateCcw, Square, Volume2, Piano, Music2, Mic2, Radio } from 'lucide-react';
 import type { Mood } from '../types';
 import type { InstrumentType } from '../lib/instruments';
 
 /**
  * Control panel for ambient music player
- * Provides mood selection, play/pause, volume control, and instrument selection
+ * Provides mood selection, play/pause/reset, volume control, and instrument selection
  * @module components/ControlPanel
  */
 
 interface ControlPanelProps {
 	isPlaying: boolean;
+	isPaused: boolean;
 	currentMood: Mood | null;
 	volume: number; // 0-1 range
 	selectedInstruments?: InstrumentType[]; // Phase 6: Multi-instrument support
 	onStart: (mood: Mood) => void;
-	onStop: () => void;
+	onPauseResume: () => void;
+	onReset: () => void;
+	onStop?: () => void; // Stop and complete session
 	onVolumeChange: (volume: number) => void;
 	onInstrumentToggle?: (instrument: InstrumentType) => void; // Phase 6
 	error: string | null;
+	isCompleted?: boolean; // Whether session is completed/stopped
 }
 
 const MOOD_OPTIONS: { value: Mood; label: string; description: string }[] = [
@@ -42,14 +46,18 @@ const INSTRUMENT_OPTIONS: {
 
 export const ControlPanel = ({
 	isPlaying,
+	isPaused,
 	currentMood,
 	volume,
 	selectedInstruments = [],
 	onStart,
+	onPauseResume,
+	onReset,
 	onStop,
 	onVolumeChange,
 	onInstrumentToggle,
 	error,
+	isCompleted = false,
 }: ControlPanelProps) => {
 	const handleMoodSelect = (mood: Mood) => {
 		if (isPlaying && currentMood === mood) {
@@ -58,7 +66,7 @@ export const ControlPanel = ({
 		}
 		if (isPlaying) {
 			// Stop current mood and start new one
-			onStop();
+			onPauseResume(); // Pause first
 			setTimeout(() => onStart(mood), 100); // Small delay for fadeout
 		} else {
 			onStart(mood);
@@ -67,11 +75,25 @@ export const ControlPanel = ({
 
 	const handlePlayPause = () => {
 		if (isPlaying) {
-			onStop();
-		} else if (currentMood) {
-			onStart(currentMood);
+			// Currently playing, so pause
+			onPauseResume();
+		} else {
+			// Currently paused or not started, so play/resume
+			if (currentMood) {
+				if (isPaused) {
+					// Resume paused session
+					onPauseResume();
+				} else {
+					// Start new session
+					onStart(currentMood);
+				}
+			}
+			// If no mood selected, do nothing (user must select mood first)
 		}
-		// If not playing and no mood selected, do nothing (user must select mood first)
+	};
+
+	const handleReset = () => {
+		onReset();
 	};
 
 	// Convert 0-1 range to 0-100 for display
@@ -81,21 +103,61 @@ export const ControlPanel = ({
 		<div className="bg-white dark:bg-slate-800 rounded-xl p-6 space-y-6 border border-slate-200 dark:border-slate-700 transition-colors duration-200">
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-semibold text-slate-900 dark:text-white">Music Selection</h2>
-				<button
-					onClick={handlePlayPause}
-					disabled={!currentMood && !isPlaying}
-					className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-						isPlaying
-							? 'bg-red-500 hover:bg-red-600'
-							: 'bg-green-500 hover:bg-green-600'
-					} text-white`}
-					aria-label={isPlaying ? 'Pause music' : 'Play music'}
-				>
-					{isPlaying ? <Pause size={24} /> : <Play size={24} />}
-				</button>
-			</div>
-
-			{error && (
+				<div className="flex items-center gap-3">
+					{/* Play/Pause button */}
+					<button
+						onClick={handlePlayPause}
+						disabled={(!currentMood && !isPlaying && !isPaused) || isCompleted}
+						className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+							isPlaying
+								? 'bg-orange-500 hover:bg-orange-600'
+								: isPaused
+									? 'bg-green-500 hover:bg-green-600'
+									: 'bg-green-500 hover:bg-green-600'
+						} text-white`}
+						aria-label={
+							isPlaying 
+								? 'Pause music' 
+								: isPaused 
+									? 'Resume music' 
+									: 'Play music'
+						}
+						title={
+							isPlaying 
+								? 'Pause' 
+								: isPaused 
+									? 'Resume' 
+									: 'Play'
+						}
+					>
+						{isPlaying ? <Pause size={24} /> : <Play size={24} />}
+					</button>
+					{/* Stop button */}
+					{onStop && ((isPlaying || isPaused) || isCompleted) && (
+						<button
+							onClick={onStop}
+							disabled={isCompleted}
+							className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+							aria-label="Stop and complete session"
+							title={isCompleted ? "Session completed" : "Stop session and get AI insights"}
+						>
+							<Square size={20} />
+						</button>
+					)}
+					{/* Reset button - rightmost */}
+					{((isPlaying || isPaused) || isCompleted) && (
+						<button
+							onClick={handleReset}
+							disabled={!isPlaying && !isPaused && !currentMood && !isCompleted}
+							className="p-4 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+							aria-label="Reset session"
+							title={isCompleted ? "Reset to start new session" : "Reset"}
+						>
+							<RotateCcw size={24} />
+						</button>
+					)}
+				</div>
+			</div>			{error && (
 				<div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
 					<p className="text-sm text-red-400 dark:text-red-400">{error}</p>
 				</div>
@@ -107,12 +169,13 @@ export const ControlPanel = ({
 						<span className="text-xs text-blue-500 dark:text-blue-400 font-normal">(click to start music)</span>
 					)}
 				</label>
-				<div className="grid grid-cols-2 gap-2">
+					<div className="grid grid-cols-2 gap-2">
 					{MOOD_OPTIONS.map((moodOption) => (
 						<button
 							key={moodOption.value}
 							onClick={() => handleMoodSelect(moodOption.value)}
-							className={`py-3 px-4 rounded-lg font-medium transition-all text-left ${
+							disabled={isPaused || isCompleted || (isPlaying && currentMood !== moodOption.value)}
+							className={`py-3 px-4 rounded-lg font-medium transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed ${
 								currentMood === moodOption.value
 									? 'bg-blue-500 text-white ring-2 ring-blue-400'
 									: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
@@ -140,7 +203,8 @@ export const ControlPanel = ({
 								<button
 									key={instrument.value}
 									onClick={() => onInstrumentToggle(instrument.value)}
-									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 ${
+									disabled={isPaused || isCompleted}
+									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
 										isSelected
 											? 'bg-purple-500 text-white ring-2 ring-purple-400'
 											: 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
@@ -178,7 +242,8 @@ export const ControlPanel = ({
 						max="100"
 						value={displayVolume}
 						onChange={(e) => onVolumeChange(Number(e.target.value) / 100)}
-						className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+						disabled={isCompleted}
+						className="flex-1 h-2 bg-slate-300 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
 						aria-label="Volume slider"
 					/>
 				</div>

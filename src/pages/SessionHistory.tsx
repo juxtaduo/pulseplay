@@ -64,7 +64,7 @@ export const SessionHistory = () => {
 		setError(null);
 
 		if (!isAuthenticated) {
-			setError('Please log in to view session history');
+			setError('Please log in to save session history');
 			setLoading(false);
 			return;
 		}

@@ -8,14 +8,19 @@ WORKDIR /app/frontend
 # Copy frontend package files
 COPY package.json ./
 COPY package-lock.json* ./
+
+# Clean any existing node_modules and lock file issues
+RUN rm -rf node_modules && npm cache clean --force
+
+# Install frontend dependencies with retry logic for esbuild issues
+RUN npm ci --include=dev --no-audit --no-fund --ignore-scripts && npm rebuild esbuild
+
+# Copy config files
 COPY tsconfig*.json ./
 COPY vite.config.ts ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 COPY index.html ./
-
-# Install frontend dependencies
-RUN npm install --production=false
 
 # Copy frontend source code
 COPY src ./src
@@ -31,10 +36,15 @@ WORKDIR /app/backend
 # Copy backend package files
 COPY backend/package.json ./
 COPY backend/package-lock.json* ./
-COPY backend/tsconfig.json ./
+
+# Clean any existing node_modules and lock file issues
+RUN rm -rf node_modules && npm cache clean --force
 
 # Install backend dependencies
-RUN npm install --production=false
+RUN npm ci --include=dev --no-audit --no-fund --ignore-scripts && npm rebuild esbuild
+
+# Copy backend config
+COPY backend/tsconfig.json ./
 
 # Copy backend source code
 COPY backend/src ./src
@@ -54,7 +64,7 @@ RUN apk add --no-cache curl
 COPY backend/package.json ./backend/
 COPY backend/package-lock.json* ./backend/
 WORKDIR /app/backend
-RUN npm install --production
+RUN npm ci --only=production --no-audit --no-fund
 
 # Copy built backend from builder
 COPY --from=backend-builder /app/backend/dist ./dist

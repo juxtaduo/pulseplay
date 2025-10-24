@@ -98,7 +98,7 @@ focusSessionSchema.set('toJSON', {
  * Calculate total duration before saving if session is completed
  */
 focusSessionSchema.pre('save', function (next) {
-	if (this.state === 'completed' && this.endTime && !this.totalDurationSeconds) {
+	if (this.state === 'completed' && this.endTime && this.totalDurationSeconds === null) {
 		const durationMs = this.endTime.getTime() - this.startTime.getTime();
 		// Store as precise seconds (e.g., 80 seconds for 1 minute 20 seconds)
 		this.totalDurationSeconds = Math.round(durationMs / 1000);

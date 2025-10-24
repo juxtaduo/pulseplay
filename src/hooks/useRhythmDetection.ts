@@ -24,6 +24,7 @@ export interface UseRhythmDetectionOptions {
 	enableInstrumentalSounds?: boolean; // Enable per-keystroke sounds
 	accessibilityMode?: boolean; // Lower frequency range (200-800 Hz)
 	throttleRapidTyping?: boolean; // Smooth blending for >200 keys/min
+	preserveData?: boolean; // Preserve rhythm data when session becomes inactive
 }
 
 export const useRhythmDetection = (
@@ -35,6 +36,7 @@ export const useRhythmDetection = (
 		enableInstrumentalSounds = false,
 		accessibilityMode = false,
 		throttleRapidTyping = true,
+		preserveData = false,
 	} = options;
 	const [rhythmData, setRhythmData] = useState<RhythmData>({
 		rhythmScore: 0,
@@ -52,6 +54,7 @@ export const useRhythmDetection = (
 	const keystrokeTimestamps = useRef<number[]>([]);
 	const clickTimestamps = useRef<number[]>([]); // Track mouse clicks (T130)
 	const mouseMovements = useRef<number[]>([]);
+	const scrollTimestamps = useRef<number[]>([]); // Track scroll events separately
 	const lastUpdateTime = useRef<number>(Date.now());
 	const audioEngineRef = useRef(getAudioEngine());
 	const instrumentIndexRef = useRef(0); // Round-robin index for multiple instruments
@@ -59,6 +62,12 @@ export const useRhythmDetection = (
 	const lastMouseMoveTime = useRef<number>(0); // Throttle mouse move events
 	const lastScrollTime = useRef<number>(0); // Throttle scroll events
 	const bpmHistory = useRef<number[]>([]); // Track BPM values over time for averaging
+	
+	// Cumulative counters for total session activity (not limited by array sizes)
+	const totalKeystrokes = useRef<number>(0);
+	const totalClicks = useRef<number>(0);
+	const totalMouseMoves = useRef<number>(0);
+	const totalScrolls = useRef<number>(0);
 
 	const calculateRhythm = useCallback(() => {
     const now = Date.now();
@@ -75,16 +84,39 @@ export const useRhythmDetection = (
     );
 
 		if (recentInteractions.length < 2) {
-			// Even with low recent activity, update averageBpm if we have historical data
+			// For minimal activity, still calculate a reasonable BPM if there are any interactions
+			let estimatedBpm = 0;
+			if (allInteractions.length >= 1) {
+				// Estimate BPM based on total session activity
+				// Typical typing: 40-60 WPM = 120-180 CPM = 2-3 CPS = 120-180 BPM
+				// For minimal activity, use a conservative estimate
+				const totalInteractions = allInteractions.length;
+				const sessionDurationMinutes = (now - Math.min(...allInteractions)) / 60000;
+				if (sessionDurationMinutes > 0) {
+					const interactionsPerMinute = totalInteractions / sessionDurationMinutes;
+					estimatedBpm = Math.min(180, Math.max(40, Math.round(interactionsPerMinute * 2))); // Rough estimate
+				} else {
+					// Very short session with activity, use default
+					estimatedBpm = 60; // Reasonable default for minimal activity
+				}
+				
+				// Add to BPM history for averaging
+				bpmHistory.current.push(estimatedBpm);
+				if (bpmHistory.current.length > 50) {
+					bpmHistory.current.shift();
+				}
+			}
+			
+			// Calculate average from history
 			const historicalAverageBpm = bpmHistory.current.length > 0 
 				? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
-				: 0;
+				: estimatedBpm;
 			
 			setRhythmData((prev) => ({
 				...prev,
 				rhythmScore: 0,
-				bpm: 0,
-				averageBpm: historicalAverageBpm || prev.averageBpm, // Keep existing average if no historical data
+				bpm: estimatedBpm,
+				averageBpm: historicalAverageBpm || prev.averageBpm || estimatedBpm, // Ensure non-zero average
 				intensity: 'low',
 				keysPerMinute: 0,
 			}));
@@ -116,6 +148,9 @@ export const useRhythmDetection = (
 			? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
 			: bpm; // If no history, use current BPM as average
 
+		// Ensure averageBpm is never 0 for sessions with activity
+		const finalAverageBpm = averageBpm > 0 ? averageBpm : (keystrokeTimestamps.current.length > 0 ? Math.max(bpm, 60) : 0);
+
 		// Calculate keys per minute (keyboard only)
 		const timeWindowMs = 60000; // 1 minute
 		const recentMinuteKeystrokes = keystrokeTimestamps.current.filter(
@@ -135,16 +170,12 @@ export const useRhythmDetection = (
 		setRhythmData({
 			rhythmScore: Math.round(rhythmScore),
 			bpm: Math.min(bpm, 180),
-			averageBpm,
+			averageBpm: finalAverageBpm,
 			intensity,
-			keystrokeCount: keystrokeTimestamps.current.length,
-			clickCount: clickTimestamps.current.length,
-			mouseMoveCount: mouseMovements.current.length,
-			scrollCount: mouseMovements.current.filter((ts, i, arr) => {
-				// Count scroll events (those that came from wheel events)
-				// For now, approximate by counting mouse movements
-				return i === 0 || ts - arr[i - 1] > 200; // Scroll throttle is 200ms
-			}).length,
+			keystrokeCount: totalKeystrokes.current,
+			clickCount: totalClicks.current,
+			mouseMoveCount: totalMouseMoves.current,
+			scrollCount: totalScrolls.current,
 			averageInterval: Math.round(averageInterval),
 			keysPerMinute,
 		});
@@ -153,7 +184,8 @@ export const useRhythmDetection = (
 
 		const now = Date.now();
 		keystrokeTimestamps.current.push(now);
-		console.log('[useRhythmDetection] Keystroke detected, total:', keystrokeTimestamps.current.length);
+		totalKeystrokes.current++; // Increment cumulative counter
+		console.log('[useRhythmDetection] Keystroke detected, total:', totalKeystrokes.current);
 
 		if (keystrokeTimestamps.current.length > 50) {
 			keystrokeTimestamps.current.shift();
@@ -227,6 +259,7 @@ export const useRhythmDetection = (
 		}
 		
 		mouseMovements.current.push(now);
+		totalMouseMoves.current++; // Increment cumulative counter
 
 		if (mouseMovements.current.length > 30) {
 			mouseMovements.current.shift();
@@ -258,6 +291,13 @@ export const useRhythmDetection = (
 			return;
 		}
 		
+		// Record scroll event timestamp
+		scrollTimestamps.current.push(now);
+		totalScrolls.current++; // Increment cumulative counter
+		if (scrollTimestamps.current.length > 50) {
+			scrollTimestamps.current.shift();
+		}
+		
 		lastScrollTime.current = now;
 		lastKeystrokeTime.current = now;
 
@@ -278,6 +318,7 @@ export const useRhythmDetection = (
 		// Track click timestamp (T130 - session stats)
 		const now = Date.now();
 		clickTimestamps.current.push(now);
+		totalClicks.current++; // Increment cumulative counter
 
 		// Play bass-range sound for mouse clicks (T074) if enabled
 		if (enableInstrumentalSounds && selectedInstruments.length > 0) {
@@ -291,23 +332,31 @@ export const useRhythmDetection = (
 
 	useEffect(() => {
 		if (!isActive) {
-			keystrokeTimestamps.current = [];
-			clickTimestamps.current = [];
-			mouseMovements.current = [];
-			lastKeystrokeTime.current = 0;
-			instrumentIndexRef.current = 0;
-			setRhythmData({
-				rhythmScore: 0,
-				bpm: 0,
-				averageBpm: 0,
-				intensity: 'low',
-				keystrokeCount: 0,
-				clickCount: 0,
-				mouseMoveCount: 0,
-				scrollCount: 0,
-				averageInterval: 0,
-				keysPerMinute: 0,
-			});
+			// Only reset data if preserveData is false
+			if (!preserveData) {
+				keystrokeTimestamps.current = [];
+				clickTimestamps.current = [];
+				mouseMovements.current = [];
+				scrollTimestamps.current = []; // Reset scroll timestamps
+				totalKeystrokes.current = 0; // Reset cumulative counters
+				totalClicks.current = 0;
+				totalMouseMoves.current = 0;
+				totalScrolls.current = 0;
+				lastKeystrokeTime.current = 0;
+				instrumentIndexRef.current = 0;
+				setRhythmData({
+					rhythmScore: 0,
+					bpm: 0,
+					averageBpm: 0,
+					intensity: 'low',
+					keystrokeCount: 0,
+					clickCount: 0,
+					mouseMoveCount: 0,
+					scrollCount: 0,
+					averageInterval: 0,
+					keysPerMinute: 0,
+				});
+			}
 			return;
 		}
 
@@ -317,6 +366,9 @@ export const useRhythmDetection = (
 		window.addEventListener('wheel', handleMouseScroll as any, { passive: true });
 
 		const intervalId = setInterval(calculateRhythm, 1000);
+
+		// Update rhythm data immediately when becoming active
+		calculateRhythm();
 
 		// Inactivity detection: stop instrumental sounds after 5 seconds (T076)
 		let inactivityTimer: NodeJS.Timeout;
@@ -354,6 +406,11 @@ export const useRhythmDetection = (
 		keystrokeTimestamps.current = [];
 		clickTimestamps.current = [];
 		mouseMovements.current = [];
+		scrollTimestamps.current = []; // Reset scroll timestamps
+		totalKeystrokes.current = 0; // Reset cumulative counters
+		totalClicks.current = 0;
+		totalMouseMoves.current = 0;
+		totalScrolls.current = 0;
 		bpmHistory.current = []; // Reset BPM history
 		lastKeystrokeTime.current = 0;
 		instrumentIndexRef.current = 0;
