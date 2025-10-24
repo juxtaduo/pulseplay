@@ -1,6 +1,7 @@
 import { Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useTheme } from '../context/ThemeContext';
 import type { RhythmData } from '../hooks/useRhythmDetection';
 
 /**
@@ -28,9 +29,14 @@ interface AIRecommendation {
 
 export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }: SongInsightsProps) => {
 	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+	const { theme } = useTheme();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	const containerClassName = theme === 'dark' 
+		? 'bg-[rgb(55_22_81_/_40%)] border-2 border-[rgb(192_132_252_/_0.8)] rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-500/40 shadow-2xl shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-500/60 transition-all duration-300'
+		: 'bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 border-2 border-purple-300 rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-200/50 hover:shadow-2xl hover:shadow-purple-300/60 transition-all duration-300';
 
 	useEffect(() => {
 		// Only fetch recommendation if session is ≥30 seconds (reduced threshold for better UX)
@@ -112,7 +118,7 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 	// Show warning if session is too short, but still render the component
 	if (sessionDuration < 30) {
 		return (
-			<div className="bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 dark:from-purple-900/60 dark:via-violet-900/60 dark:to-indigo-900/60 border-2 border-purple-300 dark:border-purple-400/80 rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-200/50 dark:shadow-purple-500/40 dark:shadow-2xl dark:shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-300/60 dark:hover:shadow-purple-500/60 transition-all duration-300">
+			<div className={containerClassName}>
 				<div className="flex items-start justify-between mb-4">
 					<div className="flex items-center gap-2">
 						<div className="p-2 bg-gradient-to-r from-purple-200 to-violet-200 dark:bg-gradient-to-r dark:from-purple-600/80 dark:to-violet-600/80 rounded-lg shadow-md">
@@ -124,7 +130,7 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 						</div>
 					</div>
 				</div>
-				<div className="bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/30 rounded-lg p-4">
+				<div className="bg-yellow-50 dark:bg-[rgb(113_63_18_/_47%)] border border-yellow-200 dark:border-yellow-500/30 rounded-lg p-4">
 					<p className="text-sm text-yellow-800 dark:text-yellow-400">
 						Session too short for AI insights. Complete a session of at least 30 seconds to get personalized song recommendations.
 					</p>
@@ -139,7 +145,7 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 	}
 
 	return (
-		<div className="bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 dark:from-purple-900/60 dark:via-violet-900/60 dark:to-indigo-900/60 border-2 border-purple-300 dark:border-purple-400/80 rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-200/50 dark:shadow-purple-500/40 dark:shadow-2xl dark:shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-300/60 dark:hover:shadow-purple-500/60 transition-all duration-300">
+		<div className={containerClassName}>
 			<div className="flex items-start justify-between mb-4">
 				<div className="flex items-center gap-2">
 					<div className="p-2 bg-gradient-to-r from-purple-200 to-violet-200 dark:bg-gradient-to-r dark:from-purple-600/80 dark:to-violet-600/80 rounded-lg shadow-md">
@@ -169,7 +175,7 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 			)}
 
 			{error && (
-				<div className="bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/30 rounded-lg p-4">
+				<div className="bg-yellow-50 dark:bg-[rgb(113_63_18_/_47%)] border border-yellow-200 dark:border-yellow-500/30 rounded-lg p-4">
 					<p className="text-sm text-yellow-800 dark:text-yellow-400">{error}</p>
 				</div>
 			)}
