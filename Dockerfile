@@ -13,7 +13,7 @@ COPY package-lock.json* ./
 RUN rm -rf node_modules && npm cache clean --force
 
 # Install frontend dependencies with retry logic for esbuild issues
-RUN npm ci --include=dev --no-audit --no-fund --no-optional --ignore-scripts && npm rebuild esbuild
+RUN npm ci --include=dev --no-audit --no-fund --ignore-scripts && npm rebuild esbuild
 
 # Copy config files
 COPY tsconfig*.json ./
@@ -41,7 +41,7 @@ COPY backend/package-lock.json* ./
 RUN rm -rf node_modules && npm cache clean --force
 
 # Install backend dependencies
-RUN npm ci --include=dev --no-audit --no-fund --no-optional --ignore-scripts && npm rebuild esbuild
+RUN npm ci --include=dev --no-audit --no-fund --ignore-scripts && npm rebuild esbuild
 
 # Copy backend config
 COPY backend/tsconfig.json ./
