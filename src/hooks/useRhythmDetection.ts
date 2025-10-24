@@ -116,6 +116,9 @@ export const useRhythmDetection = (
 			? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
 			: bpm; // If no history, use current BPM as average
 
+		// Ensure averageBpm is never 0 for sessions with activity
+		const finalAverageBpm = averageBpm > 0 ? averageBpm : (keystrokeTimestamps.current.length > 0 ? Math.max(bpm, 60) : 0);
+
 		// Calculate keys per minute (keyboard only)
 		const timeWindowMs = 60000; // 1 minute
 		const recentMinuteKeystrokes = keystrokeTimestamps.current.filter(
@@ -135,7 +138,7 @@ export const useRhythmDetection = (
 		setRhythmData({
 			rhythmScore: Math.round(rhythmScore),
 			bpm: Math.min(bpm, 180),
-			averageBpm,
+			averageBpm: finalAverageBpm,
 			intensity,
 			keystrokeCount: keystrokeTimestamps.current.length,
 			clickCount: clickTimestamps.current.length,

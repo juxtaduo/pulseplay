@@ -45,20 +45,19 @@ export function Home() {
 	useEffect(() => {
 		let intervalId: NodeJS.Timeout;
 
-		if (isPlaying) {
+		if (isPlaying && !isPaused) {
 			intervalId = setInterval(() => {
 				setSessionDuration((prev) => prev + 1);
 			}, 1000);
-		} else {
-			setSessionDuration(0);
 		}
+		// Don't reset sessionDuration to 0 - preserve it for completed sessions
 
 		return () => {
 			if (intervalId) {
 				clearInterval(intervalId);
 			}
 		};
-	}, [isPlaying]);
+	}, [isPlaying, isPaused]);
 
 	// Periodically update session with rhythm data (every 30 seconds during active session)
 	useEffect(() => {
@@ -103,6 +102,8 @@ export function Home() {
 	const handleStart = async (mood: Mood) => {
 		try {
 			console.log('[Home] handleStart called for mood:', mood);
+			// Reset session duration for new session
+			setSessionDuration(0);
 			// Reset completed session duration and ID for new session
 			setCompletedSessionDuration(null);
 			setCompletedSessionId(null);
@@ -123,17 +124,20 @@ export function Home() {
 	// Handle stopping a session
 	const handleStop = async () => {
 		try {
-			// Stop audio engine (with fadeout) and clear mood
-			stopAudio(true);
+			// Save current session info before stopping
+			const currentSessionId = sessionId;
+			const currentSessionDuration = sessionDuration;
+			
+			// Stop audio engine (with fadeout) but keep mood for UI display
+			stopAudio(false); // Don't clear mood when stopping
 			// Stop backend session with final rhythm data
 			await stopSession(rhythmData);
 			// Now that session is completed, save the duration and ID for AI insights
-			setCompletedSessionDuration(sessionDuration);
-			setCompletedSessionId(sessionId);
-			// Reset rhythm data
-			resetRhythm();
+			setCompletedSessionDuration(currentSessionDuration);
+			setCompletedSessionId(currentSessionId);
 			// Reset paused state
 			setIsPaused(false);
+			// Note: Keep rhythm data, song selections, and instrument selections for display and AI insights
 		} catch (err) {
 			console.error('[App] Failed to stop session:', err);
 		}
