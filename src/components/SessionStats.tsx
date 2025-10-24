@@ -13,23 +13,24 @@ interface SessionStatsProps {
 	sessionDuration: number;
 	isActive: boolean;
 	isPaused: boolean;
+	isCompleted?: boolean;
 }
 
-export const SessionStats = ({ rhythmData, sessionDuration, isActive, isPaused }: SessionStatsProps) => {
+export const SessionStats = ({ rhythmData, sessionDuration, isActive, isPaused, isCompleted = false }: SessionStatsProps) => {
 	const [frozenRhythmData, setFrozenRhythmData] = useState(rhythmData);
 	const [frozenSessionDuration, setFrozenSessionDuration] = useState(sessionDuration);
 
-	// Update frozen values when not paused, freeze when paused
+	// Update frozen values when not paused and not completed, freeze when paused or completed
 	useEffect(() => {
-		if (!isPaused) {
+		if (!isPaused && !isCompleted) {
 			setFrozenRhythmData(rhythmData);
 			setFrozenSessionDuration(sessionDuration);
 		}
-	}, [rhythmData, sessionDuration, isPaused]);
+	}, [rhythmData, sessionDuration, isPaused, isCompleted]);
 
-	// Use frozen values when paused, live values when not paused
-	const displayRhythmData = isPaused ? frozenRhythmData : rhythmData;
-	const displaySessionDuration = isPaused ? frozenSessionDuration : sessionDuration;
+	// Use frozen values when paused or completed, live values when active
+	const displayRhythmData = (isPaused || isCompleted) ? frozenRhythmData : rhythmData;
+	const displaySessionDuration = (isPaused || isCompleted) ? frozenSessionDuration : sessionDuration;
 	const formatDuration = (seconds: number) => {
 		const hours = Math.floor(seconds / 3600);
 		const mins = Math.floor((seconds % 3600) / 60);

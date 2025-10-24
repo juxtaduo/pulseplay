@@ -21,6 +21,7 @@ interface ControlPanelProps {
 	onVolumeChange: (volume: number) => void;
 	onInstrumentToggle?: (instrument: InstrumentType) => void; // Phase 6
 	error: string | null;
+	isCompleted?: boolean; // Whether session is completed/stopped
 }
 
 const MOOD_OPTIONS: { value: Mood; label: string; description: string }[] = [
@@ -56,6 +57,7 @@ export const ControlPanel = ({
 	onVolumeChange,
 	onInstrumentToggle,
 	error,
+	isCompleted = false,
 }: ControlPanelProps) => {
 	const handleMoodSelect = (mood: Mood) => {
 		if (isPlaying && currentMood === mood) {
@@ -93,25 +95,14 @@ export const ControlPanel = ({
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-semibold text-slate-900 dark:text-white">Music Selection</h2>
 				<div className="flex items-center gap-3">
-					{/* Stop button - only show when playing or paused */}
-					{onStop && (isPlaying || isPaused) && (
-						<button
-							onClick={onStop}
-							className="p-3 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all"
-							aria-label="Stop and complete session"
-							title="Stop session and get AI insights"
-						>
-							<Square size={20} />
-						</button>
-					)}
 					<button
 						onClick={handlePlayPauseReset}
 						disabled={!currentMood && !isPlaying && !isPaused}
 						className={`p-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
 							isPlaying
-								? 'bg-red-500 hover:bg-red-600'
+								? 'bg-orange-500 hover:bg-orange-600'
 								: isPaused
-									? 'bg-orange-500 hover:bg-orange-600'
+									? 'bg-yellow-500 hover:bg-yellow-600'
 									: 'bg-green-500 hover:bg-green-600'
 						} text-white`}
 						aria-label={
@@ -121,13 +112,29 @@ export const ControlPanel = ({
 									? 'Reset session' 
 									: 'Play music'
 						}
+						title={
+							isPlaying 
+								? 'Pause' 
+								: isPaused 
+									? 'Reset' 
+									: 'Play'
+						}
 					>
 						{isPlaying ? <Pause size={24} /> : isPaused ? <RotateCcw size={24} /> : <Play size={24} />}
 					</button>
+					{/* Stop button - to the right of play/pause/reset button */}
+					{onStop && (isPlaying || isPaused) && (
+						<button
+							onClick={onStop}
+							className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all"
+							aria-label="Stop and complete session"
+							title="Stop session and get AI insights"
+						>
+							<Square size={24} />
+						</button>
+					)}
 				</div>
-			</div>
-
-			{error && (
+			</div>			{error && (
 				<div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
 					<p className="text-sm text-red-400 dark:text-red-400">{error}</p>
 				</div>
@@ -139,12 +146,12 @@ export const ControlPanel = ({
 						<span className="text-xs text-blue-500 dark:text-blue-400 font-normal">(click to start music)</span>
 					)}
 				</label>
-				<div className="grid grid-cols-2 gap-2">
+					<div className="grid grid-cols-2 gap-2">
 					{MOOD_OPTIONS.map((moodOption) => (
 						<button
 							key={moodOption.value}
 							onClick={() => handleMoodSelect(moodOption.value)}
-							disabled={isPaused}
+							disabled={isPaused || isCompleted}
 							className={`py-3 px-4 rounded-lg font-medium transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed ${
 								currentMood === moodOption.value
 									? 'bg-blue-500 text-white ring-2 ring-blue-400'
@@ -173,7 +180,7 @@ export const ControlPanel = ({
 								<button
 									key={instrument.value}
 									onClick={() => onInstrumentToggle(instrument.value)}
-									disabled={isPaused}
+									disabled={isPaused || isCompleted}
 									className={`py-3 px-3 rounded-lg font-medium transition-all text-left flex items-start gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
 										isSelected
 											? 'bg-purple-500 text-white ring-2 ring-purple-400'

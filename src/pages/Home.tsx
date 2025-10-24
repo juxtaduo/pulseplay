@@ -28,6 +28,7 @@ export function Home() {
 		enableInstrumentalSounds,
 		accessibilityMode: false, // TODO: Add accessibility toggle in UI
 		throttleRapidTyping: true,
+		preserveData: !!completedSessionId, // Preserve data when session is completed (stopped)
 	});
 
 	// Session persistence hook (backend API integration)
@@ -128,13 +129,14 @@ export function Home() {
 			const currentSessionId = sessionId;
 			const currentSessionDuration = sessionDuration;
 			
+			// Mark session as completed immediately to preserve data
+			setCompletedSessionDuration(currentSessionDuration);
+			setCompletedSessionId(currentSessionId);
+			
 			// Stop audio engine (with fadeout) but keep mood for UI display
 			stopAudio(false); // Don't clear mood when stopping
 			// Stop backend session with final rhythm data
 			await stopSession(rhythmData);
-			// Now that session is completed, save the duration and ID for AI insights
-			setCompletedSessionDuration(currentSessionDuration);
-			setCompletedSessionId(currentSessionId);
 			// Reset paused state
 			setIsPaused(false);
 			// Note: Keep rhythm data, song selections, and instrument selections for display and AI insights
@@ -172,7 +174,9 @@ export function Home() {
 		// Reset paused state
 		setIsPaused(false);
 		
-		// Note: Keep completedSessionId and completedSessionDuration to preserve AI insights
+		// Clear completed session data to allow fresh start
+		setCompletedSessionDuration(null);
+		setCompletedSessionId(null);
 	};
 
 	// Handle instrument selection toggle (Phase 6: T091)
@@ -241,10 +245,11 @@ export function Home() {
 						onVolumeChange={setVolume}
 						onInstrumentToggle={handleInstrumentToggle}
 						error={displayError}
+						isCompleted={!!completedSessionId}
 					/>
 				</div>
 
-				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} isPaused={isPaused} />
+				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} isPaused={isPaused} isCompleted={!!completedSessionId} />
 
 				{/* AI Song Insights (Phase 7: T116, T117) - Only shown for completed sessions ≥30 seconds */}
 				{!isPlaying && completedSessionId && (completedSessionDuration || 0) >= 30 && (

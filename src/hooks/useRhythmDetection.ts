@@ -24,6 +24,7 @@ export interface UseRhythmDetectionOptions {
 	enableInstrumentalSounds?: boolean; // Enable per-keystroke sounds
 	accessibilityMode?: boolean; // Lower frequency range (200-800 Hz)
 	throttleRapidTyping?: boolean; // Smooth blending for >200 keys/min
+	preserveData?: boolean; // Preserve rhythm data when session becomes inactive
 }
 
 export const useRhythmDetection = (
@@ -35,6 +36,7 @@ export const useRhythmDetection = (
 		enableInstrumentalSounds = false,
 		accessibilityMode = false,
 		throttleRapidTyping = true,
+		preserveData = false,
 	} = options;
 	const [rhythmData, setRhythmData] = useState<RhythmData>({
 		rhythmScore: 0,
@@ -75,16 +77,39 @@ export const useRhythmDetection = (
     );
 
 		if (recentInteractions.length < 2) {
-			// Even with low recent activity, update averageBpm if we have historical data
+			// For minimal activity, still calculate a reasonable BPM if there are any interactions
+			let estimatedBpm = 0;
+			if (allInteractions.length >= 1) {
+				// Estimate BPM based on total session activity
+				// Typical typing: 40-60 WPM = 120-180 CPM = 2-3 CPS = 120-180 BPM
+				// For minimal activity, use a conservative estimate
+				const totalInteractions = allInteractions.length;
+				const sessionDurationMinutes = (now - Math.min(...allInteractions)) / 60000;
+				if (sessionDurationMinutes > 0) {
+					const interactionsPerMinute = totalInteractions / sessionDurationMinutes;
+					estimatedBpm = Math.min(180, Math.max(40, Math.round(interactionsPerMinute * 2))); // Rough estimate
+				} else {
+					// Very short session with activity, use default
+					estimatedBpm = 60; // Reasonable default for minimal activity
+				}
+				
+				// Add to BPM history for averaging
+				bpmHistory.current.push(estimatedBpm);
+				if (bpmHistory.current.length > 50) {
+					bpmHistory.current.shift();
+				}
+			}
+			
+			// Calculate average from history
 			const historicalAverageBpm = bpmHistory.current.length > 0 
 				? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
-				: 0;
+				: estimatedBpm;
 			
 			setRhythmData((prev) => ({
 				...prev,
 				rhythmScore: 0,
-				bpm: 0,
-				averageBpm: historicalAverageBpm || prev.averageBpm, // Keep existing average if no historical data
+				bpm: estimatedBpm,
+				averageBpm: historicalAverageBpm || prev.averageBpm || estimatedBpm, // Ensure non-zero average
 				intensity: 'low',
 				keysPerMinute: 0,
 			}));
@@ -294,23 +319,26 @@ export const useRhythmDetection = (
 
 	useEffect(() => {
 		if (!isActive) {
-			keystrokeTimestamps.current = [];
-			clickTimestamps.current = [];
-			mouseMovements.current = [];
-			lastKeystrokeTime.current = 0;
-			instrumentIndexRef.current = 0;
-			setRhythmData({
-				rhythmScore: 0,
-				bpm: 0,
-				averageBpm: 0,
-				intensity: 'low',
-				keystrokeCount: 0,
-				clickCount: 0,
-				mouseMoveCount: 0,
-				scrollCount: 0,
-				averageInterval: 0,
-				keysPerMinute: 0,
-			});
+			// Only reset data if preserveData is false
+			if (!preserveData) {
+				keystrokeTimestamps.current = [];
+				clickTimestamps.current = [];
+				mouseMovements.current = [];
+				lastKeystrokeTime.current = 0;
+				instrumentIndexRef.current = 0;
+				setRhythmData({
+					rhythmScore: 0,
+					bpm: 0,
+					averageBpm: 0,
+					intensity: 'low',
+					keystrokeCount: 0,
+					clickCount: 0,
+					mouseMoveCount: 0,
+					scrollCount: 0,
+					averageInterval: 0,
+					keysPerMinute: 0,
+				});
+			}
 			return;
 		}
 
