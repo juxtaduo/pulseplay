@@ -370,17 +370,23 @@ export const SessionHistory = () => {
 
 						{/* Actions */}
 						<div className="flex gap-3">
-							{/* Select All Checkbox - only show if there are sessions */}
-							{!loading && sessions.length > 0 && (
-								<label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
-									<input
-										type="checkbox"
-										checked={selectAll}
-										onChange={(e) => handleSelectAll(e.target.checked)}
-										className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
-									/>
-									<span>Select All</span>
-								</label>
+							{/* Select All Checkbox - always appear when not loading */}
+							{!loading && (
+								<div className="flex flex-col items-center gap-1">
+									<label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+										<input
+											type="checkbox"
+											checked={selectAll}
+											onChange={(e) => handleSelectAll(e.target.checked)}
+											disabled={!isAuthenticated || sessions.length === 0}
+											className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+										/>
+										<span>Select All</span>
+									</label>
+									<span className="text-xs text-slate-500 dark:text-slate-400">
+										Select ({selectedSessions.size})
+									</span>
+								</div>
 							)}
 
 							{/* Delete Selected Button - always visible */}
@@ -388,10 +394,10 @@ export const SessionHistory = () => {
 								type="button"
 								onClick={handleDeleteSelected}
 								disabled={selectedSessions.size === 0}
-								className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-all shadow-sm"
+								className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:from-red-500 disabled:to-red-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-all shadow-sm"
 							>
 								<Trash2 size={18} />
-								<span>Delete ({selectedSessions.size})</span>
+								<span>Delete</span>
 							</button>
 
 							{/* Export Button (T137) */}
@@ -404,7 +410,7 @@ export const SessionHistory = () => {
 								<span>
 									{selectedSessions.size > 0 
 										? `Export Selected (${selectedSessions.size})` 
-										: 'Export All'
+										: 'Export'
 									}
 								</span>
 							</button>
