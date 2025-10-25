@@ -383,7 +383,7 @@ export const SessionHistory = () => {
 									</label>
 									<span
 										className="text-xs text-slate-500 dark:text-slate-400"
-										style={{ marginLeft: '19px' }}
+										style={{ marginLeft: '21px' }}
 									>
 										Selected ({selectedSessions.size})
 									</span>
