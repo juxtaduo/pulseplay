@@ -215,8 +215,8 @@ export const SessionHistory = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900 py-8 px-4">
-			<div className="max-w-6xl mx-auto">
+		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900">
+			<main className="max-w-7xl mx-auto px-4 py-8 relative z-10">
 				{/* Header */}
 				<div className="mb-8">
 					<h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">Session History</h1>
@@ -453,7 +453,7 @@ export const SessionHistory = () => {
 						</button>
 					</div>
 				)}
-			</div>
+			</main>
 		</div>
 	);
 };
