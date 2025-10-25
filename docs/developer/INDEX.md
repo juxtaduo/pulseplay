@@ -45,35 +45,53 @@ This directory contains comprehensive technical documentation for developers wor
 ## 📂 Code Organization
 
 ```
-src/
-├── components/       # React UI components
-│   ├── AudioTest.tsx
-│   ├── AuthButton.tsx
-│   ├── ControlPanel.tsx
-│   ├── MoodInsights.tsx
-│   ├── RhythmVisualizer.tsx
-│   └── SessionStats.tsx
-├── hooks/           # Custom React hooks
-│   ├── useAudioEngine.ts
-│   ├── useRhythmDetection.ts
-│   └── useSessionPersistence.ts
-├── lib/             # Utilities and helpers
-│   ├── audioContext.ts
-│   ├── audioService.ts
-│   └── instruments.ts
-├── pages/           # Page components
-│   ├── Home.tsx
-│   └── SessionHistory.tsx
-└── services/        # External API clients
+src/                    # Frontend (React + TypeScript)
+├── components/         # React UI components
+│   ├── AudioTest.tsx       # Audio testing interface
+│   ├── AuthButton.tsx      # Authentication UI
+│   ├── ControlPanel.tsx    # Audio controls
+│   ├── MoodInsights.tsx    # AI-generated insights
+│   ├── RhythmVisualizer.tsx # Visual feedback
+│   └── SessionStats.tsx    # Session metrics
+├── hooks/              # Custom React hooks
+│   ├── useAudioEngine.ts        # Audio synthesis logic
+│   ├── useRhythmDetection.ts    # Rhythm tracking
+│   └── useSessionPersistence.ts # Database persistence
+├── services/           # External API clients
+│   └── moodService.ts       # AI mood generation API
+├── types/              # TypeScript type definitions
+├── utils/              # Utility functions
+└── lib/                # Library configurations
+
+backend/                # Backend (Express.js + TypeScript)
+├── src/
+│   ├── server.ts       # Express server setup
+│   ├── routes/         # API route handlers
+│   ├── services/       # Business logic services
+│   ├── models/         # MongoDB models
+│   ├── middleware/     # Express middleware
+│   ├── config/         # Configuration files
+│   └── utils/          # Backend utilities
+└── package.json        # Backend dependencies
+
+docs/                   # Documentation
+├── docker/            # Docker deployment guides
+├── developer/         # Developer documentation
+└── public/            # User guides
+
+.github/workflows/     # CI/CD pipelines
+└── docker-deploy.yml  # GitHub Actions deployment
 ```
 
 ---
 
 ## 🧪 Testing
 
-- **Unit Tests**: `npm test`
-- **Type Checking**: `npm run type-check`
+- **Frontend**: `npm test` (Vitest + React Testing Library)
+- **Backend**: `cd backend && npm test` (Jest)
+- **Type Checking**: `npm run typecheck`
 - **Linting**: `npm run lint`
+- **Integration**: `npm run test:e2e` (Playwright)
 
 ---
 

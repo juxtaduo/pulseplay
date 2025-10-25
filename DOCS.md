@@ -33,8 +33,30 @@ Technical documentation for contributors:
 - **[Developer Guide](docs/developer/DEVELOPER_GUIDE.md)** - Development setup and workflow
 - **[API Reference](docs/developer/API_REFERENCE.md)** - Complete API documentation
 - **[Architecture](docs/developer/ARCHITECTURE.md)** - System architecture and design
+- **[Quick Reference](docs/developer/QUICK_REFERENCE.md)** - Code snippets and patterns
 - **[Deployment](docs/developer/DEPLOYMENT.md)** - Production deployment guide
 - **[Background Audio](docs/developer/BACKGROUND_AUDIO.md)** - How background audio works
+
+---
+
+## 🐳 Docker Deployment
+
+Complete Docker setup and deployment guides:
+
+- **[Docker README](docs/docker/DOCKER_README.md)** - Complete Docker deployment guide
+- **[Docker Quick Reference](docs/docker/DOCKER_QUICK_REFERENCE.md)** - Quick Docker commands
+- **[Docker Files Summary](docs/docker/DOCKER_FILES_SUMMARY.md)** - Docker file inventory
+- **[Docker Deployment](docs/docker/DOCKER_DEPLOYMENT.md)** - Production deployment
+- **[GitHub Actions Deployment](docs/docker/DOCKER_GITHUB_ACTIONS_DEPLOYMENT.md)** - CI/CD pipeline
+
+---
+
+## 🍃 MongoDB Atlas
+
+Database setup and configuration guides:
+
+- **[MongoDB Atlas Setup](docs/mongodb/MONGODB_ATLAS_SETUP.md)** - Complete Atlas setup guide
+- **[MongoDB Atlas Quick Start](docs/mongodb/MONGODB_ATLAS_QUICK_START.md)** - 5-minute setup guide
 
 ---
 
@@ -69,27 +91,44 @@ Other important project documentation:
 ```
 pulseplay/
 ├── README.md                    # Project overview (start here)
-├── DOCS.md                      # This file
+├── DOCS.md                      # This navigation file
 ├── CLEANUP_SUMMARY.md           # Recent cleanup details
+├── Makefile                     # Docker command shortcuts
 │
 └── docs/
-    ├── public/                  # User-facing docs
+    ├── public/                  # User-facing documentation
     │   ├── INDEX.md
     │   ├── README.md
     │   ├── QUICK_START.md
     │   └── CONTRIBUTING.md
     │
-    ├── developer/               # Technical docs
+    ├── developer/               # Technical developer docs
     │   ├── INDEX.md
     │   ├── DEVELOPER_GUIDE.md
     │   ├── API_REFERENCE.md
     │   ├── ARCHITECTURE.md
-    │   └── [more technical docs...]
+    │   ├── QUICK_REFERENCE.md
+    │   ├── DEPLOYMENT.md
+    │   ├── BACKGROUND_AUDIO.md
+    │   ├── DOCS_INDEX.md
+    │   ├── DOCUMENTATION.md
+    │   └── PROJECT_STORY.md
     │
-    └── archive/                 # Historical docs
+    ├── docker/                  # Docker deployment docs
+    │   ├── DOCKER_README.md
+    │   ├── DOCKER_QUICK_REFERENCE.md
+    │   ├── DOCKER_FILES_SUMMARY.md
+    │   ├── DOCKER_DEPLOYMENT.md
+    │   └── DOCKER_GITHUB_ACTIONS_DEPLOYMENT.md
+    │
+    ├── mongodb/                 # MongoDB Atlas docs
+    │   ├── MONGODB_ATLAS_SETUP.md
+    │   └── MONGODB_ATLAS_QUICK_START.md
+    │
+    └── archive/                 # Historical documentation
         └── README.md
 ```
 
 ---
 
-**Last Updated**: October 19, 2025
+**Last Updated**: October 25, 2025

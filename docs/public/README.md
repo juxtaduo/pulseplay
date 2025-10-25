@@ -28,47 +28,47 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Deployment
 
-### Prerequisites
+### Docker Deployment (Recommended)
 
-- **Node.js 18+** and npm
-- **MongoDB Atlas** account ([sign up free](https://www.mongodb.com/cloud/atlas/register))
-- **Auth0** account ([sign up free](https://auth0.com/signup))
-- **Gemini API** key ([get key](https://ai.google.dev/))
-
-### Installation
+PulsePlay includes complete Docker configuration for production deployment:
 
 ```bash
-# Clone the repository
-git clone https://github.com/juxtaduo/pulseplay.git
-cd pulseplay
+# Quick start with Docker
+make up-atlas    # Start with MongoDB Atlas
+make up          # Start with local MongoDB
 
-# Install dependencies
-npm install
-
-# Configure environment variables
-cp .env.example .env
-# Edit .env with your MongoDB, Auth0, and Gemini credentials
-
-# Start development servers
-# Terminal 1: Frontend (Vite)
-npm run dev
-
-# Terminal 2: Backend (Express)
-cd backend
-npm run dev
+# View deployment guides
+# See docs/docker/DOCKER_README.md for complete instructions
 ```
 
-Visit http://localhost:5173 to see the app running!
+### Key Deployment Features
+
+- **Multi-stage Docker builds** for optimized images
+- **MongoDB Atlas integration** for cloud database
+- **Nginx reverse proxy** for static file serving
+- **Health checks** and **auto-restart** policies
+- **Environment-based configuration** for different deployment stages
+
+### Cloud Platform Options
+
+- **AWS**: ECS, Fargate, or EC2 with Docker
+- **Google Cloud**: Cloud Run, GKE
+- **Azure**: Container Instances, AKS
+- **DigitalOcean**: App Platform, Droplets
+- **Railway**: Docker deployments
+
+Set environment variables in your deployment platform's dashboard.
 
 ---
 
 ## 📖 Documentation
 
+- **[Quick Start Guide](QUICK_START.md)** - Step-by-step setup instructions
 - **[Complete Documentation](./DOCUMENTATION.md)** - Full project documentation
 - **[API Reference](./API_REFERENCE.md)** - Detailed API documentation
-- **[Developer Guide](./DEVELOPER_GUIDE.md)** - Development best practices and guides
+- **[Developer Guide](./DEVELOPER_GUIDE.md)** - Development best practices
 
 ---
 
@@ -100,37 +100,80 @@ Visit http://localhost:5173 to see the app running!
 
 ```
 pulseplay/
-├── src/
-│   ├── components/       # React UI components
-│   ├── hooks/           # Custom React hooks
-│   ├── lib/             # Audio synthesis & utilities
-│   ├── pages/           # Page components
-│   └── App.tsx          # Main application
-├── backend/
+├── src/                          # Frontend React application
+│   ├── components/               # Reusable UI components
+│   │   ├── Auth0ProviderWrapper.tsx
+│   │   ├── AuthButton.tsx
+│   │   ├── ControlPanel.tsx      # Main audio controls
+│   │   ├── MoodInsights.tsx      # AI-generated insights
+│   │   ├── RhythmVisualizer.tsx  # Real-time waveform
+│   │   └── SessionStats.tsx      # Session metrics
+│   ├── hooks/                    # Custom React hooks
+│   │   ├── useAudioEngine.ts     # Audio synthesis logic
+│   │   ├── useRhythmDetection.ts # Keyboard/mouse tracking
+│   │   └── useSessionPersistence.ts # Session management
+│   ├── lib/                      # Utilities and services
+│   │   ├── audioContext.ts       # Web Audio API wrapper
+│   │   └── midiParser.ts         # MIDI file parsing
+│   ├── pages/                    # Page components
+│   │   └── Home.tsx
+│   └── types/                    # TypeScript type definitions
+├── backend/                      # Express.js API server
 │   └── src/
-│       ├── models/      # MongoDB models
-│       ├── routes/      # API routes
-│       └── services/    # Business logic
-└── Documentation files
+│       ├── config/               # Configuration files
+│       │   ├── auth0.ts          # JWT validation middleware
+│       │   ├── database.ts       # MongoDB connection
+│       │   └── logger.ts         # Structured logging
+│       ├── middleware/           # Express middleware
+│       │   ├── errorHandler.ts   # Error handling
+│       │   └── rateLimiter.ts    # Rate limiting
+│       ├── models/               # Mongoose schemas
+│       │   ├── FocusSession.ts
+│       │   ├── UserPreferences.ts
+│       │   ├── MoodInsight.ts
+│       │   └── WeeklySummary.ts
+│       ├── routes/               # API route handlers
+│       ├── services/             # Business logic
+│       │   └── geminiService.ts  # AI mood analysis
+│       ├── types/                # TypeScript types
+│       ├── utils/                # Utilities
+│       │   └── crypto.ts         # SHA-256 hashing
+│       ├── websocket/            # WebSocket server
+│       └── server.ts             # Express app entry point
+├── docs/                         # Documentation
+├── scripts/                      # Utility scripts
+├── specs/                        # Project specifications
+├── docker-compose*.yml          # Docker orchestration
+├── Dockerfile*                   # Container definitions
+├── Makefile                     # Development shortcuts
+└── package.json                 # Dependencies and scripts
 ```
 
 ---
 
 ## 🎮 How to Use
 
-1. **Sign Up/Sign In** - Create an account with Auth0
-2. **Select Piano Song** - Choose from 4 beautiful piano pieces
-3. **Pick Instruments** - Select instruments (Piano, Flute, Xylophone, Kalimba)
-4. **Click Play** - Start the audio engine
-5. **Start Working** - Your typing rhythm will create music
-6. **View Insights** - See AI-generated analysis of your work rhythm (shown after 1+ minute sessions)
+1. **Sign Up/Sign In** - Create an account with Auth0 OAuth2 authentication
+2. **Select Piano Song** - Choose from 4 beautiful piano pieces:
+   - 🎹 **A Thousand Years** - Christina Perri's romantic ballad (75 BPM)
+   - 💧 **Kiss The Rain** - Yiruma's gentle meditation (58 BPM)
+   - 🌊 **River Flows In You** - Yiruma's flowing melody (65 BPM)
+   - ⚔️ **Gurenge** - LiSA's energetic anime theme (95 BPM)
+3. **Choose Instruments** - Select from Piano, Flute, Xylophone, and Kalimba
+4. **Click Play** - Start the real-time audio synthesis engine
+5. **Start Working** - Your typing rhythm creates adaptive music:
+   - **Keystrokes** trigger melody notes
+   - **Mouse movements** and **clicks** affect rhythm
+   - **Scroll events** contribute to the audio mix
+6. **View Real-time Insights** - AI analysis of your work patterns and focus metrics
+7. **Session History** - Review past sessions with detailed statistics
 
-### Piano Songs
+### Real-time Features
 
-- **� A Thousand Years** - Christina Perri's romantic ballad (75 BPM, C4 key)
-- **💧 Kiss The Rain** - Yiruma's gentle meditation (58 BPM, C4 key)
-- **� River Flows In You** - Yiruma's flowing melody (65 BPM, C4 key)
-- **⚔️ Gurenge** - LiSA's energetic anime theme (95 BPM, C4 key)
+- **Live BPM Detection** - Calculates your typing speed in real-time
+- **Waveform Visualization** - 60fps canvas animation synced to your rhythm
+- **Adaptive Audio** - Music changes based on your activity intensity
+- **Session Statistics** - Tracks duration, keystrokes, clicks, mouse moves, scrolls
 
 ---
 
@@ -181,12 +224,23 @@ PORT=3001
 ### Rhythm Detection Algorithm
 
 ```typescript
-1. Track all interactions (keystrokes, clicks, mouse moves, scrolls)
-2. Filter to recent events (5-second window)
+1. Track all user interactions (keystrokes, clicks, mouse moves, scrolls)
+2. Filter to recent events (5-second rolling window)
 3. Calculate intervals between consecutive events
 4. Average interval: sum(intervals) / count(intervals)
 5. Rhythm score: min(100, 10000 / max(avgInterval, 100))
 6. Intensity levels: Low (<40), Medium (40-69), High (70+)
+```
+
+### Audio Synthesis Algorithm
+
+```typescript
+1. MIDI file parsing extracts note sequences and timing
+2. OscillatorNode generates sine/sawtooth waves for each instrument
+3. GainNode controls volume with fadeIn/fadeOut effects
+4. BiquadFilterNode applies frequency filtering
+5. Real-time rhythm modulation adjusts note timing and intensity
+6. Canvas visualization renders 60fps waveform animation
 ```
 
 ---
@@ -218,103 +272,68 @@ PORT=3001
 ### Available Scripts
 
 ```bash
-npm run dev        # Start development server
+# Frontend
+npm run dev        # Start Vite development server
 npm run build      # Build for production
 npm run preview    # Preview production build
-npm run lint       # Run ESLint
+npm run lint       # Run Biome.js linting
 npm run typecheck  # Check TypeScript errors
+
+# Backend
+cd backend
+npm run dev        # Start Express server with hot reload
+npm run build      # Build TypeScript to JavaScript
+
+# Both servers
+npm run dev:all    # Start frontend & backend concurrently
+
+# Testing
+npm test           # Run unit tests
+npm run test:ui    # Run tests with UI
+npm run test:coverage # Run tests with coverage
 ```
 
 ### Environment Variables
 
-Create a `.env` file with:
+Create a `.env` file in the project root:
 
 ```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+# ============================================
+# MongoDB Configuration
+# ============================================
+# MongoDB Atlas (recommended)
+MONGODB_ATLAS_URI=mongodb+srv://username:password@cluster.mongodb.net/pulseplay?retryWrites=true&w=majority
+
+# Local MongoDB (alternative)
+MONGODB_URI=mongodb://localhost:27017/pulseplay-dev
+
+# ============================================
+# Auth0 Configuration
+# ============================================
+AUTH0_DOMAIN=your-domain.auth0.com
+AUTH0_CLIENT_ID=your_client_id
+AUTH0_CLIENT_SECRET=your_client_secret
+AUTH0_AUDIENCE=https://api.pulseplay.ai
+AUTH0_ISSUER_BASE_URL=https://your-domain.auth0.com
+
+# Frontend Auth0
+VITE_AUTH0_DOMAIN=your-domain.auth0.com
+VITE_AUTH0_CLIENT_ID=your_client_id
+VITE_AUTH0_AUDIENCE=https://api.pulseplay.ai
+VITE_API_URL=http://localhost:3001
+
+# ============================================
+# AI/ML API Keys
+# ============================================
+GEMINI_API_KEY=your_gemini_api_key
+
+# ============================================
+# Server Configuration
+# ============================================
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
 ```
-
-### Database Setup
-
-```bash
-# Install Supabase CLI
-npm install -g supabase
-
-# Link your project
-supabase link --project-ref your-project-ref
-
-# Run migrations
-supabase db push
-
-# Deploy edge functions
-supabase functions deploy generate-mood
-```
-
----
-
-## 🎯 Key Algorithms
-
-### Rhythm Detection Algorithm
-
-```typescript
-1. Track keystroke timestamps (last 50 keystrokes)
-2. Filter to recent events (5-second window)
-3. Calculate intervals between consecutive keystrokes
-4. Average interval: sum(intervals) / count(intervals)
-5. Rhythm score: min(100, 1000 / max(avgInterval, 50))
-6. BPM: (60000 / avgInterval) * 0.25
-7. Classify intensity: high (>70), medium (>40), low
-```
-
-### Audio Modulation Algorithm
-
-```typescript
-1. Normalize rhythm score (0-1 range)
-2. Modulate oscillator frequencies:
-   - targetFreq = baseFreq * (1 + normalizedScore * 0.3)
-3. Adjust filter cutoff:
-   - filterFreq = 1500 + (normalizedScore * 1500) Hz
-4. Modulate gain:
-   - gain = baseGain * (0.7 + normalizedScore * 0.3)
-5. Use linearRampToValueAtTime for smooth transitions
-```
-
----
-
-## 🧪 Testing
-
-```bash
-# Run unit tests (when implemented)
-npm test
-
-# Run E2E tests (when implemented)
-npm run test:e2e
-
-# Type checking
-npm run typecheck
-```
-
----
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-```bash
-npm install -g vercel
-vercel login
-vercel --prod
-```
-
-### Netlify
-
-```bash
-npm install -g netlify-cli
-netlify login
-netlify deploy --prod
-```
-
-Remember to set environment variables in your deployment platform!
 
 ---
 
@@ -340,18 +359,25 @@ Contributions are welcome! Please follow these steps:
 
 ## 📝 License
 
-This project is built for an open-source hackathon. License details to be added.
+This project is open source and available under the MIT License.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Built with [React](https://reactjs.org/)
-- Database by [MongoDB Atlas](https://www.mongodb.com/atlas)
-- Auth by [Auth0](https://auth0.com/)
-- AI by [Google Gemini](https://ai.google.dev/)
-- Icons from [Lucide](https://lucide.dev/)
-- Styled with [TailwindCSS](https://tailwindcss.com/)
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Fast build tool
+- **Express.js** - Backend API
+- **MongoDB Atlas** - Cloud database
+- **Mongoose** - ODM for MongoDB
+- **Auth0** - Authentication & authorization
+- **Google Gemini AI** - Mood analysis
+- **Web Audio API** - Native browser audio synthesis
+- **@tonejs/midi** - MIDI file parsing
+- **TailwindCSS** - Utility-first styling
+- **Lucide React** - Beautiful icons
+- **Biome** - Fast linting & formatting
 
 ---
 
@@ -359,19 +385,30 @@ This project is built for an open-source hackathon. License details to be added.
 
 - **Issues**: [GitHub Issues](https://github.com/juxtaduo/pulseplay/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/juxtaduo/pulseplay/discussions)
+- **Documentation**: See the `docs/` directory for detailed guides
 
 ---
 
 ## 🗺️ Roadmap
 
+- [x] Real-time audio synthesis with Web Audio API
+- [x] MIDI-based piano songs (4 songs implemented)
+- [x] Rhythm detection from typing patterns
+- [x] AI mood analysis with Gemini
+- [x] Auth0 OAuth2 authentication
+- [x] MongoDB Atlas integration
+- [x] Docker containerization
 - [ ] Mobile app version (React Native)
-- [ ] More MIDI music files
-- [ ] Session analytics and charts
+- [ ] More MIDI music files and instruments
+- [ ] Advanced session analytics and charts
 - [ ] Pomodoro timer integration
-- [ ] Export session recordings
-- [ ] Machine learning for advanced mood detection
+- [ ] Session recording export
+- [ ] Enhanced machine learning for mood detection
 - [ ] VSCode extension
+- [ ] Browser extension
 
 ---
 
 **Built with ❤️ for productivity and creativity**
+**Status**: ✅ Production Ready | Actively Maintained
+**Last Updated**: October 25, 2025

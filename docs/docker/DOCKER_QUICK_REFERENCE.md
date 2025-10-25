@@ -8,18 +8,19 @@
 make init          # Copy .env template
 # Edit .env with your credentials
 make build         # Build images
-make up            # Start services
+make up            # Start services (local MongoDB)
+make up-atlas      # Start services (MongoDB Atlas)
 
 # Access
 # Frontend: http://localhost:5173
-# Backend:  http://localhost:3000
+# Backend:  http://localhost:3000 (local) / 3001 (Atlas)
 # MongoDB:  mongodb://localhost:27017
 ```
 
 ### Development Environment
 ```bash
 # Start with hot reload
-docker-compose -f docker-compose.dev.yml up
+make up-dev        # Development with hot reload + debug tools
 
 # Or without Docker (local development)
 npm run dev:all
@@ -27,11 +28,19 @@ npm run dev:all
 
 ### Common Operations
 ```bash
+make help          # Show all available commands
 make logs          # View all logs
 make logs-backend  # View backend logs only
+make logs-dev      # View development logs
+make logs-atlas    # View Atlas deployment logs
 make restart       # Restart all services
 make down          # Stop all services
+make down-dev      # Stop development services
+make down-atlas    # Stop Atlas services
 make health        # Check service health
+make rebuild       # Rebuild and restart services
+make rebuild-dev   # Rebuild development services
+make rebuild-atlas # Rebuild Atlas services
 ```
 
 ### Database Operations
@@ -41,23 +50,37 @@ make restore       # Restore from latest backup
 make shell-mongodb # Access MongoDB shell
 ```
 
+### Development Tools
+```bash
+make shell-backend     # Access backend container shell
+make shell-backend-dev # Access development backend shell
+make shell-frontend-dev # Access development frontend shell
+make test-backend      # Run backend tests
+make test-backend-dev  # Run backend tests in dev environment
+make test-lint         # Run linter
+make test-lint-dev     # Run linter in dev environment
+```
+
 ## 📁 Files Created
 
-### Docker Configuration
+### Docker Configuration (11 files)
 - `Dockerfile` - Production multi-stage build
 - `Dockerfile.dev` - Development with hot reload
-- `docker-compose.yml` - Production orchestration
+- `Dockerfile.frontend` - Frontend-only production build
+- `docker-compose.yml` - Production orchestration (local MongoDB)
 - `docker-compose.dev.yml` - Development orchestration
+- `docker-compose.atlas.yml` - Production with MongoDB Atlas
 - `.dockerignore` - Files to exclude from build
 - `nginx.conf` - Nginx web server configuration
-
-### Environment & Setup
 - `.env.docker.template` - Environment variables template
-- `Makefile` - Convenient command shortcuts
-- `DOCKER_DEPLOYMENT.md` - Complete deployment guide
+- `Makefile` - Convenient command shortcuts (25+ commands)
+- `.github/workflows/docker-deploy.yml` - CI/CD pipeline
 
-### CI/CD
-- `.github/workflows/docker-deploy.yml` - Automated builds
+### Documentation (4 files)
+- `DOCKER_DEPLOYMENT.md` - Complete deployment guide
+- `DOCKER_QUICK_REFERENCE.md` - This quick reference
+- `DOCKER_FILES_SUMMARY.md` - File inventory & architecture
+- `DOCKER_GITHUB_ACTIONS_DEPLOYMENT.md` - CI/CD documentation
 
 ## 🔧 Environment Setup
 
@@ -79,31 +102,47 @@ make shell-mongodb # Access MongoDB shell
 ## 🏗️ Architecture
 
 ```
-┌──────────────┐
-│   Client     │
-│   Browser    │
-└──────┬───────┘
-       │
-       │ http://localhost:5173
-       ▼
-┌──────────────┐
-│   Nginx      │  Frontend Static Files
-│  Container   │  + Reverse Proxy
-└──────┬───────┘
-       │
-       │ /api/* → backend:3000
-       ▼
-┌──────────────┐
-│   Node.js    │  Backend API
-│  Container   │  Express + WebSocket
-└──────┬───────┘
-       │
-       │ mongodb://mongodb:27017
-       ▼
-┌──────────────┐
-│   MongoDB    │  Database
-│  Container   │  + Persistent Storage
-└──────────────┘
+┌─────────────────────────────────────────┐
+│           Client Browser                │
+│       http://localhost:5173             │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│        Nginx Container (Port 5173)      │
+│  • Serves static React frontend         │
+│  • Reverse proxy for /api/* requests    │
+│  • WebSocket support for real-time      │
+│  • Gzip compression & security headers  │
+└──────────────┬──────────────────────────┘
+               │
+               │ /api/* → backend:3000
+               ▼
+┌─────────────────────────────────────────┐
+│      Backend Container (Port 3000)      │
+│  • Express.js REST API (TypeScript)     │
+│  • MongoDB connection with Mongoose     │
+│  • Auth0 JWT authentication             │
+│  • Google Gemini AI integration         │
+│  • WebSocket server for real-time       │
+└──────────────┬──────────────────────────┘
+               │
+               │ mongodb://mongodb:27017
+               ▼
+┌─────────────────────────────────────────┐
+│      MongoDB Container (Port 27017)     │
+│  • Document database with Mongoose ODM  │
+│  • User sessions & preferences          │
+│  • Audio analysis data storage          │
+│  • Persistent volumes & health checks   │
+└─────────────────────────────────────────┘
+
+Optional (with --profile debug):
+┌─────────────────────────────────────────┐
+│   Mongo Express (Port 8081)             │
+│  • Web-based database admin interface   │
+│  • Query execution & data inspection    │
+└─────────────────────────────────────────┘
 ```
 
 ## 🔐 Security Checklist
