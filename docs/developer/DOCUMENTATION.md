@@ -1,4 +1,4 @@
-# PulsePlay - Complete Documentation
+# PulsePlay - Complete Technical Documentation
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -27,28 +27,883 @@
 - **AI Mood Analysis**: Provides intelligent insights about your work patterns
 - **Multiple Mood Modes**: Calm, Focus, and Energy presets
 - **Accessibility Support**: Lower frequency mode for sensory comfort
-- **Session Tracking**: Persistent storage of focus sessions with Supabase
-- **User Authentication**: Secure login with email/password
+- **Session Tracking**: Persistent storage of focus sessions with MongoDB
+- **User Authentication**: Secure login with Auth0
+- **Docker Deployment**: Containerized deployment with docker-compose
 
 ---
 
 ## Architecture
 
 ### Tech Stack
-- **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: TailwindCSS
-- **Backend**: Supabase (Auth, Database, Edge Functions)
+- **Frontend**: React 18 + TypeScript + Vite + TailwindCSS
+- **Backend**: Express.js + TypeScript + MongoDB + Auth0
 - **Audio Engine**: Web Audio API
+- **Deployment**: Docker + Docker Compose + GitHub Actions
 - **Icons**: Lucide React
 
 ### Architecture Pattern
-The application follows a **component-driven architecture** with:
-- Custom React hooks for business logic separation
-- Service layer for external API communication
+The application follows a **microservices architecture** with:
+- Separate frontend and backend services
+- RESTful API communication
+- Containerized deployment
 - Web Audio API for real-time sound synthesis
-- Supabase for backend services (auth, database, serverless functions)
+- MongoDB for data persistence
 
 ```
+┌─────────────────┐    HTTP/REST    ┌─────────────────┐
+│   React         │◄──────────────►│   Express.js    │
+│   Frontend      │                 │   Backend       │
+│   (Port 5173)   │                 │   (Port 3001)   │
+└─────────────────┘                 └─────────────────┘
+         │                                   │
+         │ Web Audio API                     │ Auth0
+         ▼                                   ▼
+┌─────────────────┐                 ┌─────────────────┐
+│   Browser       │                 │   MongoDB       │
+│   Audio Engine  │                 │   Database      │
+└─────────────────┘                 └─────────────────┘
+```
+
+---
+
+## Project Structure
+
+```
+pulseplay/
+├── src/                          # Frontend React Application
+│   ├── components/               # React UI Components
+│   │   ├── AudioTest.tsx         # Audio testing interface
+│   │   ├── AuthButton.tsx        # Auth0 authentication UI
+│   │   ├── ControlPanel.tsx      # Audio control interface
+│   │   ├── MoodInsights.tsx      # AI mood analysis display
+│   │   ├── RhythmVisualizer.tsx  # Real-time rhythm visualization
+│   │   └── SessionStats.tsx      # Session metrics dashboard
+│   │
+│   ├── hooks/                    # Custom React Hooks
+│   │   ├── useAudioEngine.ts     # Audio synthesis management
+│   │   ├── useRhythmDetection.ts # Keyboard/mouse tracking
+│   │   └── useSessionPersistence.ts # Session data persistence
+│   │
+│   ├── services/                 # External API Services
+│   │   └── moodService.ts        # Gemini AI mood analysis
+│   │
+│   ├── types/                    # TypeScript Type Definitions
+│   ├── utils/                    # Utility Functions
+│   └── lib/                      # Library Configurations
+│
+├── backend/                      # Backend Express.js API
+│   ├── src/
+│   │   ├── server.ts             # Express server setup
+│   │   ├── routes/               # API route handlers
+│   │   │   ├── auth.ts           # Auth0 authentication routes
+│   │   │   ├── sessions.ts       # Session management routes
+│   │   │   └── ai.ts             # AI mood analysis routes
+│   │   ├── services/             # Business logic services
+│   │   │   ├── authService.ts    # Auth0 integration
+│   │   │   ├── sessionService.ts # Session data management
+│   │   │   └── aiService.ts      # Gemini AI integration
+│   │   ├── models/               # MongoDB data models
+│   │   │   └── Session.ts        # Session schema
+│   │   ├── middleware/           # Express middleware
+│   │   │   ├── auth.ts           # Auth0 JWT validation
+│   │   │   └── cors.ts           # CORS configuration
+│   │   ├── config/               # Configuration files
+│   │   └── utils/                # Backend utilities
+│   └── package.json              # Backend dependencies
+│
+├── docker/                       # Docker Configuration
+│   ├── docker-compose.yml        # Local development (MongoDB)
+│   ├── docker-compose.atlas.yml  # Production (MongoDB Atlas)
+│   ├── docker-compose.dev.yml    # Development with hot reload
+│   ├── Dockerfile                # Backend production build
+│   ├── Dockerfile.dev            # Development builds
+│   └── nginx.conf                # Nginx configuration
+│
+├── docs/                         # Documentation
+├── .github/workflows/            # CI/CD Pipelines
+└── package.json                  # Frontend dependencies
+```
+
+---
+
+## Core Technologies
+
+### Frontend Stack
+
+#### React 18.3
+- **Version**: 18.3.1
+- **Usage**: Core UI framework with hooks-based architecture
+- **Key Features Used**:
+  - Functional components with hooks
+  - Context API for global state
+  - Suspense for loading states
+  - StrictMode for development checks
+
+#### TypeScript 5.5
+- **Usage**: Type-safe development across frontend and backend
+- **Configuration**: Strict mode enabled
+- **Benefits**:
+  - Compile-time error checking
+  - Enhanced IDE support with IntelliSense
+  - Better refactoring capabilities
+  - Self-documenting code with types
+
+#### Vite 5.4
+- **Usage**: Fast build tool and development server
+- **Benefits**:
+  - Lightning-fast HMR (Hot Module Replacement)
+  - Native ESM support
+  - Optimized production builds
+  - Plugin ecosystem
+
+#### TailwindCSS 3.4
+- **Usage**: Utility-first CSS framework
+- **Theme**: Dark theme with slate color palette
+- **Custom Configuration**: Minimal custom config, using default theme
+
+### Backend Stack
+
+#### Express.js
+- **Version**: 4.19
+- **Usage**: RESTful API server with TypeScript
+- **Key Features**:
+  - Middleware architecture
+  - Route organization
+  - Error handling
+  - CORS support
+
+#### MongoDB with Mongoose
+- **Usage**: NoSQL database for session data
+- **Features**:
+  - Schema validation
+  - Middleware support
+  - Query building
+  - Connection pooling
+
+#### Auth0
+- **Usage**: Authentication and authorization
+- **Integration**: JWT validation middleware
+- **Features**: Social login, user management, token refresh
+
+#### Google Gemini AI
+- **Usage**: AI-powered mood analysis
+- **Integration**: REST API calls with authentication
+- **Features**: Natural language processing for work pattern analysis
+
+### DevOps Stack
+
+#### Docker & Docker Compose
+- **Usage**: Containerization and orchestration
+- **Benefits**:
+  - Consistent environments
+  - Easy deployment
+  - Service isolation
+  - Volume management
+
+#### GitHub Actions
+- **Usage**: CI/CD pipeline automation
+- **Features**:
+  - Automated testing
+  - Docker image building
+  - Security scanning
+  - Multi-environment deployment
+
+---
+
+## Features
+
+### 1. Real-time Rhythm Detection
+Tracks user keyboard and mouse activity to calculate:
+- **BPM (Beats Per Minute)**: Based on keystroke intervals
+- **Rhythm Score**: 0-100 scale indicating activity intensity
+- **Intensity Level**: Low, Medium, or High classification
+- **Average Interval**: Time between keystrokes in milliseconds
+
+### 2. Adaptive Audio Engine
+Dynamically generates music using:
+- **Multiple Oscillators**: Sine, triangle, and square waves
+- **Frequency Modulation**: Adjusts based on rhythm score
+- **Filter Sweeps**: Changes cutoff frequency with activity
+- **Reverb Effects**: Adds spatial depth to the sound
+- **Three Mood Modes**:
+  - **Calm**: Lower frequencies (130-196 Hz or 261-392 Hz accessible)
+  - **Focus**: Standard frequencies (293-440 Hz)
+  - **Energy**: Higher frequencies (329-494 Hz)
+
+### 3. AI Mood Analysis
+Integrates with Google Gemini AI to generate:
+- Mood classification (Deep Focus, Productive Flow, High Energy)
+- Tempo recommendations based on work patterns
+- Detailed analysis of typing rhythm and consistency
+- Personalized suggestions for optimal focus
+
+### 4. Session Persistence
+Automatically tracks and stores:
+- Session start/end timestamps
+- Average rhythm metrics (BPM, intensity)
+- Total keystroke counts
+- Session duration in minutes
+- Mood preferences and AI insights
+- User identification via Auth0
+
+### 5. Accessibility Mode
+- Reduces frequency ranges for sensory-friendly experience
+- Lowers filter cutoff frequencies
+- Maintains musical quality while being gentler on sensitive users
+
+### 6. Visual Feedback
+- **Animated Canvas Visualizer**: Pulsing circle that responds to rhythm
+- **Color-coded Intensity**: Green (low), Blue (medium), Red (high)
+- **Wave Rings**: Animated concentric circles showing activity
+- **Real-time BPM Display**: Center of visualizer
+- **Session Statistics**: Duration, keystrokes, current intensity
+
+---
+
+## Components
+
+### App.tsx
+**Main application orchestrator** - coordinates all features
+
+**Key Responsibilities**:
+- Session duration tracking with automatic timer
+- Coordinating audio engine with rhythm detection
+- Managing play/pause state and user controls
+- Routing data between components
+- Error boundary implementation
+
+**State Management**:
+- `sessionDuration`: Tracks time in seconds
+- `isPlaying`: Audio engine state
+- `currentMood`: Selected mood preset
+- Integrates `useAudioEngine`, `useRhythmDetection`, `useSessionPersistence`
+
+**Effects**:
+1. Updates audio parameters when rhythm changes
+2. Manages session timer interval (1-second updates)
+3. Saves session data on component unmount
+4. Handles keyboard shortcuts
+
+---
+
+### AuthButton.tsx
+**Authentication interface** with Auth0 integration
+
+**Features**:
+- Login/logout functionality
+- Auth state management
+- User profile display
+- Error handling for auth failures
+- Responsive design for mobile/desktop
+
+**Auth0 Integration**:
+```typescript
+// Login redirect
+auth0.loginWithRedirect()
+
+// Logout with return URL
+auth0.logout({ returnTo: window.location.origin })
+
+// Get user profile
+const user = await auth0.getUser()
+```
+
+---
+
+### ControlPanel.tsx
+**Audio control dashboard** for user interaction
+
+**Props**:
+```typescript
+interface ControlPanelProps {
+  isPlaying: boolean;
+  currentMood: MoodType;
+  volume: number;
+  accessibilityMode: boolean;
+  onPlayPause: () => void;
+  onMoodChange: (mood: MoodType) => void;
+  onVolumeChange: (volume: number) => void;
+  onAccessibilityToggle: () => void;
+}
+```
+
+**UI Elements**:
+- Play/Pause button (Green/Red with icons)
+- Mood selector (3-button group)
+- Volume slider (0-100 with percentage display)
+- Accessibility mode toggle
+- Responsive grid layout
+
+---
+
+### MoodInsights.tsx
+**AI-generated insights panel** with Gemini integration
+
+**Features**:
+- Fetches mood analysis from backend API
+- Loading states with skeleton UI
+- Conditional rendering (requires 10+ keystrokes)
+- 5-second debounce to prevent API spam
+- Error handling for API failures
+
+**Data Displayed**:
+- Current mood classification
+- Detailed description of work patterns
+- Recommended tempo adjustments
+- Personalized productivity suggestions
+
+---
+
+### RhythmVisualizer.tsx
+**Canvas-based audio visualizer** with WebGL acceleration
+
+**Technical Details**:
+- HTML5 Canvas element (300x300px)
+- `requestAnimationFrame` for 60fps animation
+- Radial gradient backgrounds
+- Dynamic circle radius based on rhythm score
+- Animated wave rings with phase offsets
+
+**Animation Logic**:
+```typescript
+const baseRadius = 60;
+const maxRadius = 120;
+const radius = baseRadius + (maxRadius - baseRadius) * normalizedScore;
+const phase = (Date.now() * 0.005) % (Math.PI * 2);
+```
+
+**Color Mapping**:
+- High intensity: Red (239, 68, 68)
+- Medium intensity: Blue (59, 130, 246)
+- Low intensity: Green (34, 197, 94)
+
+---
+
+### SessionStats.tsx
+**Session metrics dashboard** with real-time updates
+
+**Metrics Displayed**:
+1. **Duration**: MM:SS format with live updates
+2. **Keystrokes**: Running count of keyboard activity
+3. **Intensity**: Color-coded level indicator
+4. **Rhythm Score**: Progress bar (0-100 scale)
+
+**Features**:
+- Responsive card layout
+- Animated progress bars
+- Color-coded intensity levels
+- Conditional rendering during active sessions
+
+---
+
+## Custom Hooks
+
+### useAudioEngine.ts
+**Core audio synthesis management** hook
+
+**Exports**:
+```typescript
+{
+  isPlaying: boolean;
+  currentMood: MoodType;
+  volume: number;
+  accessibilityMode: boolean;
+  play: () => void;
+  pause: () => void;
+  setMood: (mood: MoodType) => void;
+  setVolume: (volume: number) => void;
+  toggleAccessibility: () => void;
+  updateAudioParameters: (rhythmData: RhythmData) => void;
+}
+```
+
+**Audio Architecture**:
+```
+AudioContext
+├── Oscillators (×3) [sine, triangle, square]
+├── GainNodes (×3) [volume control per oscillator]
+├── MasterGain [overall volume]
+├── Filter [lowpass filter]
+├── Reverb [convolver node]
+└── Destination [speakers]
+```
+
+**Key Functions**:
+
+#### initAudioContext()
+- Creates AudioContext with error handling
+- Sets up audio node graph
+- Initializes reverb impulse response
+- Configures filter parameters
+
+#### getMoodFrequencies(mood, accessibility)
+Returns frequency arrays for different moods:
+```typescript
+Calm: [261.63, 329.63, 392.0] or [130, 165, 196] (accessible)
+Focus: [293.66, 349.23, 440.0]
+Energy: [329.63, 392.0, 493.88]
+```
+
+#### createOscillators(frequencies, ctx)
+- Creates 3 oscillators with different waveforms
+- Sets gain levels (0.3, 0.2, 0.15 for mix balance)
+- Connects to master gain node
+- Starts playback with slight detuning for richness
+
+#### updateAudioParameters(rhythmData)
+Real-time audio modulation:
+- Frequency modulation: `baseFreq * (1 + normalizedScore * 0.3)`
+- Filter sweep: `1500 + (normalizedScore * 1500)` Hz
+- Gain modulation: `baseGain * (0.7 + normalizedScore * 0.3)`
+- Smooth transitions using `linearRampToValueAtTime`
+
+---
+
+### useRhythmDetection.ts
+**Keyboard and mouse activity tracking** hook
+
+**Exports**:
+```typescript
+{
+  rhythmData: RhythmData;
+  resetRhythm: () => void;
+}
+```
+
+**RhythmData Interface**:
+```typescript
+interface RhythmData {
+  bpm: number;
+  intensity: number;
+  score: number;
+  averageInterval: number;
+  keystrokeCount: number;
+}
+```
+
+**Tracking Logic**:
+- Keyboard event listeners for keydown events
+- Mouse event listeners for mousedown events
+- Timestamp recording for interval calculation
+- Moving average calculations for BPM
+- Intensity classification (Low: <30, Medium: 30-70, High: >70)
+
+**Algorithm**:
+1. Record timestamp on each keystroke
+2. Calculate intervals between keystrokes
+3. Compute average interval and convert to BPM
+4. Calculate rhythm consistency score
+5. Update intensity level based on activity
+
+---
+
+### useSessionPersistence.ts
+**Session data management** with MongoDB integration
+
+**Exports**:
+```typescript
+{
+  saveSession: (sessionData: SessionData) => Promise<void>;
+  loadSessions: () => Promise<SessionData[]>;
+  isLoading: boolean;
+  error: string | null;
+}
+```
+
+**SessionData Interface**:
+```typescript
+interface SessionData {
+  userId: string;
+  startTime: Date;
+  endTime: Date;
+  duration: number;
+  keystrokes: number;
+  averageBpm: number;
+  averageIntensity: number;
+  mood: MoodType;
+  aiInsights?: AIInsights;
+}
+```
+
+**Features**:
+- Automatic session saving on app close
+- Session history loading with pagination
+- Error handling for network failures
+- Optimistic updates for better UX
+- Data validation before API calls
+
+---
+
+## Services
+
+### moodService.ts
+**Gemini AI integration** for mood analysis
+
+**API Calls**:
+```typescript
+// Analyze work patterns
+const insights = await moodService.analyzeMood({
+  bpm: rhythmData.bpm,
+  intensity: rhythmData.intensity,
+  keystrokes: rhythmData.keystrokeCount,
+  duration: sessionDuration
+});
+```
+
+**Response Format**:
+```typescript
+interface AIInsights {
+  mood: string;
+  description: string;
+  recommendation: string;
+  tempo: number;
+}
+```
+
+**Error Handling**:
+- Network timeout handling
+- API quota exceeded handling
+- Invalid response format handling
+- Fallback to default insights
+
+---
+
+## Database Schema
+
+### Session Model (MongoDB)
+
+```typescript
+interface Session {
+  _id: ObjectId;
+  userId: string;           // Auth0 user ID
+  startTime: Date;          // Session start timestamp
+  endTime: Date;            // Session end timestamp
+  duration: number;         // Duration in minutes
+  keystrokes: number;       // Total keystroke count
+  averageBpm: number;       // Average BPM during session
+  averageIntensity: number; // Average intensity (0-100)
+  mood: 'calm' | 'focus' | 'energy';
+  aiInsights?: {
+    mood: string;
+    description: string;
+    recommendation: string;
+    tempo: number;
+  };
+  createdAt: Date;          // Auto-generated timestamp
+  updatedAt: Date;          // Auto-updated timestamp
+}
+```
+
+### Indexes
+```javascript
+// Performance indexes
+db.sessions.createIndex({ userId: 1, createdAt: -1 });
+db.sessions.createIndex({ userId: 1, mood: 1 });
+
+// TTL index for auto-deletion (90 days)
+db.sessions.createIndex(
+  { createdAt: 1 },
+  { expireAfterSeconds: 7776000 }
+);
+```
+
+---
+
+## Setup & Installation
+
+### Prerequisites
+- Node.js 18+ installed
+- MongoDB (local or Atlas)
+- Auth0 account
+- Google Gemini API key
+
+### Installation Steps
+
+1. **Clone Repository**
+```bash
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
+```
+
+2. **Install Dependencies**
+```bash
+# Frontend
+npm install
+
+# Backend
+cd backend
+npm install
+cd ..
+```
+
+3. **Environment Setup**
+```bash
+# Copy environment templates
+cp .env.example .env
+cp backend/.env.example backend/.env
+
+# Edit with your credentials
+nano .env
+nano backend/.env
+```
+
+4. **Start Development**
+```bash
+# Option 1: Local development
+npm run dev:all
+
+# Option 2: Docker development
+docker-compose -f docker-compose.dev.yml up
+```
+
+---
+
+## Environment Variables
+
+### Frontend (.env)
+```bash
+# Auth0 Configuration
+VITE_AUTH0_DOMAIN=your-tenant.auth0.com
+VITE_AUTH0_CLIENT_ID=your_client_id
+VITE_AUTH0_AUDIENCE=https://api.pulseplay.ai
+VITE_API_URL=http://localhost:3001
+
+# Optional
+VITE_DEBUG=true
+```
+
+### Backend (backend/.env)
+```bash
+# Server
+NODE_ENV=development
+PORT=3001
+
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/pulseplay
+
+# Auth0
+AUTH0_DOMAIN=your-tenant.auth0.com
+AUTH0_CLIENT_ID=your_client_id
+AUTH0_CLIENT_SECRET=your_client_secret
+AUTH0_AUDIENCE=https://api.pulseplay.ai
+AUTH0_ISSUER_BASE_URL=https://your-tenant.auth0.com
+
+# Gemini AI
+GEMINI_API_KEY=your_gemini_api_key
+
+# CORS
+FRONTEND_URL=http://localhost:5173
+```
+
+---
+
+## Development Guide
+
+### Code Style
+- **TypeScript**: Strict mode enabled
+- **ESLint**: Airbnb config with TypeScript support
+- **Prettier**: Consistent code formatting
+- **Husky**: Pre-commit hooks for quality checks
+
+### Testing Strategy
+- **Unit Tests**: Component and hook testing with Vitest
+- **Integration Tests**: API endpoint testing
+- **E2E Tests**: User journey testing with Playwright
+- **Coverage**: Minimum 80% coverage required
+
+### Git Workflow
+1. Create feature branch from `main`
+2. Make changes with tests
+3. Run `npm run typecheck` and `npm test`
+4. Commit with conventional format
+5. Create pull request
+6. Code review and merge
+
+---
+
+## API Documentation
+
+### Authentication Endpoints
+
+#### POST /api/auth/login
+Initiates Auth0 login flow
+**Response**: Redirect to Auth0
+
+#### POST /api/auth/logout
+Logs out current user
+**Response**: Success confirmation
+
+#### GET /api/auth/user
+Gets current user profile
+**Response**: User object or 401 if not authenticated
+
+### Session Endpoints
+
+#### POST /api/sessions
+Creates a new focus session
+```json
+{
+  "startTime": "2024-01-01T10:00:00Z",
+  "endTime": "2024-01-01T11:30:00Z",
+  "duration": 90,
+  "keystrokes": 2450,
+  "averageBpm": 85,
+  "averageIntensity": 65,
+  "mood": "focus"
+}
+```
+
+#### GET /api/sessions
+Gets user's session history
+**Query Parameters**:
+- `limit`: Number of sessions (default: 10)
+- `offset`: Pagination offset (default: 0)
+
+#### GET /api/sessions/:id
+Gets specific session details
+
+#### PUT /api/sessions/:id
+Updates session data
+
+#### DELETE /api/sessions/:id
+Deletes a session
+
+### AI Endpoints
+
+#### POST /api/ai/mood-analysis
+Analyzes work patterns with Gemini AI
+```json
+{
+  "bpm": 85,
+  "intensity": 65,
+  "keystrokes": 2450,
+  "duration": 90
+}
+```
+
+**Response**:
+```json
+{
+  "mood": "Deep Focus",
+  "description": "Your typing rhythm shows consistent, focused work patterns...",
+  "recommendation": "Consider maintaining this rhythm for optimal productivity",
+  "tempo": 88
+}
+```
+
+### Health Check
+
+#### GET /api/health
+Service health check
+**Response**: `{"status": "healthy", "timestamp": "2024-01-01T12:00:00Z"}`
+
+---
+
+## Performance Considerations
+
+### Frontend Optimization
+- **Code Splitting**: Route-based splitting with Vite
+- **Lazy Loading**: Component lazy loading for better initial load
+- **Memoization**: React.memo for expensive components
+- **Web Audio API**: Efficient audio processing with minimal latency
+
+### Backend Optimization
+- **Connection Pooling**: MongoDB connection reuse
+- **Caching**: Response caching for AI analysis
+- **Rate Limiting**: API rate limiting to prevent abuse
+- **Compression**: Response compression with gzip
+
+### Database Optimization
+- **Indexing**: Proper indexes on frequently queried fields
+- **TTL Indexes**: Automatic cleanup of old sessions
+- **Aggregation**: Efficient data aggregation for analytics
+- **Connection Limits**: Appropriate connection pool sizing
+
+---
+
+## Security Considerations
+
+### Authentication
+- JWT token validation on all protected routes
+- Secure token storage in HTTP-only cookies
+- Automatic token refresh handling
+- Proper logout with token invalidation
+
+### API Security
+- CORS configuration for allowed origins
+- Rate limiting on sensitive endpoints
+- Input validation and sanitization
+- Error message sanitization (no stack traces in production)
+
+### Data Protection
+- User data isolation by Auth0 user ID
+- No PII storage beyond user ID
+- Session data encryption at rest
+- Secure MongoDB connection with TLS
+
+---
+
+## Deployment
+
+### Docker Deployment
+```bash
+# Development
+docker-compose -f docker-compose.dev.yml up
+
+# Production with local MongoDB
+docker-compose -f docker-compose.yml up -d
+
+# Production with MongoDB Atlas
+docker-compose -f docker-compose.atlas.yml up -d
+```
+
+### Environment-Specific Builds
+- **Development**: Hot reload, source maps, debug logging
+- **Production**: Minified code, optimized assets, error logging
+- **Staging**: Production build with debug logging enabled
+
+---
+
+## Monitoring & Analytics
+
+### Application Metrics
+- Session duration tracking
+- User engagement metrics
+- Audio performance monitoring
+- API response times
+
+### Error Tracking
+- Frontend error boundaries
+- Backend error logging
+- Auth0 authentication errors
+- AI service failures
+
+### Performance Monitoring
+- Web Vitals tracking
+- Audio context performance
+- Database query performance
+- API endpoint latency
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](../public/CONTRIBUTING.md) for detailed contribution guidelines.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+## Support
+
+- **Documentation**: This file and related docs
+- **Issues**: [GitHub Issues](https://github.com/juxtaduo/pulseplay/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/juxtaduo/pulseplay/discussions)
 ┌─────────────────────────────────────────────────────┐
 │                   React Frontend                     │
 │  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │

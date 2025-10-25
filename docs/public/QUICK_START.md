@@ -1,8 +1,8 @@
 # PulsePlay - Quick Start Guide
 
-## Phase 2 Complete ✅
+**Turn your typing rhythm into personalized focus music**
 
-All foundational infrastructure is in place. You can now start implementing User Story 1.
+This guide will help you get PulsePlay up and running on your local machine for development.
 
 ## Project Structure
 
@@ -44,13 +44,19 @@ pulseplay/
 │   │   └── SessionStats.tsx
 │   ├── lib/
 │   │   ├── audioContext.ts  # Web Audio API wrapper
-│   │   └── supabase.ts      # (Legacy - to be removed)
-│   └── hooks/
-│       ├── useAudioEngine.ts
-│       ├── useRhythmDetection.ts
-│       └── useSessionPersistence.ts
+│   │   └── midiParser.ts    # MIDI file parsing utilities
+│   ├── hooks/
+│   │   ├── useAudioEngine.ts
+│   │   ├── useRhythmDetection.ts
+│   │   └── useSessionPersistence.ts
+│   ├── pages/
+│   │   └── Home.tsx
+│   └── types/
+│       └── index.ts
 ├── biome.json               # Biome.js configuration
 ├── .env.example             # Environment variables template
+├── docker-compose.yml       # Docker orchestration
+├── Makefile                 # Development shortcuts
 └── package.json
 ```
 
@@ -68,29 +74,51 @@ cd backend && npm install && cd ..
 
 ### 2. Configure Environment Variables
 
-Create `.env` in project root:
+Copy the example file and edit it with your credentials:
 
 ```bash
-# Backend environment variables
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/pulseplay?retryWrites=true&w=majority
+cp .env.example .env
+nano .env  # or use your preferred editor
+```
+
+**Required environment variables:**
+
+```bash
+# ============================================
+# MongoDB Configuration (choose one)
+# ============================================
+# Option A: MongoDB Atlas (recommended for production)
+MONGODB_ATLAS_URI=mongodb+srv://username:password@cluster.mongodb.net/pulseplay?retryWrites=true&w=majority
+
+# Option B: Local MongoDB (for development)
+MONGODB_URI=mongodb://localhost:27017/pulseplay-dev
+
+# ============================================
+# Auth0 Configuration
+# ============================================
 AUTH0_DOMAIN=your-domain.auth0.com
 AUTH0_CLIENT_ID=your_client_id
 AUTH0_CLIENT_SECRET=your_client_secret
 AUTH0_AUDIENCE=https://api.pulseplay.ai
 AUTH0_ISSUER_BASE_URL=https://your-domain.auth0.com
-GEMINI_API_KEY=your_gemini_api_key
-PORT=3000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-```
 
-Create `.env` in project root for frontend variables:
-
-```bash
-# Frontend environment variables
+# Frontend Auth0 (for Vite)
 VITE_AUTH0_DOMAIN=your-domain.auth0.com
 VITE_AUTH0_CLIENT_ID=your_client_id
 VITE_AUTH0_AUDIENCE=https://api.pulseplay.ai
+VITE_API_URL=http://localhost:3001
+
+# ============================================
+# AI/ML API Keys
+# ============================================
+GEMINI_API_KEY=your_gemini_api_key
+
+# ============================================
+# Server Configuration
+# ============================================
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
 ```
 
 ### 3. Development Setup Complete
@@ -119,7 +147,7 @@ npm run dev:backend
 ### 4. Verify Setup
 
 - Frontend: http://localhost:5173
-- Backend: http://localhost:3000/health
+- Backend: http://localhost:3001/api/health
 
 ## Development Commands
 
@@ -129,13 +157,49 @@ npm run dev              # Start Vite dev server
 npm run build            # Build for production
 npm run lint             # Run Biome.js linting
 npm run lint:fix         # Fix linting issues
+npm run typecheck        # Check TypeScript errors
 
 # Backend
 npm run dev:backend      # Start backend with nodemon
 npm run build:backend    # Build backend TypeScript
 
 # Both
-npm run dev:all          # Start both servers
+npm run dev:all          # Start both servers concurrently
+
+# Testing
+npm test                 # Run unit tests
+npm run test:ui          # Run tests with UI
+npm run test:coverage    # Run tests with coverage
+```
+
+## Docker Development (Alternative)
+
+For a complete development environment with MongoDB:
+
+```bash
+# Start all services (local MongoDB)
+make up
+
+# Start development environment (hot reload + debug tools)
+make up-dev
+
+# Start with MongoDB Atlas
+make up-atlas
+
+# View logs
+make logs          # All services
+make logs-dev      # Development environment
+make logs-atlas    # Atlas deployment
+
+# Stop services
+make down          # All services
+make down-dev      # Development services
+make down-atlas    # Atlas services
+
+# Rebuild after changes
+make rebuild       # All services
+make rebuild-dev   # Development services
+make rebuild-atlas # Atlas services
 ```
 
 ## Tech Stack
@@ -156,76 +220,71 @@ npm run dev:all          # Start both servers
 - Auth0 React SDK
 - Web Audio API
 
-## Next Steps: Phase 3 (User Story 1)
+## 🎮 How to Use PulsePlay
 
-**Goal**: Users can select mood and start session with ambient Lofi music
+1. **Open the application** at http://localhost:5173
+2. **Sign in** with Auth0 (OAuth2 authentication)
+3. **Select a piano song** from the four available options:
+   - 🎹 **A Thousand Years** - Christina Perri's romantic ballad
+   - 💧 **Kiss The Rain** - Yiruma's gentle meditation
+   - 🌊 **River Flows In You** - Yiruma's flowing melody
+   - ⚔️ **Gurenge** - LiSA's energetic anime theme
+4. **Choose instruments** (Piano, Flute, Xylophone, Kalimba)
+5. **Click Play** to start the audio engine
+6. **Start typing/working** - your rhythm creates music in real-time
+7. **View insights** - AI-generated analysis appears after sessions
 
-**Tasks to implement** (13 tasks):
+## 🎵 How It Works
 
-1. **Backend**:
-   - Session API routes (POST/GET/PUT /api/sessions)
-   - Session service layer
-   - User preferences endpoints
+- **Real-time rhythm detection** tracks your keystrokes, mouse movements, and clicks
+- **MIDI-based melodies** use actual note sequences from the original songs
+- **Adaptive timing** - your typing speed modulates the piano note timing
+- **Web Audio API synthesis** creates all sounds in real-time (no pre-recorded samples)
+- **AI mood analysis** provides insights based on your work patterns
 
-2. **Frontend**:
-   - `useAudioEngine` hook for audio synthesis
-   - `audioService` for OscillatorNode management
-   - `ControlPanel` component (mood selector, start/stop)
-   - `useSessionPersistence` hook
-   - Auth0 login button integration
-   - Volume control and fadeout
-
-3. **Integration**:
-   - Connect frontend to backend API
-   - Implement session state management
-   - Test end-to-end flow
-
-## Architecture Highlights
-
-### Authentication Flow
-1. User clicks "Login with Auth0"
-2. Auth0 redirects to login page
-3. User authenticates
-4. Auth0 returns JWT token
-5. Frontend stores token in localStorage
-6. Backend validates JWT on each API request
-
-### Audio Synthesis Flow
-1. User selects piano song (thousand-years, kiss-the-rain, river-flows, gurenge)
-2. Mood maps to base frequency (160Hz, 200Hz, 150Hz, 220Hz)
-3. OscillatorNode generates sine/sawtooth waves
-4. GainNode controls volume with fadeIn/fadeOut
-5. Canvas visualizes waveform in real-time
-
-### Real-time Rhythm Detection
-1. Frontend detects keystrokes/clicks
-2. Calculates keys per minute (KPM)
-3. Sends rhythm updates via WebSocket
-4. Backend stores rhythm data in FocusSession
-5. AI generates insights based on typing patterns
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Backend won't start
-- Check MongoDB URI in `.env`
-- Verify Auth0 credentials
-- Run `cd backend && npm install`
+- Check MongoDB connection (Atlas URI or local MongoDB)
+- Verify Auth0 credentials are correct
+- Ensure PORT=3001 is set in .env
+- Run `npm install` in backend directory
 
-### Frontend can't authenticate
+### Frontend authentication issues
 - Verify `VITE_AUTH0_DOMAIN` and `VITE_AUTH0_CLIENT_ID`
 - Check Auth0 callback URL includes `http://localhost:5173`
+- Ensure `VITE_API_URL` points to `http://localhost:3001`
+
+### Audio not working
+- Check browser permissions for audio
+- Ensure you're using a modern browser with Web Audio API support
+- Try refreshing the page
+
+### MongoDB connection failed
+- For Atlas: Verify connection string and IP whitelist
+- For local: Ensure MongoDB is running on port 27017
+- Check network connectivity
 
 ### Linting errors
-- Run `npm run lint:fix` to auto-fix
-- Check `biome.json` configuration
+- Run `npm run lint:fix` to auto-fix formatting issues
+- Check `biome.json` configuration if problems persist
 
-## Resources
+## 📚 Resources
 
-- [Constitution v2.2.0](./specs/001-adaptive-focus-music/constitution.md)
-- [Tasks Breakdown](./specs/001-adaptive-focus-music/tasks.md)
-- [Phase 2 Completion Summary](./docs/phase2-completion.md)
+- **[Main README](../../README.md)** - Project overview and features
+- **[API Documentation](../developer/API_REFERENCE.md)** - Backend API reference
+- **[Developer Guide](../developer/DEVELOPER_GUIDE.md)** - Development best practices
+- **[Docker Deployment](../docker/DOCKER_README.md)** - Production deployment guide
+- **[MongoDB Atlas Setup](../mongodb/MONGODB_ATLAS_SETUP.md)** - Database setup guide
+
+## 🎯 Getting Help
+
+- **Issues**: [GitHub Issues](https://github.com/juxtaduo/pulseplay/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/juxtaduo/pulseplay/discussions)
+- **Documentation**: Check the `docs/` directory for detailed guides
 
 ---
 
-**Status**: Phase 2 Complete ✅ | Ready for Phase 3
-**Last Updated**: October 18, 2025
+**Ready to start developing?** Run `npm run dev:all` and visit http://localhost:5173
+
+**Last Updated**: October 25, 2025

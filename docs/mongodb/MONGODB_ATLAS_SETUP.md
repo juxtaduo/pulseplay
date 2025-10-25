@@ -1,15 +1,16 @@
 # MongoDB Atlas Setup Guide for Docker
 
-This guide explains how to use MongoDB Atlas (cloud-hosted MongoDB) with your Docker containers instead of running a local MongoDB instance.
+This guide explains how to use MongoDB Atlas (cloud-hosted MongoDB) with your PulsePlay application. PulsePlay uses a modern tech stack with **Express.js + TypeScript backend**, **React frontend**, **MongoDB with Mongoose ODM**, **Auth0 authentication**, and **Google Gemini AI integration**.
 
 ## 🌐 Why Use MongoDB Atlas?
 
-- ✅ **No local database** - Reduces Docker resource usage
-- ✅ **Free tier available** - M0 cluster is free forever
-- ✅ **Automatic backups** - Built-in backup and restore
-- ✅ **Scaling** - Easy to scale up/down
-- ✅ **Monitoring** - Built-in performance monitoring
-- ✅ **High availability** - Automatic failover and replication
+- ✅ **No local database management** - Focus on your Express.js + TypeScript backend
+- ✅ **Free tier available** - M0 cluster is free forever for development
+- ✅ **Automatic backups** - Built-in backup and restore for production data
+- ✅ **Seamless scaling** - Easy upgrade from free tier to production clusters
+- ✅ **Built-in monitoring** - Performance metrics and alerting included
+- ✅ **High availability** - Automatic failover and data replication
+- ✅ **Mongoose ODM ready** - Perfect for your schema-validated data models
 
 ## 📋 Setup Steps
 
@@ -109,6 +110,16 @@ This guide explains how to use MongoDB Atlas (cloud-hosted MongoDB) with your Do
    AUTH0_DOMAIN=your-domain.auth0.com
    AUTH0_CLIENT_ID=your_client_id
    AUTH0_CLIENT_SECRET=your_client_secret
+   AUTH0_AUDIENCE=https://api.pulseplay.ai
+   AUTH0_ISSUER_BASE_URL=https://your-domain.auth0.com
+   
+   # Frontend Auth0 configuration (for Docker build)
+   VITE_AUTH0_DOMAIN=your-domain.auth0.com
+   VITE_AUTH0_CLIENT_ID=your_client_id
+   VITE_AUTH0_AUDIENCE=https://api.pulseplay.ai
+   VITE_API_URL=http://localhost:3001
+   
+   # AI API keys
    GEMINI_API_KEY=your_gemini_api_key
    ```
 
@@ -154,18 +165,30 @@ AUTH0_CLIENT_SECRET=your_secret_here
 AUTH0_AUDIENCE=https://api.pulseplay.ai
 AUTH0_ISSUER_BASE_URL=https://pulseplay.auth0.com
 
+# Frontend Auth0 (for Docker build)
+VITE_AUTH0_DOMAIN=pulseplay.auth0.com
+VITE_AUTH0_CLIENT_ID=abc123xyz789
+VITE_AUTH0_AUDIENCE=https://api.pulseplay.ai
+VITE_API_URL=http://localhost:3001
+
 # ============================================
 # AI/ML API Keys
 # ============================================
 GEMINI_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXX
+GRADIENT_AI_API_KEY=your_gradient_api_key_here
 
 # ============================================
 # Server Configuration
 # ============================================
 NODE_ENV=production
-BACKEND_PORT=3000
+BACKEND_PORT=3001
 FRONTEND_PORT=5173
 FRONTEND_URL=http://localhost:5173
+
+# ============================================
+# Optional: Error Monitoring
+# ============================================
+SENTRY_DSN=your_sentry_dsn_here
 ```
 
 ## 🚀 Starting Your Application
@@ -212,7 +235,7 @@ server_started | Connected to MongoDB Atlas
 
 ### 2. Test API Health
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:3001/api/health
 ```
 
 Should return:
@@ -355,8 +378,9 @@ Encoding table:
 - No automatic backups
 
 ### Upgrade When You Need
-- M10: 2 GB RAM, 10 GB storage ($0.08/hour)
-- M20: 4 GB RAM, 20 GB storage ($0.20/hour)
+- M10: ~$0.08/hour - 2 GB RAM, 10 GB storage, dedicated clusters
+- M20: ~$0.20/hour - 4 GB RAM, 20 GB storage, dedicated clusters
+- M30: ~$0.54/hour - 8 GB RAM, 80 GB storage, dedicated clusters
 - Scale up in Atlas dashboard
 
 ## 🌐 Production Deployment

@@ -2,25 +2,26 @@
 
 ## 📦 What's Included
 
-Your PulsePlay application now has a complete Docker deployment setup with **12 files** created:
+Your PulsePlay application now has a complete Docker deployment setup with **16 files** created:
 
-### Configuration Files (8)
+### Configuration Files (11)
 - ✅ `Dockerfile` - Production build
 - ✅ `Dockerfile.dev` - Development build with hot reload
+- ✅ `Dockerfile.frontend` - Frontend-only build
 - ✅ `docker-compose.yml` - Production orchestration
 - ✅ `docker-compose.dev.yml` - Development orchestration
+- ✅ `docker-compose.atlas.yml` - MongoDB Atlas production
 - ✅ `.dockerignore` - Build optimization
 - ✅ `nginx.conf` - Web server configuration
 - ✅ `.env.docker.template` - Environment template
 - ✅ `Makefile` - Command shortcuts
+- ✅ `.github/workflows/docker-deploy.yml` - CI/CD pipeline
 
-### Documentation (3)
+### Documentation (4)
 - ✅ `DOCKER_DEPLOYMENT.md` - Complete deployment guide
 - ✅ `DOCKER_QUICK_REFERENCE.md` - Quick reference
 - ✅ `DOCKER_FILES_SUMMARY.md` - This summary
-
-### CI/CD (1)
-- ✅ `.github/workflows/docker-deploy.yml` - Automated builds
+- ✅ `DOCKER_GITHUB_ACTIONS_DEPLOYMENT.md` - CI/CD documentation
 
 ## 🚀 Getting Started (3 Steps)
 
@@ -61,47 +62,80 @@ GEMINI_API_KEY=your_gemini_api_key
 ## 🎯 Common Commands
 
 ```bash
-make help          # Show all commands
-make up            # Start all services
+make help          # Show all available commands
+make up            # Start all services (local MongoDB)
+make up-atlas      # Start services with MongoDB Atlas
+make up-dev        # Start development environment with hot reload
 make down          # Stop all services
+make down-dev      # Stop development services
+make down-atlas    # Stop Atlas services
 make logs          # View all logs
-make logs-backend  # View backend logs
-make restart       # Restart services
+make logs-dev      # View development logs
+make logs-atlas    # View Atlas deployment logs
+make restart       # Restart all services
 make health        # Check service health
 make backup        # Backup MongoDB
 make restore       # Restore from backup
-make shell-backend # Access backend shell
-make rebuild       # Rebuild and restart
+make shell-backend # Access backend container shell
+make rebuild       # Rebuild and restart services
+make rebuild-dev   # Rebuild development services
+make rebuild-atlas # Rebuild Atlas services
 ```
 
 ## 🏗️ Architecture Overview
 
 ```
-┌──────────┐
-│ Browser  │ → http://localhost:5173
-└─────┬────┘
-      ▼
-┌──────────┐
-│  Nginx   │ → Serves frontend + proxies /api/*
-└─────┬────┘
-      ▼
-┌──────────┐
-│ Backend  │ → Express API (port 3000)
-└─────┬────┘
-      ▼
-┌──────────┐
-│ MongoDB  │ → Database (port 27017)
-└──────────┘
+┌─────────────────────────────────────────┐
+│           Client Browser                │
+│       http://localhost:5173             │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│        Nginx Container (Port 5173)      │
+│  • Serves static React frontend         │
+│  • Reverse proxy for /api/* requests    │
+│  • WebSocket support for real-time      │
+│  • Gzip compression & security headers  │
+└──────────────┬──────────────────────────┘
+               │
+               │ /api/* → backend:3000
+               ▼
+┌─────────────────────────────────────────┐
+│      Backend Container (Port 3000)      │
+│  • Express.js REST API (TypeScript)     │
+│  • MongoDB connection with Mongoose     │
+│  • Auth0 JWT authentication             │
+│  • Google Gemini AI integration         │
+│  • WebSocket server for real-time       │
+└──────────────┬──────────────────────────┘
+               │
+               │ mongodb://mongodb:27017
+               ▼
+┌─────────────────────────────────────────┐
+│      MongoDB Container (Port 27017)     │
+│  • Document database with Mongoose ODM  │
+│  • User sessions & preferences          │
+│  • Audio analysis data storage          │
+│  • Persistent volumes & health checks   │
+└─────────────────────────────────────────┘
+
+Optional (with --profile debug):
+┌─────────────────────────────────────────┐
+│   Mongo Express (Port 8081)             │
+│  • Web-based database admin interface   │
+│  • Query execution & data inspection    │
+└─────────────────────────────────────────┘
 ```
 
 ## 📊 Services
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| Frontend (Nginx) | 5173 | Serves React app |
-| Backend (Node.js) | 3000 | REST API |
-| MongoDB | 27017 | Database |
-| Mongo Express | 8081 | DB Admin (optional) |
+| Service | Port | Technology | Purpose |
+|---------|------|------------|---------|
+| **Frontend** (Nginx) | 5173 | React + TypeScript | Serves SPA + proxies API |
+| **Backend** (Node.js) | 3000 | Express.js + TypeScript | REST API + WebSockets |
+| **MongoDB** | 27017 | MongoDB + Mongoose | Document database |
+| **Mongo Express** | 8081 | Web UI | Database admin (optional) |
 
 ## 🔐 Security Features
 

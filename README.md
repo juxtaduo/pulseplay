@@ -33,12 +33,29 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 
 ### Prerequisites
 
-- **Node.js 18+** and npm
+- **Node.js 18+** and npm (for manual development)
+- **Docker + Docker Compose** (recommended for full development environment)
 - **MongoDB Atlas** account ([sign up free](https://www.mongodb.com/cloud/atlas/register))
 - **Auth0** account ([sign up free](https://auth0.com/signup))
 - **Gemini API** key ([get key](https://ai.google.dev/))
 
 ### Installation
+
+#### Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
+
+# Start development environment
+make up-dev
+
+# Or with MongoDB Atlas
+make up-atlas
+```
+
+#### Manual Installation
 
 ```bash
 # Clone the repository
@@ -88,6 +105,21 @@ FRONTEND_URL=http://localhost:5173
 
 ### Running the Application
 
+#### Docker (Recommended)
+
+```bash
+# Start all services
+make up-dev
+
+# View logs
+make logs
+
+# Stop services
+make down
+```
+
+#### Manual Development
+
 ```bash
 # Terminal 1: Start backend server
 cd backend
@@ -97,7 +129,7 @@ npm run dev
 npm run dev
 ```
 
-Visit `http://localhost:5173` in your browser.
+Visit `http://localhost:5173` (manual) or `http://localhost:3000` (Docker) in your browser.
 
 ---
 
@@ -108,15 +140,25 @@ Visit `http://localhost:5173` in your browser.
 - **[Quick Start Guide](docs/public/QUICK_START.md)** - Get up and running
 - **[Background Audio Guide](docs/developer/BACKGROUND_AUDIO.md)** - How audio works when tab is inactive
 - **[Contributing](docs/public/CONTRIBUTING.md)** - How to contribute to the project
-- **[Docker Deployment](DOCKER_DEPLOYMENT.md)** - Deploy with Docker and MongoDB Atlas
+
+### Docker Deployment
+
+- **[Docker README](docs/docker/DOCKER_README.md)** - Complete Docker deployment guide
+- **[Docker Quick Reference](docs/docker/DOCKER_QUICK_REFERENCE.md)** - Quick Docker commands
+- **[Docker Files Summary](docs/docker/DOCKER_FILES_SUMMARY.md)** - Docker file inventory
+
+### Database Setup
+
+- **[MongoDB Atlas Setup](docs/mongodb/MONGODB_ATLAS_SETUP.md)** - Complete Atlas setup guide
+- **[MongoDB Atlas Quick Start](docs/mongodb/MONGODB_ATLAS_QUICK_START.md)** - 5-minute setup guide
 
 ### For Developers
 
 - **[Developer Guide](docs/developer/DEVELOPER_GUIDE.md)** - Comprehensive development guide
 - **[API Reference](docs/developer/API_REFERENCE.md)** - Complete API documentation
 - **[Architecture](docs/developer/ARCHITECTURE.md)** - System architecture and design
+- **[Quick Reference](docs/developer/QUICK_REFERENCE.md)** - Code snippets and patterns
 - **[Deployment Guide](docs/developer/DEPLOYMENT.md)** - Production deployment instructions
-- **[Docker Quick Start](DOCKER_QUICK_REFERENCE.md)** - Quick Docker commands reference
 - **[Technical Documentation](docs/developer/DOCUMENTATION.md)** - In-depth technical details
 
 ---
@@ -139,36 +181,66 @@ Visit `http://localhost:5173` in your browser.
 
 ### Frontend
 
-- **React 18.3** - UI framework
-- **TypeScript 5.5** - Type safety
-- **Vite** - Build tool and dev server
-- **TailwindCSS** - Styling
-- **Web Audio API** - Audio synthesis
-- **Canvas API** - Waveform visualization
-- **Lucide React** - Icon library
+- **React 18.3** - UI framework with hooks and concurrent features
+- **TypeScript 5.5** - Type safety and enhanced developer experience
+- **Vite** - Fast build tool and development server
+- **TailwindCSS** - Utility-first CSS framework
+- **Web Audio API** - Native browser audio synthesis engine
+- **Canvas API** - Real-time waveform visualization
+- **Lucide React** - Beautiful, consistent icon library
 
 ### Backend
 
-- **Node.js + Express** - REST API server
-- **MongoDB Atlas** - Cloud database
-- **Mongoose** - ODM for MongoDB
-- **Auth0** - Authentication and authorization
-- **Google Gemini AI** - Mood recommendations
+- **Node.js + Express** - RESTful API server with middleware
+- **TypeScript** - Type-safe backend development
+- **MongoDB Atlas** - Cloud database with global clusters
+- **Mongoose** - ODM for schema validation and data modeling
+- **Auth0** - OAuth2 authentication and JWT validation
+- **Google Gemini AI** - AI-powered mood analysis and recommendations
 
-### DevOps
+### DevOps & Tools
 
-- **Biome** - Linting and formatting
-- **GitHub Actions** - CI/CD (planned)
+- **Docker + Docker Compose** - Containerized development and deployment
+- **Biome** - Fast linting and code formatting
+- **Makefile** - Development workflow automation
+- **Nginx** - Reverse proxy for production deployment
+- **GitHub Actions** - CI/CD pipeline (planned)
+
+### Audio & Music
+
+- **Web Audio API** - Real-time audio synthesis and processing
+- **MIDI Parser** - Custom MIDI file parsing for piano songs
+- **Audio Worklets** - Background audio processing
+- **OscillatorNode** - Waveform generation
+- **BiquadFilterNode** - Audio filtering and effects
 
 ---
 
 ## 🔧 Development
 
+### Quick Setup
+
+```bash
+# Clone repository
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
+
+# Start development environment
+make up-dev
+
+# Or run manually:
+# Terminal 1: Backend
+cd backend && npm install && npm run dev
+
+# Terminal 2: Frontend
+npm install && npm run dev
+```
+
 ### Available Scripts
 
 ```bash
 # Development
-npm run dev          # Start frontend dev server
+npm run dev          # Start frontend dev server (port 5173)
 npm run dev:all      # Start both frontend and backend
 npm run build        # Build for production
 npm run preview      # Preview production build
@@ -177,12 +249,33 @@ npm run preview      # Preview production build
 npm run lint         # Run Biome linter
 npm run typecheck    # Check TypeScript errors
 
-# Docker Commands
-make up              # Start all services
-make down            # Stop all services
-make logs            # View logs
-make rebuild         # Rebuild and restart
+# Backend Scripts (in backend/ directory)
+npm run dev          # Start backend dev server (port 3001)
+npm run build        # Build backend
+npm run start        # Start production server
 ```
+
+### Docker Development
+
+```bash
+# Full development environment
+make up-dev          # Start all services with hot reload
+
+# With local MongoDB
+make up-local        # Local database for development
+
+# With MongoDB Atlas
+make up-atlas        # Cloud database for production-like setup
+
+# Development workflow
+make logs            # Monitor all services
+make rebuild         # Rebuild after dependency changes
+make down            # Stop all services
+```
+
+### Environment Configuration
+
+See the [Developer Guide](docs/developer/DEVELOPER_GUIDE.md) for complete environment setup instructions.
 
 ---
 
@@ -195,18 +288,36 @@ pulseplay/
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Utilities and helpers
 │   ├── pages/             # Page components
-│   └── services/          # API services
+│   ├── services/          # API services
+│   ├── types/             # TypeScript type definitions
+│   ├── utils/             # Utility functions
+│   └── assets/            # Static assets
 ├── backend/               # Backend API server
 │   └── src/
 │       ├── models/        # MongoDB models
 │       ├── routes/        # Express routes
 │       ├── services/      # Business logic
-│       └── middleware/    # Express middleware
+│       ├── middleware/    # Express middleware
+│       ├── config/        # Configuration files
+│       ├── types/         # TypeScript types
+│       └── utils/         # Backend utilities
 ├── docs/                  # Documentation
-│   ├── public/           # User-facing docs
-│   ├── developer/        # Developer docs
-│   └── archive/          # Historical docs
-└── specs/                # Project specifications
+│   ├── public/           # User-facing documentation
+│   ├── developer/        # Developer technical docs
+│   ├── docker/           # Docker deployment guides
+│   ├── mongodb/          # MongoDB Atlas setup guides
+│   └── archive/          # Historical documentation
+├── specs/                # Project specifications
+├── scripts/              # Utility scripts
+├── public/               # Static files served by Vite
+├── docker/               # Docker-related files
+│   ├── docker-compose.dev.yml
+│   ├── docker-compose.atlas.yml
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   ├── Dockerfile.dev
+│   └── Dockerfile.frontend
+└── Makefile              # Development and deployment commands
 ```
 
 ---
@@ -251,7 +362,72 @@ npm run typecheck
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Docker Deployment (Recommended)
+
+PulsePlay is fully containerized and ready for production deployment with Docker.
+
+#### Quick Start
+
+```bash
+# Clone and setup
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
+
+# Start all services (MongoDB Atlas)
+make up-atlas
+
+# Or start with local MongoDB
+make up-local
+
+# View application
+open http://localhost:3000
+```
+
+#### Production Deployment
+
+```bash
+# Build and deploy
+make build-prod
+make deploy-prod
+
+# Monitor logs
+make logs
+
+# Update deployment
+make update-prod
+```
+
+#### Environment Setup
+
+Create `.env` files as described in the [Docker README](docs/docker/DOCKER_README.md).
+
+#### Available Commands
+
+```bash
+# Development
+make up-dev          # Start development environment
+make up-local        # Start with local MongoDB
+make up-atlas        # Start with MongoDB Atlas
+
+# Production
+make build-prod      # Build production images
+make deploy-prod     # Deploy to production
+make update-prod     # Update running deployment
+
+# Management
+make logs            # View all service logs
+make logs-backend    # View backend logs only
+make logs-frontend   # View frontend logs only
+make down            # Stop all services
+make clean           # Remove containers and volumes
+make rebuild         # Rebuild and restart all services
+```
+
+See the [Docker README](docs/docker/DOCKER_README.md) for complete deployment instructions.
+
+### Traditional Deployment
+
+#### Vercel (Frontend Only)
 
 ```bash
 npm install -g vercel
@@ -259,7 +435,7 @@ vercel login
 vercel --prod
 ```
 
-### Netlify
+#### Netlify (Frontend Only)
 
 ```bash
 npm install -g netlify-cli
@@ -267,7 +443,7 @@ netlify login
 netlify deploy --prod
 ```
 
-Remember to set environment variables in your deployment platform!
+**Note:** Traditional hosting requires separate backend deployment. Docker deployment is recommended for full-stack deployment.
 
 ---
 

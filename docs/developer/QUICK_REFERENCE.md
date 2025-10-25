@@ -10,21 +10,26 @@ A cheat sheet for common tasks, commands, and code patterns.
 # Initial setup
 npm install
 cp .env.example .env
-# Edit .env with your Supabase credentials
+# Edit .env with your MongoDB Atlas, Auth0, and Gemini credentials
 
 # Development
 npm run dev              # Start dev server (http://localhost:5173)
 npm run typecheck        # Check TypeScript errors
 npm run lint             # Run ESLint
 
+# Backend development
+cd backend && npm install
+npm run dev              # Start backend server (http://localhost:3001)
+
+# Docker development
+docker-compose -f docker-compose.dev.yml up --build
+
 # Production
 npm run build            # Build for production
 npm run preview          # Preview production build
 
-# Supabase
-supabase link            # Link to project
-supabase db push         # Apply migrations
-supabase functions deploy generate-mood
+# Database
+# MongoDB Atlas is cloud-hosted, no local setup needed
 ```
 
 ---
@@ -94,10 +99,11 @@ export interface MyResponse {
 
 export const myServiceCall = async (data: any): Promise<MyResponse> => {
   try {
-    const response = await fetch(apiUrl, {
+    const token = localStorage.getItem('auth0_token');
+    const response = await fetch('/api/my-endpoint', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${API_KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
@@ -195,90 +201,104 @@ export const myServiceCall = async (data: any): Promise<MyResponse> => {
 
 ---
 
-## 🔌 Supabase Code Snippets
+## 🔌 Auth0 + MongoDB Code Snippets
 
-### Authentication
+### Authentication (Auth0)
 
 ```typescript
-// Sign Up
-const { data, error } = await supabase.auth.signUp({
-  email: 'user@example.com',
-  password: 'password123'
-});
+// Login with Auth0
+const login = async () => {
+  const auth0 = new Auth0Client({
+    domain: import.meta.env.VITE_AUTH0_DOMAIN,
+    client_id: import.meta.env.VITE_AUTH0_CLIENT_ID,
+    redirect_uri: window.location.origin
+  });
+  
+  await auth0.loginWithRedirect();
+};
 
-// Sign In
-const { data, error } = await supabase.auth.signInWithPassword({
-  email: 'user@example.com',
-  password: 'password123'
-});
+// Get user info
+const getUser = async () => {
+  const auth0 = new Auth0Client({
+    domain: import.meta.env.VITE_AUTH0_DOMAIN,
+    client_id: import.meta.env.VITE_AUTH0_CLIENT_ID
+  });
+  
+  const user = await auth0.getUser();
+  const token = await auth0.getTokenSilently();
+  
+  return { user, token };
+};
 
-// Sign Out
-const { error } = await supabase.auth.signOut();
-
-// Get Session
-const { data: { session } } = await supabase.auth.getSession();
-const user = session?.user;
-
-// Auth State Change
-const { data: { subscription } } = supabase.auth.onAuthStateChange(
-  (event, session) => {
-    console.log(event, session?.user);
-  }
-);
-// Cleanup
-subscription.unsubscribe();
+// Logout
+const logout = async () => {
+  const auth0 = new Auth0Client({
+    domain: import.meta.env.VITE_AUTH0_DOMAIN,
+    client_id: import.meta.env.VITE_AUTH0_CLIENT_ID
+  });
+  
+  await auth0.logout({
+    returnTo: window.location.origin
+  });
+};
 ```
 
-### Database Operations
+### API Calls (Express.js Backend)
 
 ```typescript
-// SELECT
-const { data, error } = await supabase
-  .from('table_name')
-  .select('column1, column2')
-  .eq('id', userId)
-  .single();
+// GET request with auth
+const fetchUserData = async (): Promise<UserData> => {
+  const token = localStorage.getItem('auth0_token');
+  
+  const response = await fetch('/api/user/profile', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
 
-// SELECT with filter
-const { data, error } = await supabase
-  .from('table_name')
-  .select('*')
-  .eq('user_id', userId)
-  .order('created_at', { ascending: false })
-  .limit(10);
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
 
-// INSERT
-const { data, error } = await supabase
-  .from('table_name')
-  .insert({
-    column1: 'value1',
-    column2: 'value2'
-  })
-  .select()
-  .single();
+  return response.json();
+};
 
-// UPDATE
-const { data, error } = await supabase
-  .from('table_name')
-  .update({ column1: 'new_value' })
-  .eq('id', recordId);
+// POST request
+const saveSession = async (sessionData: SessionData): Promise<Session> => {
+  const token = localStorage.getItem('auth0_token');
+  
+  const response = await fetch('/api/sessions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(sessionData),
+  });
 
-// DELETE
-const { data, error } = await supabase
-  .from('table_name')
-  .delete()
-  .eq('id', recordId);
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
 
-// Check for existing record
-const { data, error } = await supabase
-  .from('table_name')
-  .select('id')
-  .eq('user_id', userId)
-  .maybeSingle();
+  return response.json();
+};
 
-if (!data) {
-  // Record doesn't exist
-}
+// PUT request
+const updateSettings = async (settings: UserSettings): Promise<UserSettings> => {
+  const token = localStorage.getItem('auth0_token');
+  
+  const response = await fetch('/api/user/settings', {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(settings),
+  });
+
+  return response.json();
+};
 ```
 
 ---
@@ -453,15 +473,22 @@ countRef.current += 1;
 window.audioContext = audioContextRef.current;
 console.log(audioContext.state); // 'running', 'suspended', 'closed'
 
-// Check user session
-const { data } = await supabase.auth.getSession();
-console.log(data.session?.user);
+// Check Auth0 token
+const token = localStorage.getItem('auth0_token');
+console.log('Auth0 token:', token ? 'present' : 'missing');
 
-// Test edge function
-fetch('https://project.supabase.co/functions/v1/generate-mood', {
+// Test API endpoint
+fetch('/api/health', {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+}).then(r => r.json()).then(console.log);
+
+// Test mood analysis API
+fetch('/api/mood-analysis', {
   method: 'POST',
   headers: {
-    'Authorization': 'Bearer YOUR_ANON_KEY',
+    'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
@@ -497,54 +524,78 @@ const value = data?.property ?? 'default';
 
 ---
 
-## 📝 SQL Snippets
+## 📝 MongoDB/Mongoose Snippets
 
-### Create Table with RLS
+### Mongoose Schema
 
-```sql
-CREATE TABLE my_table (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
-  field1 text NOT NULL,
-  created_at timestamptz DEFAULT now()
-);
+```typescript
+// models/User.ts
+import mongoose, { Schema, Document } from 'mongoose';
 
-ALTER TABLE my_table ENABLE ROW LEVEL SECURITY;
+export interface IUser extends Document {
+  auth0Id: string;
+  email: string;
+  name?: string;
+  settings: {
+    volume: number;
+    mood: string;
+  };
+  createdAt: Date;
+}
 
-CREATE POLICY "Users can view own records"
-  ON my_table FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
+const UserSchema = new Schema<IUser>({
+  auth0Id: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
+  name: { type: String },
+  settings: {
+    volume: { type: Number, default: 70 },
+    mood: { type: String, default: 'Focus' }
+  }
+}, {
+  timestamps: true
+});
 
-CREATE POLICY "Users can insert own records"
-  ON my_table FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE INDEX idx_my_table_user_id ON my_table(user_id);
+export const User = mongoose.model<IUser>('User', UserSchema);
 ```
 
 ### Common Queries
 
-```sql
--- Get user's records
-SELECT * FROM table_name
-WHERE user_id = auth.uid()
-ORDER BY created_at DESC;
+```typescript
+// Find user by Auth0 ID
+const user = await User.findOne({ auth0Id: auth0Id });
 
--- Count records
-SELECT COUNT(*) FROM table_name
-WHERE user_id = auth.uid();
+// Find sessions for user
+const sessions = await Session.find({ userId: user._id })
+  .sort({ createdAt: -1 })
+  .limit(10);
 
--- Aggregate data
-SELECT 
-  DATE(created_at) as date,
-  AVG(score) as avg_score,
-  COUNT(*) as count
-FROM focus_sessions
-WHERE user_id = auth.uid()
-GROUP BY DATE(created_at)
-ORDER BY date DESC;
+// Create new session
+const session = new Session({
+  userId: user._id,
+  rhythmScore: 85,
+  bpm: 120,
+  duration: 1800
+});
+await session.save();
+
+// Update user settings
+await User.findByIdAndUpdate(user._id, {
+  'settings.volume': 80,
+  'settings.mood': 'Calm'
+});
+
+// Aggregate session data
+const stats = await Session.aggregate([
+  { $match: { userId: user._id } },
+  {
+    $group: {
+      _id: null,
+      avgScore: { $avg: '$rhythmScore' },
+      totalSessions: { $sum: 1 },
+      avgBpm: { $avg: '$bpm' }
+    }
+  }
+]);
 ```
 
 ---
@@ -554,9 +605,20 @@ ORDER BY date DESC;
 ### .env Template
 
 ```env
-# Supabase Configuration
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your_anon_key_here
+# MongoDB Atlas
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/pulseplay
+
+# Auth0 Configuration
+VITE_AUTH0_DOMAIN=your-domain.auth0.com
+VITE_AUTH0_CLIENT_ID=your_client_id
+VITE_AUTH0_AUDIENCE=your_api_identifier
+
+# Google Gemini AI
+GEMINI_API_KEY=your_gemini_api_key
+
+# Backend Configuration
+JWT_SECRET=your_jwt_secret_key
+PORT=3001
 
 # Optional: Development flags
 VITE_DEBUG=true
@@ -585,26 +647,28 @@ VITE_DEBUG=true
 # Pre-deployment
 □ npm run typecheck        # No TypeScript errors
 □ npm run lint             # No linting errors
-□ npm run build            # Build succeeds
-□ Test production build    # npm run preview
+□ npm run build            # Frontend build succeeds
+□ Backend build succeeds   # cd backend && npm run build
 
-# Supabase
-□ Migrations applied       # supabase db push
-□ Edge functions deployed  # supabase functions deploy
-□ RLS policies enabled     # Check in dashboard
+# Docker
+□ docker-compose build     # Images build successfully
+□ docker-compose up        # Services start without errors
 
-# Deployment Platform
-□ Environment variables set
-□ Build command: npm run build
-□ Output directory: dist
-□ Node version: 18+
+# Database & Services
+□ MongoDB Atlas accessible # Test connection string
+□ Auth0 app configured     # Check domain and client ID
+□ Gemini API key valid     # Test API access
+
+# Environment
+□ .env file configured     # All required variables set
+□ Secrets not in repo      # Check .gitignore
 
 # Post-deployment
-□ Test auth flow
-□ Test audio playback
-□ Test database operations
-□ Check browser console
-□ Verify API calls work
+□ Test auth flow           # Login/logout works
+□ Test audio playback      # Sound generates correctly
+□ Test API endpoints       # Backend responds to requests
+□ Check browser console    # No runtime errors
+□ Verify data persistence  # Sessions save to MongoDB
 ```
 
 ---
@@ -613,10 +677,15 @@ VITE_DEBUG=true
 
 - **React Docs**: https://react.dev/
 - **TypeScript Docs**: https://www.typescriptlang.org/docs/
-- **Supabase Docs**: https://supabase.com/docs
+- **MongoDB Atlas**: https://www.mongodb.com/docs/atlas/
+- **Mongoose ODM**: https://mongoosejs.com/docs/
+- **Auth0 Docs**: https://auth0.com/docs
+- **Google Gemini AI**: https://ai.google.dev/docs
+- **Express.js**: https://expressjs.com/
 - **Web Audio API**: https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
 - **TailwindCSS**: https://tailwindcss.com/docs
 - **Vite**: https://vitejs.dev/guide/
+- **Docker**: https://docs.docker.com/
 
 ---
 
@@ -631,13 +700,38 @@ if (audioContext.state === 'suspended') {
 // Ensure user interaction before starting
 ```
 
-### Database RLS errors
-```sql
--- Verify policies are set
-SELECT * FROM pg_policies WHERE tablename = 'your_table';
+### Database connection errors
+```bash
+# Check MongoDB Atlas connection
+# 1. Verify connection string in .env
+# 2. Check IP whitelist in Atlas dashboard
+# 3. Test connection: mongosh "your-connection-string"
 
--- Check user is authenticated
-SELECT auth.uid(); -- Should return user ID, not null
+# Backend logs
+docker logs pulseplay-backend
+```
+
+### Auth0 authentication errors
+```typescript
+// Check Auth0 configuration
+console.log('Auth0 Domain:', import.meta.env.VITE_AUTH0_DOMAIN);
+console.log('Client ID:', import.meta.env.VITE_AUTH0_CLIENT_ID);
+
+// Verify callback URLs in Auth0 dashboard
+// Should include: http://localhost:5173, https://yourdomain.com
+```
+
+### API request failures
+```bash
+# Check backend is running
+curl http://localhost:3001/api/health
+
+# Check Auth0 token
+const token = localStorage.getItem('auth0_token');
+console.log('Token exists:', !!token);
+
+# Test API with token
+curl -H "Authorization: Bearer $token" http://localhost:3001/api/user/profile
 ```
 
 ### TypeScript errors
@@ -650,13 +744,16 @@ npm install
 npx tsc --noEmit src/file.tsx
 ```
 
-### Build fails
+### Docker build fails
 ```bash
-# Clear cache
-rm -rf dist .vite
+# Clear Docker cache
+docker system prune -a
 
-# Rebuild
-npm run build
+# Rebuild without cache
+docker-compose build --no-cache
+
+# Check build logs
+docker-compose build --progress=plain
 ```
 
 ---

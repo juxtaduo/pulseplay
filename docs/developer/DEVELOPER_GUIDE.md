@@ -31,14 +31,17 @@
 - GitLens
 - Better Comments
 - Error Lens
+- Biome (for linting and formatting)
 
 ### Initial Setup
 
 1. **Clone and Install**
    ```bash
-   git clone https://github.com/yourusername/pulseplay.git
+   git clone https://github.com/juxtaduo/pulseplay.git
    cd pulseplay
    npm install
+   npm install  # Also install backend dependencies
+   cd backend && npm install && cd ..
    ```
 
 2. **Environment Configuration**
@@ -47,31 +50,30 @@
    cp .env.example .env
    
    # Edit .env with your values
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_ANON_KEY=your_anon_key_here
+   MONGODB_ATLAS_URI=mongodb+srv://username:password@cluster.mongodb.net/pulseplay
+   AUTH0_DOMAIN=your-domain.auth0.com
+   AUTH0_CLIENT_ID=your_client_id
+   AUTH0_CLIENT_SECRET=your_client_secret
+   GEMINI_API_KEY=your_gemini_api_key
    ```
 
-3. **Supabase Setup**
+3. **MongoDB Atlas Setup**
    ```bash
-   # Install Supabase CLI
-   npm install -g supabase
-   
-   # Login to Supabase
-   supabase login
-   
-   # Link to your project
-   supabase link --project-ref your-project-ref
-   
-   # Run migrations
-   supabase db push
-   
-   # Deploy edge function
-   supabase functions deploy generate-mood
+   # Create free MongoDB Atlas account at https://mongodb.com/atlas
+   # Create cluster, set up database user, get connection string
+   # Add connection string to .env as MONGODB_ATLAS_URI
    ```
 
-4. **Start Development Server**
+4. **Auth0 Setup**
    ```bash
-   npm run dev
+   # Create Auth0 account at https://auth0.com
+   # Create application, get domain/client ID/secret
+   # Add to .env file
+   ```
+
+5. **Start Development Server**
+   ```bash
+   npm run dev:all  # Starts both frontend and backend
    ```
    
    Open http://localhost:5173 in your browser
@@ -85,49 +87,65 @@
 ```
 pulseplay/
 │
-├── src/
-│   ├── components/          # React UI components
-│   │   ├── AuthButton.tsx        # Self-contained auth UI
-│   │   ├── ControlPanel.tsx      # Audio control interface
-│   │   ├── MoodInsights.tsx      # AI insights display
-│   │   ├── RhythmVisualizer.tsx  # Canvas visualizer
-│   │   └── SessionStats.tsx      # Metrics dashboard
+├── src/                          # Frontend React application
+│   ├── components/               # React UI components
+│   │   ├── Auth0ProviderWrapper.tsx    # Auth0 integration
+│   │   ├── AuthButton.tsx             # Login/logout UI
+│   │   ├── ControlPanel.tsx           # Audio controls
+│   │   ├── MoodInsights.tsx           # AI insights display
+│   │   ├── RhythmVisualizer.tsx       # Real-time waveform
+│   │   └── SessionStats.tsx           # Session metrics
 │   │
-│   ├── hooks/               # Custom React hooks (business logic)
-│   │   ├── useAudioEngine.ts         # Web Audio API wrapper
-│   │   ├── useRhythmDetection.ts     # Activity tracking
-│   │   └── useSessionPersistence.ts  # DB sync
+│   ├── hooks/                    # Custom React hooks (business logic)
+│   │   ├── useAudioEngine.ts          # Web Audio API wrapper
+│   │   ├── useRhythmDetection.ts      # Activity tracking
+│   │   └── useSessionPersistence.ts   # DB sync
 │   │
-│   ├── services/            # External API clients
-│   │   └── moodService.ts        # Edge function client
+│   ├── lib/                      # Shared utilities and services
+│   │   ├── audioContext.ts           # Web Audio API wrapper
+│   │   └── midiParser.ts             # MIDI file parsing
 │   │
-│   ├── lib/                 # Shared utilities
-│   │   └── supabase.ts          # Supabase client + types
+│   ├── pages/                    # Page components
+│   │   └── Home.tsx
 │   │
-│   ├── App.tsx              # Main app (orchestrator)
-│   ├── main.tsx             # Entry point
-│   ├── index.css            # Global styles
-│   └── vite-env.d.ts        # Vite type definitions
+│   ├── types/                    # TypeScript type definitions
+│   │   └── index.ts
+│   │
+│   ├── App.tsx                   # Main app (orchestrator)
+│   ├── main.tsx                  # Entry point
+│   ├── index.css                 # Global styles
+│   └── vite-env.d.ts             # Vite type definitions
 │
-├── supabase/
-│   ├── functions/           # Edge functions (serverless)
-│   │   └── generate-mood/
-│   │       └── index.ts
-│   │
-│   └── migrations/          # Database migrations (SQL)
-│       └── *.sql
+├── backend/                      # Express.js API server
+│   └── src/
+│       ├── config/               # Configuration files
+│       │   ├── auth0.ts          # JWT validation middleware
+│       │   ├── database.ts       # MongoDB connection
+│       │   └── logger.ts         # Structured logging
+│       ├── middleware/           # Express middleware
+│       │   ├── errorHandler.ts   # Error handling
+│       │   └── rateLimiter.ts    # Rate limiting
+│       ├── models/               # Mongoose schemas
+│       │   ├── FocusSession.ts
+│       │   ├── UserPreferences.ts
+│       │   ├── MoodInsight.ts
+│       │   └── WeeklySummary.ts
+│       ├── routes/               # API route handlers
+│       ├── services/             # Business logic
+│       │   └── geminiService.ts  # AI mood analysis
+│       ├── types/                # TypeScript types
+│       ├── utils/                # Utilities
+│       │   └── crypto.ts         # SHA-256 hashing
+│       ├── websocket/            # WebSocket server
+│       └── server.ts             # Express app entry point
 │
-├── public/                  # Static assets
-├── node_modules/            # Dependencies (gitignored)
-├── dist/                    # Production build (gitignored)
-│
-├── .env                     # Environment variables (gitignored)
-├── .gitignore
-├── package.json             # Dependencies & scripts
-├── vite.config.ts           # Vite configuration
-├── tailwind.config.js       # Tailwind configuration
-├── tsconfig.json            # TypeScript configuration
-└── README.md
+├── docs/                         # Documentation
+├── scripts/                      # Utility scripts
+├── specs/                        # Project specifications
+├── docker-compose*.yml          # Docker orchestration
+├── Dockerfile*                   # Container definitions
+├── Makefile                     # Development shortcuts
+└── package.json                 # Dependencies and scripts
 ```
 
 ### Architecture Layers
@@ -148,13 +166,21 @@ pulseplay/
 ┌──────────────────▼──────────────────────────┐
 │          Service Layer                      │
 │  (API Clients - External Communication)     │
-│  - moodService, supabase client             │
+│  - Gemini AI service, Auth0 client          │
+└──────────────────┬──────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────┐
+│         Data Access Layer                   │
+│  (Database & Persistence)                   │
+│  - MongoDB Atlas, Mongoose ODM             │
 └──────────────────┬──────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────┐
 │         External Services                   │
-│  - Supabase (Auth, DB, Functions)           │
-│  - Web Audio API                            │
+│  - MongoDB Atlas (Database)                 │
+│  - Auth0 (Authentication)                   │
+│  - Google Gemini AI (Mood Analysis)         │
+│  - Web Audio API (Audio Synthesis)          │
 └─────────────────────────────────────────────┘
 ```
 
@@ -168,13 +194,13 @@ User Interaction
     │       └─→ rhythmData state
     │           ├─→ RhythmVisualizer (display)
     │           ├─→ useAudioEngine (modulation)
-    │           ├─→ MoodInsights (AI analysis)
-    │           └─→ useSessionPersistence (save)
+    │           ├─→ MoodInsights (AI analysis via Gemini)
+    │           └─→ useSessionPersistence (save to MongoDB)
+    │               └─→ Express API → MongoDB Atlas
     │
     └─→ UI Controls
         └─→ ControlPanel
-            ├─→ useAudioEngine (play/stop/mood)
-            └─→ App state updates
+            └─→ Auth0 authentication flow
 ```
 
 ---
@@ -471,32 +497,40 @@ if (audioContextRef.current?.state === 'suspended') {
 #### 2. Database Operations Failing
 ```typescript
 // Check authentication
-const { data: { session } } = await supabase.auth.getSession();
-console.log('User:', session?.user);
+const token = localStorage.getItem('auth0_token');
+console.log('Auth0 token:', token ? 'present' : 'missing');
 
-// Check RLS policies in Supabase dashboard
-// Verify user has permission to access table
+// Check MongoDB connection
+const response = await fetch('/api/health');
+const health = await response.json();
+console.log('MongoDB connection:', health.database);
 
 // Log errors
-const { data, error } = await supabase.from('table').select();
-if (error) {
-  console.error('DB Error:', error.message, error.details);
+try {
+  const response = await fetch('/api/sessions', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const data = await response.json();
+  console.log('API response:', data);
+} catch (error) {
+  console.error('API Error:', error);
 }
 ```
 
-#### 3. Edge Function Errors
+#### 3. API Endpoint Errors
 ```typescript
-// Check logs in Supabase dashboard
-// Functions → generate-mood → Logs
+// Check API server logs
+// Backend logs are available in Docker container
+docker logs pulseplay-backend
 
-// Test locally
-supabase functions serve generate-mood
-
-// Make request with curl
-curl -X POST http://localhost:54321/functions/v1/generate-mood \
-  -H "Authorization: Bearer YOUR_ANON_KEY" \
+// Test API endpoint locally
+curl -X POST http://localhost:3001/api/mood-analysis \
+  -H "Authorization: Bearer YOUR_AUTH0_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"rhythmScore": 50, "bpm": 100, "intensity": "medium", "keystrokeCount": 100}'
+
+// Check MongoDB connection in backend
+// Backend will log connection status on startup
 ```
 
 #### 4. TypeScript Errors
@@ -614,101 +648,137 @@ console.log(`Operation took ${end - start}ms`);
    const { data, doSomething } = useNewFeature('param');
    ```
 
-### Adding a Database Table
+### Adding a Database Model
 
-1. **Create Migration File**
+1. **Create Mongoose Schema**
    ```bash
-   # Create new migration
-   touch supabase/migrations/$(date +%Y%m%d%H%M%S)_add_new_table.sql
+   # Create new model file
+   touch backend/src/models/NewModel.ts
    ```
 
-2. **Write Migration SQL**
-   ```sql
-   -- supabase/migrations/*_add_new_table.sql
-   CREATE TABLE IF NOT EXISTS new_table (
-     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-     user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
-     field1 text NOT NULL,
-     field2 integer DEFAULT 0,
-     created_at timestamptz DEFAULT now()
-   );
-   
-   ALTER TABLE new_table ENABLE ROW LEVEL SECURITY;
-   
-   CREATE POLICY "Users can view own records"
-     ON new_table FOR SELECT
-     TO authenticated
-     USING (auth.uid() = user_id);
-   ```
-
-3. **Apply Migration**
-   ```bash
-   supabase db push
-   ```
-
-4. **Add TypeScript Types**
+2. **Define Schema**
    ```typescript
-   // src/lib/supabase.ts
-   export interface NewTable {
-     id: string;
-     user_id: string;
+   // backend/src/models/NewModel.ts
+   import mongoose, { Schema, Document } from 'mongoose';
+   
+   export interface INewModel extends Document {
+     userId: mongoose.Types.ObjectId;
      field1: string;
      field2: number;
-     created_at: string;
+     createdAt: Date;
    }
-   ```
-
-### Adding a New Edge Function
-
-1. **Create Function**
-   ```bash
-   supabase functions new my-function
-   ```
-
-2. **Implement Function**
-   ```typescript
-   // supabase/functions/my-function/index.ts
-   import "jsr:@supabase/functions-js/edge-runtime.d.ts";
    
-   const corsHeaders = {
-     "Access-Control-Allow-Origin": "*",
-     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-   };
-   
-   Deno.serve(async (req: Request) => {
-     if (req.method === "OPTIONS") {
-       return new Response(null, { status: 200, headers: corsHeaders });
+   const NewModelSchema = new Schema<INewModel>({
+     userId: {
+       type: Schema.Types.ObjectId,
+       ref: 'User',
+       required: true
+     },
+     field1: {
+       type: String,
+       required: true
+     },
+     field2: {
+       type: Number,
+       default: 0
      }
-     
+   }, {
+     timestamps: true
+   });
+   
+   export const NewModel = mongoose.model<INewModel>('NewModel', NewModelSchema);
+   ```
+
+3. **Add to Database Connection**
+   ```typescript
+   // backend/src/config/database.ts
+   import { NewModel } from '../models/NewModel';
+   
+   // Models are registered when imported
+   export const models = {
+     NewModel
+   };
+   ```
+
+4. **Create API Routes**
+   ```typescript
+   // backend/src/routes/newModel.ts
+   import express from 'express';
+   import { NewModel } from '../models/NewModel';
+   import { authenticateToken } from '../middleware/auth';
+   
+   const router = express.Router();
+   
+   router.get('/', authenticateToken, async (req, res) => {
      try {
-       const body = await req.json();
-       
-       // Your logic here
-       const result = { success: true };
-       
-       return new Response(JSON.stringify(result), {
-         headers: { ...corsHeaders, "Content-Type": "application/json" },
-       });
+       const models = await NewModel.find({ userId: req.user.id });
+       res.json(models);
      } catch (error) {
-       return new Response(
-         JSON.stringify({ error: error.message }),
-         { status: 500, headers: corsHeaders }
-       );
+       res.status(500).json({ error: error.message });
      }
    });
+   
+   export default router;
    ```
 
-3. **Deploy Function**
-   ```bash
-   supabase functions deploy my-function
+5. **Register Route**
+   ```typescript
+   // backend/src/server.ts
+   import newModelRoutes from './routes/newModel';
+   
+   app.use('/api/new-models', newModelRoutes);
    ```
 
-4. **Test Function**
+### Adding a New API Endpoint
+
+1. **Create Route File**
    ```bash
-   curl -X POST https://your-project.supabase.co/functions/v1/my-function \
-     -H "Authorization: Bearer YOUR_ANON_KEY" \
+   touch backend/src/routes/my-endpoint.ts
+   ```
+
+2. **Implement Route Handler**
+   ```typescript
+   // backend/src/routes/my-endpoint.ts
+   import express from 'express';
+   import { authenticateToken } from '../middleware/auth';
+   
+   const router = express.Router();
+   
+   router.post('/', authenticateToken, async (req, res) => {
+     try {
+       const { data } = req.body;
+       
+       // Your logic here
+       const result = { success: true, data };
+       
+       res.json(result);
+     } catch (error) {
+       console.error('Endpoint error:', error);
+       res.status(500).json({ error: error.message });
+     }
+   });
+   
+   export default router;
+   ```
+
+3. **Register Route**
+   ```typescript
+   // backend/src/server.ts
+   import myEndpointRoutes from './routes/my-endpoint';
+   
+   app.use('/api/my-endpoint', myEndpointRoutes);
+   ```
+
+4. **Test Endpoint**
+   ```bash
+   # Test locally
+   curl -X POST http://localhost:3001/api/my-endpoint \
+     -H "Authorization: Bearer YOUR_AUTH0_TOKEN" \
      -H "Content-Type: application/json" \
-     -d '{"test": "data"}'
+     -d '{"data": "test"}'
+   
+   # Check backend logs
+   docker logs pulseplay-backend
    ```
 
 ---
@@ -735,69 +805,79 @@ npm run build
 
 ### Deployment Options
 
-#### Option 1: Vercel (Recommended)
+#### Option 1: Docker Compose (Recommended)
 
 ```bash
-# Install Vercel CLI
-npm install -g vercel
+# 1. Build and start all services
+docker-compose up --build
 
-# Login
-vercel login
+# 2. Or for production
+docker-compose -f docker-compose.yml up --build -d
 
-# Deploy
-vercel
-
-# Production deployment
-vercel --prod
+# 3. Check logs
+docker-compose logs -f
 ```
 
-**Environment Variables in Vercel**:
-1. Go to project settings
-2. Navigate to "Environment Variables"
-3. Add:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
+**Environment Variables for Docker**:
+Create `.env` file with:
+```env
+# MongoDB Atlas
+MONGODB_URI=mongodb+srv://...
 
-#### Option 2: Netlify
+# Auth0
+AUTH0_DOMAIN=your-domain.auth0.com
+AUTH0_CLIENT_ID=...
+AUTH0_CLIENT_SECRET=...
 
-```bash
-# Install Netlify CLI
-npm install -g netlify-cli
+# Google Gemini AI
+GEMINI_API_KEY=...
 
-# Login
-netlify login
-
-# Deploy
-netlify deploy
-
-# Production deployment
-netlify deploy --prod
+# Backend
+JWT_SECRET=your-secret-key
+PORT=3001
 ```
 
-#### Option 3: Custom Server
+#### Option 2: Manual Docker Build
 
 ```bash
-# Build
-npm run build
+# Build frontend
+docker build -f Dockerfile.frontend -t pulseplay-frontend .
 
-# Copy dist/ to your server
-scp -r dist/* user@server:/var/www/html/
+# Build backend
+docker build -f Dockerfile -t pulseplay-backend .
 
-# Configure nginx/apache to serve static files
+# Run with docker-compose
+docker-compose up
+```
+
+#### Option 3: Cloud Deployment
+
+```bash
+# Deploy to cloud provider (AWS, GCP, Azure)
+# Use docker-compose.prod.yml for production
+
+# Example: AWS ECS
+aws ecs create-service \
+  --cluster pulseplay-cluster \
+  --service-name pulseplay-service \
+  --task-definition pulseplay-task \
+  --desired-count 1
 ```
 
 ### Pre-deployment Checklist
 
-- [ ] Environment variables configured
-- [ ] Supabase migrations applied
-- [ ] Edge functions deployed
+- [ ] Environment variables configured (.env file)
+- [ ] MongoDB Atlas cluster accessible
+- [ ] Auth0 application configured
+- [ ] Google Gemini API key valid
+- [ ] Docker images build successfully
 - [ ] TypeScript errors resolved
-- [ ] Build completes successfully
 - [ ] Test in production-like environment
 - [ ] Check browser console for errors
 - [ ] Verify authentication works
 - [ ] Test audio playback
 - [ ] Verify database operations
+- [ ] Backend API endpoints responding
 
 ---
 
@@ -832,10 +912,11 @@ npm run typecheck
 - Ensure API URLs are correct
 
 **Issue**: Authentication not working
-- Verify Supabase URL and key
-- Check Supabase project is active
-- Verify RLS policies are set up
-- Check CORS settings in Supabase
+- Verify Auth0 domain and client ID
+- Check Auth0 application configuration
+- Verify JWT token validation in backend
+- Check CORS settings in Express.js
+- Ensure Auth0 callback URLs are configured
 
 **Issue**: Audio not starting
 - Requires user interaction (browser policy)

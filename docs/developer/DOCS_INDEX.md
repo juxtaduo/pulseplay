@@ -36,10 +36,10 @@ New to PulsePlay? Start here:
 **[API_REFERENCE.md](./API_REFERENCE.md)** - Detailed API documentation
 
 **Contents:**
-- Supabase client API methods
+- Supabase client API methods → MongoDB Atlas + Mongoose API methods
 - Custom hooks API with examples
 - Component props interfaces
-- Edge Functions API specification
+- Express.js API endpoints specification
 - Type definitions
 - Web Audio API reference
 - Error handling patterns
@@ -152,8 +152,8 @@ New to PulsePlay? Start here:
 | Custom Hooks | [API_REFERENCE.md](./API_REFERENCE.md) | [DOCUMENTATION.md](./DOCUMENTATION.md) |
 | Component Props | [API_REFERENCE.md](./API_REFERENCE.md) | [DOCUMENTATION.md](./DOCUMENTATION.md) |
 | Supabase API | [API_REFERENCE.md](./API_REFERENCE.md) | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) |
-| Web Audio API | [API_REFERENCE.md](./API_REFERENCE.md) | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) |
-| Edge Functions | [API_REFERENCE.md](./API_REFERENCE.md) | [DOCUMENTATION.md](./DOCUMENTATION.md) |
+| MongoDB Atlas API | [API_REFERENCE.md](./API_REFERENCE.md) | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) |
+| Express.js API | [API_REFERENCE.md](./API_REFERENCE.md) | [DOCUMENTATION.md](./DOCUMENTATION.md) |
 
 ### Deployment & Operations
 
@@ -212,8 +212,8 @@ New to PulsePlay? Start here:
 **Q: How do I add a new component?**
 → See [DEVELOPER_GUIDE.md - Adding a New Component](./DEVELOPER_GUIDE.md#adding-a-new-component)
 
-**Q: What are the available Supabase API methods?**
-→ See [API_REFERENCE.md - Supabase Client API](./API_REFERENCE.md#supabase-client-api)
+**Q: What are the available MongoDB Atlas API methods?**
+→ See [API_REFERENCE.md - MongoDB Atlas API](./API_REFERENCE.md#mongodb-atlas-api)
 
 **Q: How do I deploy the app?**
 → See [DEVELOPER_GUIDE.md - Deployment Guide](./DEVELOPER_GUIDE.md#deployment-guide)
@@ -329,18 +329,25 @@ When reading the documentation:
 
 - [React Documentation](https://react.dev/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Supabase Docs](https://supabase.com/docs)
+- [MongoDB Atlas Docs](https://www.mongodb.com/docs/atlas/)
+- [Mongoose ODM](https://mongoosejs.com/docs/)
+- [Auth0 Documentation](https://auth0.com/docs)
+- [Google Gemini AI](https://ai.google.dev/docs)
+- [Express.js Guide](https://expressjs.com/)
 - [Web Audio API Guide](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 - [TailwindCSS Docs](https://tailwindcss.com/docs)
 - [Vite Guide](https://vitejs.dev/guide/)
+- [Docker Documentation](https://docs.docker.com/)
 
 ### Recommended Reading
 
 - Understanding Web Audio API
 - React Hooks in depth
 - TypeScript best practices
-- Supabase authentication patterns
-- Real-time database sync
+- MongoDB Atlas database design
+- Auth0 authentication patterns
+- Express.js API development
+- Docker containerization
 
 ---
 

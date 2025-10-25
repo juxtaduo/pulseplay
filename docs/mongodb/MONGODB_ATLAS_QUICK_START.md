@@ -49,7 +49,7 @@ docker-compose -f docker-compose.atlas.yml up -d
 
 ```bash
 # MongoDB Atlas (Required)
-MONGODB_ATLAS_URI=mongodb+srv://user:pass@cluster.mongodb.net/pulseplay?retryWrites=true&w=majority
+MONGODB_ATLAS_URI=mongodb+srv://pulseplay-user:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/pulseplay?retryWrites=true&w=majority
 
 # Auth0 (Required)
 AUTH0_DOMAIN=your-domain.auth0.com
@@ -58,33 +58,40 @@ AUTH0_CLIENT_SECRET=your_client_secret
 AUTH0_AUDIENCE=https://api.pulseplay.ai
 AUTH0_ISSUER_BASE_URL=https://your-domain.auth0.com
 
-# Gemini (Required)
+# Frontend Auth0 (for Docker build)
+VITE_AUTH0_DOMAIN=your-domain.auth0.com
+VITE_AUTH0_CLIENT_ID=your_client_id
+VITE_AUTH0_AUDIENCE=https://api.pulseplay.ai
+VITE_API_URL=http://localhost:3001
+
+# Gemini AI (Required)
 GEMINI_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXX
 
 # Server Config
 NODE_ENV=production
-BACKEND_PORT=3000
+BACKEND_PORT=3001
 FRONTEND_PORT=5173
+FRONTEND_URL=http://localhost:5173
 ```
 
 ## 🎯 Common Commands
 
 ```bash
 # Start with Atlas
-make up-atlas
+make up-atlas      # Start services with MongoDB Atlas
 
 # View logs
-make logs-atlas
+make logs-atlas    # View Atlas deployment logs
 
 # Stop services
-make down-atlas
+make down-atlas    # Stop Atlas services
 
 # Check health
-curl http://localhost:3000/api/health
+curl http://localhost:3001/api/health
 
 # Access services
 http://localhost:5173  # Frontend
-http://localhost:3000  # Backend API
+http://localhost:3001  # Backend API
 ```
 
 ## 🔐 Security Tips
@@ -148,9 +155,10 @@ docker-compose -f docker-compose.atlas.yml logs -f backend
 
 ## 📈 Scaling
 
-**Free (M0)**: 512 MB storage
-**M10**: $0.08/hr - 2GB RAM, 10GB storage
-**M20**: $0.20/hr - 4GB RAM, 20GB storage
+**Free (M0)**: 512 MB storage, shared clusters
+**M10**: ~$0.08/hr - 2GB RAM, 10GB storage, dedicated clusters
+**M20**: ~$0.20/hr - 4GB RAM, 20GB storage, dedicated clusters
+**M30**: ~$0.54/hr - 8GB RAM, 80GB storage, dedicated clusters
 
 Upgrade in Atlas dashboard when needed.
 
