@@ -25,6 +25,7 @@ COPY vite.config.ts ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 COPY index.html ./
+COPY public ./public
 
 # Install frontend dependencies
 RUN npm install --production=false
