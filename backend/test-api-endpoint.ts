@@ -1,5 +1,5 @@
 import axios from 'axios';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import 'dotenv/config';
 

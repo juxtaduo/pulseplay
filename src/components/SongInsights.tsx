@@ -33,11 +33,22 @@ export const SongInsights = ({
 	rhythmData,
 	onClose,
 }: SongInsightsProps) => {
+	// Map song identifiers to proper display names
+	const getSongDisplayName = (songId: string): string => {
+		const songNames: Record<string, string> = {
+			'thousand-years': 'A Thousand Years',
+			'kiss-the-rain': 'Kiss The Rain',
+			'river-flows': 'River Flows In You',
+			gurenge: 'Gurenge',
+		};
+		return songNames[songId] || songId.replace(/-/g, ' ');
+	};
 	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const { theme } = useTheme();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [isRateLimitError, setIsRateLimitError] = useState(false);
 
 	const containerClassName =
 		theme === 'dark'
@@ -47,6 +58,7 @@ export const SongInsights = ({
 	const fetchRecommendation = useCallback(async () => {
 		setLoading(true);
 		setError(null);
+		setIsRateLimitError(false);
 
 		try {
 			let response: Response;
@@ -101,6 +113,17 @@ export const SongInsights = ({
 			}
 
 			if (!response.ok) {
+				// Check if this is a rate limit error
+				try {
+					const errorData = await response.json();
+					if (errorData.isRateLimit) {
+						setIsRateLimitError(true);
+						setError('API exceeded quota. Please try again later or check back tomorrow.');
+						return;
+					}
+				} catch {
+					// If we can't parse the error response, fall back to generic error
+				}
 				throw new Error('Failed to fetch AI recommendation');
 			}
 
@@ -191,8 +214,48 @@ export const SongInsights = ({
 			)}
 
 			{error && (
-				<div className="bg-yellow-50 dark:bg-[rgb(113_63_18_/_47%)] border border-yellow-200 dark:border-yellow-500/30 rounded-lg p-4">
-					<p className="text-sm text-yellow-800 dark:text-yellow-400">{error}</p>
+				<div
+					className={`border rounded-lg p-4 ${
+						isRateLimitError
+							? 'bg-orange-50 dark:bg-[rgb(154_52_18_/_47%)] border-orange-200 dark:border-orange-500/30'
+							: 'bg-yellow-50 dark:bg-[rgb(113_63_18_/_47%)] border-yellow-200 dark:border-yellow-500/30'
+					}`}
+				>
+					<div className="flex items-start gap-3">
+						<div
+							className={`p-1 rounded ${
+								isRateLimitError
+									? 'bg-orange-200 dark:bg-orange-600/80'
+									: 'bg-yellow-200 dark:bg-yellow-600/80'
+							}`}
+						>
+							{isRateLimitError ? (
+								<Clock size={16} className="text-orange-700 dark:text-orange-200" />
+							) : (
+								<Sparkles size={16} className="text-yellow-700 dark:text-yellow-200" />
+							)}
+						</div>
+						<div>
+							<p
+								className={`text-sm font-medium mb-1 ${
+									isRateLimitError
+										? 'text-orange-800 dark:text-orange-400'
+										: 'text-yellow-800 dark:text-yellow-400'
+								}`}
+							>
+								{isRateLimitError ? 'API Limit Reached' : 'AI Insights Unavailable'}
+							</p>
+							<p
+								className={`text-sm ${
+									isRateLimitError
+										? 'text-orange-700 dark:text-orange-300'
+										: 'text-yellow-700 dark:text-yellow-300'
+								}`}
+							>
+								{error}
+							</p>
+						</div>
+					</div>
 				</div>
 			)}
 
@@ -206,7 +269,7 @@ export const SongInsights = ({
 								Suggested for next session:
 							</div>
 							<div className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
-								{recommendation.suggestedSong.replace(/-/g, ' ')}
+								{getSongDisplayName(recommendation.suggestedSong)}
 							</div>
 						</div>
 					</div>

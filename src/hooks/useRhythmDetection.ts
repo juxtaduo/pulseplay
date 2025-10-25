@@ -53,6 +53,10 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 	const lastKeystrokeTime = useRef<number>(0);
 	const lastMouseMoveTime = useRef<number>(0); // Throttle mouse move events
 	const lastScrollTime = useRef<number>(0); // Throttle scroll events
+	const lastTouchTime = useRef<number>(0); // Throttle touch scroll events
+	const touchStartY = useRef<number>(0); // Track touch start position for scroll detection
+	const touchStartX = useRef<number>(0); // Track touch start position for scroll detection
+	const isScrolling = useRef<boolean>(false); // Track if user is actively scrolling
 	const bpmHistory = useRef<number[]>([]); // Track BPM values over time for averaging
 
 	// Cumulative counters for total session activity (not limited by array sizes)
@@ -318,6 +322,72 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		[isActive, enableInstrumentalSounds, selectedInstruments]
 	);
 
+	const handleTouchStart = useCallback(
+		(event: TouchEvent) => {
+			if (!isActive) return;
+
+			// Store initial touch position
+			const touch = event.touches[0];
+			touchStartX.current = touch.clientX;
+			touchStartY.current = touch.clientY;
+			isScrolling.current = false;
+		},
+		[isActive]
+	);
+
+	const handleTouchMove = useCallback(
+		(event: TouchEvent) => {
+			if (!isActive) return;
+
+			const touch = event.touches[0];
+			const deltaX = Math.abs(touch.clientX - touchStartX.current);
+			const deltaY = Math.abs(touch.clientY - touchStartY.current);
+
+			// If movement is significant and more vertical than horizontal, consider it scrolling
+			if ((deltaY > 10 || deltaX > 10) && deltaY >= deltaX && !isScrolling.current) {
+				const now = Date.now();
+
+				// Throttle touch scroll events (200ms minimum between scrolls)
+				if (now - lastTouchTime.current < 200) {
+					return;
+				}
+
+				// Record touch scroll event timestamp
+				scrollTimestamps.current.push(now);
+				totalScrolls.current++; // Increment cumulative counter
+				if (scrollTimestamps.current.length > 50) {
+					scrollTimestamps.current.shift();
+				}
+
+				lastTouchTime.current = now;
+				lastKeystrokeTime.current = now;
+				isScrolling.current = true;
+
+				// Play note on touch scroll if instrumental sounds enabled
+				if (enableInstrumentalSounds && selectedInstruments.length > 0) {
+					const instrument =
+						INSTRUMENTS[
+							selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]
+						];
+					const velocity = deltaY > 50 ? 0.5 : 0.35; // Louder for larger scroll movements
+
+					audioEngineRef.current.playInstrumentNote(instrument, velocity);
+
+					instrumentIndexRef.current =
+						(instrumentIndexRef.current + 1) % selectedInstruments.length;
+				}
+			}
+		},
+		[isActive, enableInstrumentalSounds, selectedInstruments]
+	);
+
+	const handleTouchEnd = useCallback(() => {
+		if (!isActive) return;
+
+		// Reset scrolling state
+		isScrolling.current = false;
+	}, [isActive]);
+
 	const handleMouseClick = useCallback(() => {
 		if (!isActive) return;
 
@@ -370,6 +440,9 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		window.addEventListener('mousemove', handleMouseMove);
 		window.addEventListener('click', handleMouseClick);
 		window.addEventListener('wheel', handleMouseScroll, { passive: true });
+		window.addEventListener('touchstart', handleTouchStart, { passive: true });
+		window.addEventListener('touchmove', handleTouchMove, { passive: true });
+		window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
 		const intervalId = setInterval(calculateRhythm, 1000);
 
@@ -397,6 +470,9 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 			window.removeEventListener('mousemove', handleMouseMove);
 			window.removeEventListener('click', handleMouseClick);
 			window.removeEventListener('wheel', handleMouseScroll);
+			window.removeEventListener('touchstart', handleTouchStart);
+			window.removeEventListener('touchmove', handleTouchMove);
+			window.removeEventListener('touchend', handleTouchEnd);
 			clearInterval(intervalId);
 			if (inactivityTimer) clearInterval(inactivityTimer);
 		};
@@ -406,6 +482,9 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		handleMouseMove,
 		handleMouseClick,
 		handleMouseScroll,
+		handleTouchStart,
+		handleTouchMove,
+		handleTouchEnd,
 		calculateRhythm,
 		enableInstrumentalSounds,
 		preserveData,

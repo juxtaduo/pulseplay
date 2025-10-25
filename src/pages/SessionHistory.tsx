@@ -11,7 +11,6 @@ import {
 	TrendingUp,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { Mood } from '../types';
 import { formatDuration, formatRelativeTime } from '../utils/timeFormatter';
@@ -249,20 +248,20 @@ export const SessionHistory = () => {
 				</div>
 
 				{/* Controls */}
-				<div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 mb-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm">
+				<div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 mb-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm relative z-[10000]">
 					<div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
 						{/* Mood Filter (T136) */}
 						<div className="flex items-center gap-3">
 							<Filter size={20} className="text-slate-600 dark:text-slate-400" />
-							<div className="relative z-[1001]" ref={dropdownRef}>
+							<div className="relative z-[10000]" ref={dropdownRef}>
 								<button
 									type="button"
 									onClick={() => {
 										if (!isDropdownOpen && dropdownRef.current) {
 											const rect = dropdownRef.current.getBoundingClientRect();
 											setDropdownPosition({
-												top: rect.bottom + window.scrollY,
-												left: rect.left + window.scrollX,
+												top: rect.height,
+												left: 0,
 												width: rect.width,
 											});
 										}
@@ -279,6 +278,37 @@ export const SessionHistory = () => {
 										className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
 									/>
 								</button>
+
+								{/* Dropdown Menu */}
+								{isDropdownOpen && (
+									<div
+										className="absolute bg-white dark:bg-[#485466] border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-[10001] isolate"
+										style={{
+											top: dropdownPosition.top,
+											left: dropdownPosition.left,
+											width: dropdownPosition.width,
+										}}
+									>
+										{MOOD_OPTIONS.map((option) => (
+											<button
+												type="button"
+												key={option.value}
+												onClick={() => {
+													setSelectedSong(option.value as Mood | 'all');
+													setCurrentPage(1);
+													setIsDropdownOpen(false);
+												}}
+												className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+													selectedSong === option.value
+														? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+														: 'text-slate-800 dark:text-slate-200'
+												}`}
+											>
+												{option.label}
+											</button>
+										))}
+									</div>
+								)}
 							</div>
 						</div>
 
@@ -307,42 +337,9 @@ export const SessionHistory = () => {
 					</div>
 				</div>
 
-				{/* Dropdown Portal */}
-				{isDropdownOpen &&
-					createPortal(
-						<div
-							className="fixed bg-white dark:bg-[#485466] border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-[9999] isolate"
-							style={{
-								top: dropdownPosition.top,
-								left: dropdownPosition.left,
-								width: dropdownPosition.width,
-							}}
-						>
-							{MOOD_OPTIONS.map((option) => (
-								<button
-									type="button"
-									key={option.value}
-									onClick={() => {
-										setSelectedSong(option.value as Mood | 'all');
-										setCurrentPage(1);
-										setIsDropdownOpen(false);
-									}}
-									className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg transition-colors ${
-										selectedSong === option.value
-											? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-											: 'text-slate-800 dark:text-slate-200'
-									}`}
-								>
-									{option.label}
-								</button>
-							))}
-						</div>,
-						document.body
-					)}
-
 				{/* Error Message */}
 				{error && (
-					<div className="bg-gradient-to-r from-red-100 via-rose-100 to-pink-100 dark:from-red-900/60 dark:via-rose-900/60 dark:to-pink-900/60 border-2 border-red-400 dark:border-red-500/80 rounded-xl p-6 mb-6 shadow-xl shadow-red-200/50 dark:shadow-red-500/40 dark:shadow-2xl dark:shadow-red-600/30 hover:shadow-2xl hover:shadow-red-300/60 dark:hover:shadow-red-500/60 transition-all duration-300 backdrop-blur-sm">
+					<div className="bg-gradient-to-r from-red-100 via-rose-100 to-pink-100 dark:from-red-900/60 dark:via-rose-900/60 dark:to-pink-900/60 border-2 border-red-400 dark:border-red-500/80 rounded-xl p-6 mb-6 shadow-xl shadow-red-200/50 dark:shadow-red-500/40 dark:shadow-2xl dark:shadow-red-600/30 hover:shadow-2xl hover:shadow-red-300/60 dark:hover:shadow-red-500/60 transition-all duration-300 backdrop-blur-sm relative z-[1]">
 						<div className="flex items-start gap-4">
 							<div className="flex-shrink-0">
 								<div className="p-2 bg-gradient-to-r from-red-500 to-rose-500 rounded-lg shadow-md">
