@@ -459,10 +459,10 @@ export const SessionHistory = () => {
 								key={session.sessionId}
 								className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 hover:bg-white/90 dark:hover:bg-slate-750 transition-all border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm hover:shadow-xl"
 							>
-								<div className="flex flex-col md:flex-row gap-4 justify-between">
+								<div className="flex flex-row gap-4 items-center">
 									{/* Checkbox - only show for authenticated users */}
 									{isAuthenticated && (
-										<div className="flex items-center">
+										<div className="flex items-center flex-shrink-0">
 											<input
 												type="checkbox"
 												checked={selectedSessions.has(session.sessionId)}
@@ -473,7 +473,7 @@ export const SessionHistory = () => {
 									)}
 
 									{/* Session Info */}
-									<div className="flex-1">
+									<div className="flex-1 min-w-0">
 										<div className="flex items-center gap-3 mb-3">
 											<span
 												className={`px-3 py-1 rounded-full text-xs font-semibold border shadow-sm ${getSongColor(
