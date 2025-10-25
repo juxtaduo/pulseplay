@@ -408,11 +408,7 @@ export const SessionHistory = () => {
 								className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
 							>
 								<Download size={18} />
-								<span>
-									{selectedSessions.size > 0
-										? `Export Selected (${selectedSessions.size})`
-										: 'Export'}
-								</span>
+								<span>Export</span>
 							</button>
 						</div>
 					</div>
