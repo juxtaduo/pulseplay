@@ -100,7 +100,7 @@ export const ControlPanel = ({
 	const displayVolume = Math.round(volume * 100);
 
 	return (
-		<div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 space-y-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm transition-colors duration-200">
+		<div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 space-y-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm transition-colors duration-200 relative z-20">
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-semibold text-slate-800 dark:text-white">Music Selection</h2>
 				<div className="flex items-center gap-3">
