@@ -61,7 +61,7 @@ export const SessionStats = ({ rhythmData, sessionDuration, isActive, isPaused, 
 	const keysPerMinute = displaySessionDuration > 0 ? Math.round((displayRhythmData.keystrokeCount / displaySessionDuration) * 60) : 0;
 
 	return (
-		<div className="bg-white/80 dark:bg-slate-800 rounded-xl p-6 border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm transition-colors duration-200">
+		<div className="bg-white/80 dark:bg-slate-800 rounded-xl p-6 border border-slate-200/60 dark:border-slate-700 shadow-lg backdrop-blur-sm transition-colors duration-200 relative z-20">
 			<div className="flex items-center justify-between mb-4">
 				<h2 className="text-xl font-semibold text-slate-800 dark:text-white">Session Stats</h2>
 				{isActive && (

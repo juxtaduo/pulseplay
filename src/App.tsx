@@ -43,36 +43,57 @@ function App() {
   backdrop-blur-md border-b border-slate-200/60 dark:border-slate-600/60
   shadow-sm transition-colors duration-200
 ">
-					<div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-						<div className="flex items-center gap-6">
-							<Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-								<div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md">
-									<img src={gramophoneIcon} alt="PulsePlay" className="w-6 h-6" />
+					<div className="max-w-7xl mx-auto px-4 py-4 md:py-4 flex items-center justify-between">
+						<div className="flex items-center gap-3 md:gap-6">
+							<Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
+								<div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md">
+									<img src={gramophoneIcon} alt="PulsePlay" className="w-5 h-5 md:w-6 md:h-6" />
 								</div>
 								<div>
-									<h1 className="text-2xl font-bold text-slate-800 dark:text-white">PulsePlay</h1>
-									<p className="text-sm text-slate-600 dark:text-slate-400">Moves with rhythm</p>
+									<h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">PulsePlay</h1>
+									<p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">Moves with rhythm</p>
 								</div>
 							</Link>
-							
-							<nav className="flex gap-4">
+						</div>
+						<div className="flex items-center gap-2 md:gap-3">
+							{/* Desktop navigation */}
+							<nav className="hidden md:flex gap-4 mr-2 md:mr-3">
 								<Link
 									to="/"
 									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 hover:from-rose-200 hover:via-pink-200 hover:to-purple-200 dark:from-rose-900/30 dark:via-pink-900/30 dark:to-purple-900/30 dark:hover:from-rose-800/70 dark:hover:via-pink-800/70 dark:hover:to-purple-800/70 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60 dark:shadow-lg dark:shadow-rose-900/40 dark:hover:shadow-xl dark:hover:shadow-rose-800/50 border border-rose-200/60 hover:border-rose-300/80 dark:border-rose-700/20 dark:hover:border-rose-600/80 dark:ring-2 dark:ring-rose-700/30 dark:hover:ring-rose-600/50"
 								>
 									<Music size={16} />
-									<span>Session</span>
+									<span className="text-slate-800 dark:text-white">Session</span>
 								</Link>
 								<Link
 									to="/history"
 									className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 hover:from-rose-200 hover:via-pink-200 hover:to-purple-200 dark:from-rose-900/30 dark:via-pink-900/30 dark:to-purple-900/30 dark:hover:from-rose-800/70 dark:hover:via-pink-800/70 dark:hover:to-purple-800/70 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60 dark:shadow-lg dark:shadow-rose-900/40 dark:hover:shadow-xl dark:hover:shadow-rose-800/50 border border-rose-200/60 hover:border-rose-300/80 dark:border-rose-700/20 dark:hover:border-rose-600/80 dark:ring-2 dark:ring-rose-700/30 dark:hover:ring-rose-600/50"
 								>
 									<History size={16} />
-									<span>Session History</span>
+									<span className="text-slate-800 dark:text-white">Session History</span>
 								</Link>
 							</nav>
-						</div>
-						<div className="flex items-center gap-3">
+							
+							{/* Mobile navigation - icon only */}
+							<nav className="flex md:hidden gap-2 mr-2">
+								<Link
+									to="/"
+									className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 hover:from-rose-200 hover:via-pink-200 hover:to-purple-200 dark:from-rose-900/30 dark:via-pink-900/30 dark:to-purple-900/30 dark:hover:from-rose-800/70 dark:hover:via-pink-800/70 dark:hover:to-purple-800/70 transition-all text-slate-800 dark:text-white shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60 dark:shadow-lg dark:shadow-rose-900/40 dark:hover:shadow-xl dark:hover:shadow-rose-800/50 border border-rose-200/60 hover:border-rose-300/80 dark:border-rose-700/20 dark:hover:border-rose-600/80 dark:ring-2 dark:ring-rose-700/30 dark:hover:ring-rose-600/50"
+									title="Session"
+									aria-label="Session"
+								>
+									<Music size={18} />
+								</Link>
+								<Link
+									to="/history"
+									className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 hover:from-rose-200 hover:via-pink-200 hover:to-purple-200 dark:from-rose-900/30 dark:via-pink-900/30 dark:to-purple-900/30 dark:hover:from-rose-800/70 dark:hover:via-pink-800/70 dark:hover:to-purple-800/70 transition-all text-slate-800 dark:text-white shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60 dark:shadow-lg dark:shadow-rose-900/40 dark:hover:shadow-xl dark:hover:shadow-rose-800/50 border border-rose-200/60 hover:border-rose-300/80 dark:border-rose-700/20 dark:hover:border-rose-600/80 dark:ring-2 dark:ring-rose-700/30 dark:hover:ring-rose-600/50"
+									title="Session History"
+									aria-label="Session History"
+								>
+									<History size={18} />
+								</Link>
+							</nav>
+							
 							<ThemeToggle />
 							<AuthButton />
 						</div>

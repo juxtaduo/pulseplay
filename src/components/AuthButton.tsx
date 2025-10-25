@@ -30,9 +30,9 @@ export const AuthButton = () => {
 	// If Auth0 is not available, show development mode
 	if (!auth0Available) {
 		return (
-			<div className="flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/50 dark:to-yellow-800/50 border border-yellow-200 dark:border-yellow-600/50 rounded-full px-4 py-2 shadow-sm">
-				<User size={18} className="text-yellow-700 dark:text-yellow-400" />
-				<span className="text-sm text-yellow-800 dark:text-yellow-300 font-medium">
+			<div className="flex items-center gap-2 md:gap-2 bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/50 dark:to-yellow-800/50 border border-yellow-200 dark:border-yellow-600/50 rounded-full px-3 md:px-4 py-2 shadow-sm">
+				<User size={16} className="md:w-4 md:h-4 text-yellow-700 dark:text-yellow-400" />
+				<span className="text-sm text-yellow-800 dark:text-yellow-300 font-medium hidden md:inline">
 					Dev Mode
 				</span>
 			</div>
@@ -59,25 +59,26 @@ export const AuthButton = () => {
 	};
 
 	if (isLoading) {
-		return <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full animate-pulse" />;
+		return <div className="w-10 h-10 md:w-10 md:h-10 bg-slate-200 dark:bg-slate-700 rounded-full animate-pulse" />;
 	}
 
 	if (isAuthenticated && user) {
 		return (
-			<div className="flex items-center gap-3">
-				<div className="flex items-center gap-2 bg-white/90 dark:bg-gradient-to-r dark:from-[rgb(48_53_91)] dark:to-[rgb(61_65_102)] rounded-full px-4 py-2 shadow-sm border border-slate-200/60 dark:border-slate-600/60">
-					<User size={18} className="text-slate-600 dark:text-slate-400" />
-					<span className="text-sm text-slate-700 dark:text-slate-300">
+			<div className="flex items-center gap-2 md:gap-3">
+				<div className="flex items-center gap-2 bg-white/90 dark:bg-gradient-to-r dark:from-[rgb(48_53_91)] dark:to-[rgb(61_65_102)] rounded-full px-3 md:px-4 py-2 shadow-sm border border-slate-200/60 dark:border-slate-600/60">
+					<User size={16} className="md:w-4 md:h-4 text-slate-600 dark:text-slate-400" />
+					<span className="text-sm text-slate-700 dark:text-slate-300 hidden md:inline">
 						{user.name || user.email?.split('@')[0] || 'User'}
 					</span>
 				</div>
 				<button
 					onClick={handleLogout}
-					className="p-2 bg-white/90 dark:bg-gradient-to-r dark:from-[rgb(48_53_91)] dark:to-[rgb(61_65_102)] hover:bg-slate-100 dark:hover:from-[rgb(48_53_91)] dark:hover:to-[rgb(61_65_102)] rounded-full transition-all text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200/60 dark:border-slate-600/60"
+					className="w-8 h-8 md:w-auto md:h-auto p-2 md:p-2 bg-white/90 dark:bg-gradient-to-r dark:from-[rgb(48_53_91)] dark:to-[rgb(61_65_102)] hover:bg-slate-100 dark:hover:from-[rgb(48_53_91)] dark:hover:to-[rgb(61_65_102)] rounded-full transition-all text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200/60 dark:border-slate-600/60"
 					title="Sign Out"
 					aria-label="Sign out"
 				>
-					<LogOut size={18} />
+					<LogOut size={16} className="md:w-4 md:h-4" />
+					<span className="hidden md:inline ml-2">Sign Out</span>
 				</button>
 			</div>
 		);
@@ -86,11 +87,11 @@ export const AuthButton = () => {
 	return (
 		<button
 			onClick={handleLogin}
-			className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 px-4 py-2 rounded-full transition-all text-white font-medium shadow-sm"
+			className="flex items-center justify-center w-10 h-10 md:w-auto md:h-auto gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 px-0 md:px-4 py-0 md:py-2 rounded-full transition-all text-white font-medium shadow-sm"
 			aria-label="Sign in with Auth0"
 		>
-			<LogIn size={18} />
-			Sign In
+			<LogIn size={18} className="md:w-4 md:h-4" />
+			<span className="hidden md:inline">Sign In</span>
 		</button>
 	);
 };
