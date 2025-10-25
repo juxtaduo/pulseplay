@@ -13,7 +13,7 @@ import {
 	logBrowserCapabilities,
 	type BrowserCapabilities,
 } from './utils/browserCheck';
-import gramophoneIcon from './icon/gramophone.png';
+import gramophoneIcon from './icon/gramophone.svg';
 
 function App() {
 	const [browserCheck, setBrowserCheck] = useState<BrowserCapabilities | null>(null);
