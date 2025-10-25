@@ -188,42 +188,6 @@ export const SessionHistory = () => {
 		}
 	};
 
-	// Delete all sessions
-	const handleDeleteAll = async () => {
-		if (!isAuthenticated) {
-			setError('Please log in to delete sessions');
-			return;
-		}
-
-		if (!confirm('Are you sure you want to delete ALL sessions? This cannot be undone.')) {
-			return;
-		}
-
-		try {
-			const token = await getAccessTokenSilently();
-			const response = await fetch(`${API_BASE_URL}/api/sessions/all`, {
-				method: 'DELETE',
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to delete sessions');
-			}
-
-			const result = await response.json();
-			alert(`Successfully deleted ${result.deletedCount} session(s)`);
-
-			// Refresh the list
-			setCurrentPage(1);
-			fetchSessions();
-		} catch (err) {
-			console.error('[SessionHistory] Delete error:', err);
-			setError('Failed to delete sessions. Please try again.');
-		}
-	};
-
 	// Handle individual session selection
 	const handleSessionSelect = (sessionId: string, checked: boolean) => {
 		setSelectedSessions((prev) => {
@@ -434,16 +398,6 @@ export const SessionHistory = () => {
 							>
 								<Download size={18} />
 								<span>Export Data</span>
-							</button>
-
-							{/* Delete All Button */}
-							<button
-								type="button"
-								onClick={handleDeleteAll}
-								className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
-							>
-								<Trash2 size={18} />
-								<span>Delete All</span>
 							</button>
 						</div>
 					</div>
