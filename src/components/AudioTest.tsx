@@ -1,5 +1,5 @@
-import { Play } from 'lucide-react';
 import { useState } from 'react';
+import { Play } from 'lucide-react';
 
 /**
  * Emergency Audio Test Component
@@ -12,7 +12,7 @@ export function AudioTest() {
 	const testDirectAudio = async () => {
 		try {
 			console.log('🔊 Starting audio test with Do-Re-Mi-Fa-Sol-La-Ti-Do scale...');
-
+			
 			// Create AudioContext
 			const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
 			const ctx = new AudioContextClass();
@@ -32,38 +32,38 @@ export function AudioTest() {
 				{ name: 'E5 (Mi)', freq: 659.25 },
 				{ name: 'F5 (Fa)', freq: 698.46 },
 				{ name: 'G5 (Sol)', freq: 783.99 },
-				{ name: 'A5 (La)', freq: 880.0 },
+				{ name: 'A5 (La)', freq: 880.00 },
 				{ name: 'B5 (Ti)', freq: 987.77 },
-				{ name: 'C6 (Do)', freq: 1046.5 },
+				{ name: 'C6 (Do)', freq: 1046.50 },
 			];
-
+			
 			console.log('🎵 Playing Do-Re-Mi-Fa-Sol-La-Ti-Do scale (0.3s per note)...');
-
+			
 			// Play each note in sequence (0.3 seconds each, no overlap)
 			notes.forEach((note, index) => {
-				const startTime = ctx.currentTime + index * 0.3; // 0.3 second apart (no gap, no overlap)
-
+				const startTime = ctx.currentTime + (index * 0.3); // 0.3 second apart (no gap, no overlap)
+				
 				const osc = ctx.createOscillator();
 				const gain = ctx.createGain();
-
+				
 				// Connect audio graph
 				osc.connect(gain);
 				gain.connect(ctx.destination);
-
+				
 				// Set parameters
 				osc.type = 'sine';
 				osc.frequency.setValueAtTime(note.freq, startTime);
-
+				
 				// Envelope: quick fade in and out for 0.3s duration
 				gain.gain.setValueAtTime(0, startTime);
 				gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02); // Quick attack
 				gain.gain.setValueAtTime(0.3, startTime + 0.25); // Sustain
 				gain.gain.linearRampToValueAtTime(0, startTime + 0.3); // Quick fade out
-
+				
 				// Start and stop (exactly 0.3 seconds)
 				osc.start(startTime);
 				osc.stop(startTime + 0.3);
-
+				
 				console.log(`  ${index + 1}. ${note.name} (${note.freq.toFixed(2)}Hz)`);
 			});
 
@@ -74,30 +74,30 @@ export function AudioTest() {
 			setTimeout(() => {
 				setIsPlaying(false);
 				console.log('⏹️ Test complete!');
-
+				
 				if (ctx.state === 'running') {
 					console.log('✅ SUCCESS: AudioContext is running!');
 					console.log('If you heard the 8-note scale, Web Audio API works.');
 					console.log('If not, check system audio settings.');
 				} else {
-					console.log(`❌ WARNING: AudioContext state is: ${ctx.state}`);
+					console.log('❌ WARNING: AudioContext state is: ' + ctx.state);
 				}
 			}, 2400);
+
 		} catch (error) {
-			console.log(`❌ ERROR: ${(error as Error).message}`);
+			console.log('❌ ERROR: ' + (error as Error).message);
 			setIsPlaying(false);
 		}
 	};
 
 	return (
 		<button
-			type="button"
 			onClick={testDirectAudio}
 			disabled={isPlaying}
 			className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all shadow-md ${
 				isPlaying
 					? 'bg-gray-400 cursor-not-allowed text-gray-700'
-					: 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 dark:from-amber-600 dark:to-amber-800 dark:hover:from-amber-700 dark:hover:to-amber-900 text-amber-900 dark:text-amber-100'
+					: 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 dark:from-[#d08c15] dark:to-[#ad4d12] dark:hover:from-amber-700 dark:hover:to-amber-900 text-amber-900 dark:text-amber-100'
 			}`}
 		>
 			<Play size={20} />

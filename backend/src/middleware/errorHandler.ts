@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { logger } from '../config/logger.js';
 import type { APIError } from '../types/index.js';
 
@@ -11,7 +11,12 @@ import type { APIError } from '../types/index.js';
  * Global error handler for Express
  * Catches all errors and returns consistent error responses
  */
-export function errorHandler(err: any, req: Request, res: Response, _next: NextFunction): void {
+export function errorHandler(
+	err: any,
+	req: Request,
+	res: Response,
+	_next: NextFunction,
+): void {
 	// Log error with context
 	logger.error(
 		{
@@ -24,7 +29,7 @@ export function errorHandler(err: any, req: Request, res: Response, _next: NextF
 			method: req.method,
 			ip: req.ip,
 		},
-		'request_error'
+		'request_error',
 	);
 
 	// Determine status code
@@ -79,7 +84,7 @@ export function errorHandler(err: any, req: Request, res: Response, _next: NextF
  */
 export function notFoundHandler(req: Request, res: Response): void {
 	logger.warn({ path: req.path, method: req.method }, 'route_not_found');
-
+	
 	res.status(404).json({
 		error: 'Not Found',
 		message: `Route ${req.method} ${req.path} not found`,

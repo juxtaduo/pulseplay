@@ -32,7 +32,7 @@ export function isWebAudioSupported(): boolean {
  */
 export function isCanvasSupported(): boolean {
 	const canvas = document.createElement('canvas');
-	return !!canvas.getContext?.('2d');
+	return !!(canvas.getContext && canvas.getContext('2d'));
 }
 
 /**
@@ -45,7 +45,7 @@ export function isLocalStorageSupported(): boolean {
 		localStorage.setItem(testKey, 'test');
 		localStorage.removeItem(testKey);
 		return true;
-	} catch (_e) {
+	} catch (e) {
 		return false;
 	}
 }
@@ -56,15 +56,10 @@ export function isLocalStorageSupported(): boolean {
  */
 export function isES6Supported(): boolean {
 	try {
-		// Test arrow functions, const/let, template literals without eval
-		const testArrow = () => 'test';
-		const testTemplate = `test ${testArrow()}`;
-		const testConst = (() => {
-			const x = 1;
-			return x;
-		})();
-		return testTemplate === 'test test' && testConst === 1;
-	} catch (_e) {
+		// Test arrow functions, const/let, template literals
+		eval('const x = () => `test`;');
+		return true;
+	} catch (e) {
 		return false;
 	}
 }
@@ -140,11 +135,7 @@ export function checkBrowserCapabilities(): BrowserCapabilities {
 
 	// Overall support check
 	const isSupported =
-		webAudioSupported &&
-		canvasSupported &&
-		localStorageSupported &&
-		es6Supported &&
-		versionSupported;
+		webAudioSupported && canvasSupported && localStorageSupported && es6Supported && versionSupported;
 
 	return {
 		webAudioSupported,
@@ -178,13 +169,13 @@ export function getUnsupportedFeatureMessages(capabilities: BrowserCapabilities)
 	}
 
 	if (!capabilities.localStorageSupported) {
-		messages.push('localStorage is not available. Your preferences cannot be saved locally.');
+		messages.push(
+			'localStorage is not available. Your preferences cannot be saved locally.'
+		);
 	}
 
 	if (!capabilities.es6Supported) {
-		messages.push(
-			'Your browser does not support modern JavaScript (ES6). Please update your browser.'
-		);
+		messages.push('Your browser does not support modern JavaScript (ES6). Please update your browser.');
 	}
 
 	const minVersions: Record<string, number> = {
@@ -225,8 +216,6 @@ export function logBrowserCapabilities(capabilities: BrowserCapabilities): void 
 	if (!capabilities.isSupported) {
 		console.warn('⚠️ Browser is not fully supported. Some features may not work correctly.');
 		const messages = getUnsupportedFeatureMessages(capabilities);
-		messages.forEach((msg) => {
-			console.warn(`  - ${msg}`);
-		});
+		messages.forEach((msg) => console.warn(`  - ${msg}`));
 	}
 }

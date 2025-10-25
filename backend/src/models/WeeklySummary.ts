@@ -1,4 +1,4 @@
-import mongoose, { type Document, Schema } from 'mongoose';
+import mongoose, { Schema, type Document } from 'mongoose';
 import type { WeeklySummary } from '../types/index.js';
 
 /**
@@ -64,7 +64,7 @@ const weeklySummarySchema = new Schema<WeeklySummaryDocument>(
 	{
 		timestamps: true,
 		collection: 'weekly_summaries',
-	}
+	},
 );
 
 // Compound index for unique weekly summaries per user
@@ -83,5 +83,5 @@ weeklySummarySchema.set('toJSON', {
 
 export const WeeklySummaryModel = mongoose.model<WeeklySummaryDocument>(
 	'WeeklySummary',
-	weeklySummarySchema
+	weeklySummarySchema,
 );

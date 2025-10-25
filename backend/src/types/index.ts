@@ -6,7 +6,11 @@
 /**
  * Valid song types for focus sessions
  */
-export type Song = 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge';
+export type Song =
+	| 'thousand-years'
+	| 'kiss-the-rain'
+	| 'river-flows'
+	| 'gurenge';
 
 /**
  * Rhythm types based on typing pattern analysis
