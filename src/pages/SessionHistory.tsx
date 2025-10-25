@@ -163,11 +163,9 @@ export const SessionHistory = () => {
 
 		try {
 			const token = await getAccessTokenSilently();
-			
 			// If sessions are selected, export only selected ones
 			const selectedIds = selectedSessions.size > 0 ? Array.from(selectedSessions) : null;
 			const queryParams = selectedIds ? `?sessionIds=${selectedIds.join(',')}` : '';
-			
 			const response = await fetch(`${API_BASE_URL}/api/sessions/export${queryParams}`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -383,8 +381,11 @@ export const SessionHistory = () => {
 										/>
 										<span>Select All</span>
 									</label>
-									<span className="text-xs text-slate-500 dark:text-slate-400 ml-6">
-										Select ({selectedSessions.size})
+									<span
+										className="text-xs text-slate-500 dark:text-slate-400"
+										style={{ marginLeft: '21px' }}
+									>
+										Selected ({selectedSessions.size})
 									</span>
 								</div>
 							)}
@@ -408,10 +409,9 @@ export const SessionHistory = () => {
 							>
 								<Download size={18} />
 								<span>
-									{selectedSessions.size > 0 
-										? `Export Selected (${selectedSessions.size})` 
-										: 'Export'
-									}
+									{selectedSessions.size > 0
+										? `Export Selected (${selectedSessions.size})`
+										: 'Export'}
 								</span>
 							</button>
 						</div>

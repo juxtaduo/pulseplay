@@ -207,8 +207,8 @@ router.get('/export', checkJwt, async (req: Request, res: Response) => {
 		let sessionsToExport = allSessions;
 		const sessionIdsParam = req.query.sessionIds as string;
 		if (sessionIdsParam) {
-			const requestedIds = sessionIdsParam.split(',').map(id => id.trim());
-			sessionsToExport = allSessions.filter(session => 
+			const requestedIds = sessionIdsParam.split(',').map((id) => id.trim());
+			sessionsToExport = allSessions.filter((session) =>
 				requestedIds.includes(session._id.toString())
 			);
 		}
