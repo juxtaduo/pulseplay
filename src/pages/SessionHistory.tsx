@@ -204,14 +204,14 @@ export const SessionHistory = () => {
 	};
 
 	const getSongColor = (song?: Mood) => {
-		if (!song) return 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
+		if (!song) return 'bg-slate-500/20 text-slate-700 dark:text-slate-400 border-slate-500/30';
 		const colors: Record<Mood, string> = {
-			'thousand-years': 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-			'kiss-the-rain': 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
-			'river-flows': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-			'gurenge': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+			'thousand-years': 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/30',
+			'kiss-the-rain': 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
+			'river-flows': 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/30',
+			'gurenge': 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30',
 		};
-		return colors[song] || 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
+		return colors[song] || 'bg-slate-500/20 text-slate-700 dark:text-slate-400 border-slate-500/30';
 	};
 
 	return (
