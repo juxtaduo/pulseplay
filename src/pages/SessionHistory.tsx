@@ -398,11 +398,7 @@ export const SessionHistory = () => {
 								className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:from-red-500 disabled:to-red-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-all shadow-sm"
 							>
 								<Trash2 size={18} />
-								<span>
-									{selectedSessions.size > 0
-										? `Delete Selected (${selectedSessions.size})`
-										: 'Delete'}
-								</span>
+								<span>Delete</span>
 							</button>
 
 							{/* Export Button (T137) */}
