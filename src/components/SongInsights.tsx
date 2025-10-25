@@ -1,6 +1,6 @@
-import { Sparkles, TrendingUp, Clock } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { Clock, Sparkles, TrendingUp } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import type { RhythmData } from '../hooks/useRhythmDetection';
 
@@ -27,26 +27,24 @@ interface AIRecommendation {
 	generatedAt: string;
 }
 
-export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }: SongInsightsProps) => {
+export const SongInsights = ({
+	sessionId,
+	sessionDuration,
+	rhythmData,
+	onClose,
+}: SongInsightsProps) => {
 	const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 	const { theme } = useTheme();
 	const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const containerClassName = theme === 'dark' 
-		? 'bg-[rgb(55_22_81_/_40%)] border-2 border-[rgb(192_132_252_/_0.8)] rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-500/40 shadow-2xl shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-500/60 transition-all duration-300'
-		: 'bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 border-2 border-purple-300 rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-200/50 hover:shadow-2xl hover:shadow-purple-300/60 transition-all duration-300';
+	const containerClassName =
+		theme === 'dark'
+			? 'bg-[rgb(55_22_81_/_40%)] border-2 border-[rgb(192_132_252_/_0.8)] rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-500/40 shadow-2xl shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-500/60 transition-all duration-300'
+			: 'bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 border-2 border-purple-300 rounded-xl p-6 backdrop-blur-sm shadow-xl shadow-purple-200/50 hover:shadow-2xl hover:shadow-purple-300/60 transition-all duration-300';
 
-	useEffect(() => {
-		// Only fetch recommendation if session is ≥30 seconds (reduced threshold for better UX)
-		// For authenticated users, require sessionId; for unauthenticated, require rhythmData
-		if (sessionDuration >= 30 && ((isAuthenticated && sessionId) || (!isAuthenticated && rhythmData))) {
-			fetchRecommendation();
-		}
-	}, [sessionId, sessionDuration, rhythmData, isAuthenticated]);
-
-	const fetchRecommendation = async () => {
+	const fetchRecommendation = useCallback(async () => {
 		setLoading(true);
 		setError(null);
 
@@ -66,22 +64,23 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 				});
 			} else if (!isAuthenticated && rhythmData) {
 				// Unauthenticated user: send rhythm data directly
-				const rhythmType = rhythmData.intensity === 'high' 
-					? 'energetic' 
-					: rhythmData.intensity === 'medium' 
-					? 'steady' 
-					: 'thoughtful';
+				const rhythmType =
+					rhythmData.intensity === 'high'
+						? 'energetic'
+						: rhythmData.intensity === 'medium'
+							? 'steady'
+							: 'thoughtful';
 
 				const requestBody = {
 					rhythmData: {
 						averageKeysPerMinute: rhythmData.keysPerMinute,
 						rhythmType,
 						peakIntensity: rhythmData.rhythmScore / 100,
-						samples: []
+						samples: [],
 					},
 					keystrokeCount: rhythmData.keystrokeCount,
 					averageBpm: rhythmData.averageBpm,
-					sessionDuration
+					sessionDuration,
 				};
 
 				response = await fetch(`${API_BASE_URL}/api/ai/song-recommendation-guest`, {
@@ -113,7 +112,18 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [getAccessTokenSilently, isAuthenticated, sessionId, rhythmData, sessionDuration]);
+
+	useEffect(() => {
+		// Only fetch recommendation if session is ≥30 seconds (reduced threshold for better UX)
+		// For authenticated users, require sessionId; for unauthenticated, require rhythmData
+		if (
+			sessionDuration >= 30 &&
+			((isAuthenticated && sessionId) || (!isAuthenticated && rhythmData))
+		) {
+			fetchRecommendation();
+		}
+	}, [sessionId, sessionDuration, rhythmData, isAuthenticated, fetchRecommendation]);
 
 	// Show warning if session is too short, but still render the component
 	if (sessionDuration < 30) {
@@ -125,14 +135,17 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 							<Sparkles size={20} className="text-purple-700 dark:text-purple-200" />
 						</div>
 						<div>
-							<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
+							<h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+								AI Song Insights
+							</h3>
 							<p className="text-xs text-slate-600 dark:text-slate-400">Powered by Gemini</p>
 						</div>
 					</div>
 				</div>
 				<div className="bg-yellow-50 dark:bg-[rgb(113_63_18_/_47%)] border border-yellow-200 dark:border-yellow-500/30 rounded-lg p-4">
 					<p className="text-sm text-yellow-800 dark:text-yellow-400">
-						Session too short for AI insights. Complete a session of at least 30 seconds to get personalized song recommendations.
+						Session too short for AI insights. Complete a session of at least 30 seconds to get
+						personalized song recommendations.
 					</p>
 				</div>
 			</div>
@@ -152,12 +165,15 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 						<Sparkles size={20} className="text-purple-700 dark:text-purple-200" />
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">AI Song Insights</h3>
+						<h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+							AI Song Insights
+						</h3>
 						<p className="text-xs text-slate-600 dark:text-slate-400">Powered by Gemini</p>
 					</div>
 				</div>
 				{onClose && (
 					<button
+						type="button"
 						onClick={onClose}
 						className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors"
 						aria-label="Close insights"
@@ -186,7 +202,9 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 					<div className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/40 dark:to-violet-900/40 rounded-lg p-4 border border-purple-200/60 dark:border-purple-500/50 shadow-md dark:shadow-purple-900/30">
 						<TrendingUp size={18} className="text-purple-600 dark:text-purple-300 flex-shrink-0" />
 						<div>
-							<div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Suggested for next session:</div>
+							<div className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+								Suggested for next session:
+							</div>
 							<div className="text-lg font-semibold text-slate-900 dark:text-white capitalize">
 								{recommendation.suggestedSong.replace(/-/g, ' ')}
 							</div>
@@ -195,7 +213,9 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 
 					{/* AI Rationale */}
 					<div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/40 dark:to-violet-900/40 rounded-lg p-4 border-2 border-purple-200/60 dark:border-purple-500/50 shadow-lg shadow-purple-100/50 dark:shadow-purple-900/50">
-						<p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{recommendation.rationale}</p>
+						<p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
+							{recommendation.rationale}
+						</p>
 					</div>
 
 					{/* Confidence Score */}
@@ -204,9 +224,7 @@ export const SongInsights = ({ sessionId, sessionDuration, rhythmData, onClose }
 							<Clock size={14} className="text-slate-600 dark:text-slate-400" />
 							<span>Generated just now</span>
 						</div>
-						<div>
-							Confidence: {Math.round(recommendation.confidence * 100)}%
-						</div>
+						<div>Confidence: {Math.round(recommendation.confidence * 100)}%</div>
 					</div>
 				</div>
 			)}

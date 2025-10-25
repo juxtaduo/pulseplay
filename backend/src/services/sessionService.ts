@@ -1,6 +1,6 @@
-import { FocusSessionModel, type FocusSessionDocument } from '../models/FocusSession.js';
 import { logger } from '../config/logger.js';
-import type { Song, SessionState, RhythmData } from '../types/index.js';
+import { type FocusSessionDocument, FocusSessionModel } from '../models/FocusSession.js';
+import type { RhythmData, SessionState, Song } from '../types/index.js';
 
 /**
  * Session service for managing focus sessions
@@ -45,7 +45,7 @@ export async function createSession(input: CreateSessionInput): Promise<FocusSes
 				song: input.song,
 				userIdHash: input.userIdHash,
 			},
-			'session_created',
+			'session_created'
 		);
 
 		return session;
@@ -55,7 +55,7 @@ export async function createSession(input: CreateSessionInput): Promise<FocusSes
 				error: error instanceof Error ? error.message : String(error),
 				userIdHash: input.userIdHash,
 			},
-			'session_creation_failed',
+			'session_creation_failed'
 		);
 		throw error;
 	}
@@ -80,7 +80,7 @@ export async function getSessionById(sessionId: string): Promise<FocusSessionDoc
 				error: error instanceof Error ? error.message : String(error),
 				sessionId,
 			},
-			'session_retrieval_failed',
+			'session_retrieval_failed'
 		);
 		throw error;
 	}
@@ -91,17 +91,14 @@ export async function getSessionById(sessionId: string): Promise<FocusSessionDoc
  */
 export async function getSessionsByUser(
 	userIdHash: string,
-	limit = 10,
+	limit = 10
 ): Promise<FocusSessionDocument[]> {
 	try {
 		const sessions = await FocusSessionModel.find({ userIdHash })
 			.sort({ createdAt: -1 })
 			.limit(limit);
 
-		logger.info(
-			{ userIdHash, count: sessions.length },
-			'sessions_retrieved_by_user',
-		);
+		logger.info({ userIdHash, count: sessions.length }, 'sessions_retrieved_by_user');
 
 		return sessions;
 	} catch (error) {
@@ -110,7 +107,7 @@ export async function getSessionsByUser(
 				error: error instanceof Error ? error.message : String(error),
 				userIdHash,
 			},
-			'sessions_retrieval_by_user_failed',
+			'sessions_retrieval_by_user_failed'
 		);
 		throw error;
 	}
@@ -121,7 +118,7 @@ export async function getSessionsByUser(
  */
 export async function updateSession(
 	sessionId: string,
-	updates: UpdateSessionInput,
+	updates: UpdateSessionInput
 ): Promise<FocusSessionDocument | null> {
 	try {
 		const session = await FocusSessionModel.findById(sessionId);
@@ -131,36 +128,36 @@ export async function updateSession(
 			return null;
 		}
 
-	// Update fields
-	if (updates.state) {
-		session.state = updates.state;
-		
-		// If session is being completed, set endTime
-		if (updates.state === 'completed') {
-			// Use provided endTime if available, otherwise use server time
-			session.endTime = updates.endTime || new Date();
-		}
-	}
+		// Update fields
+		if (updates.state) {
+			session.state = updates.state;
 
-	if (updates.endTime && updates.state !== 'completed') {
-		// Only allow manual endTime setting if not completing the session
-		session.endTime = updates.endTime;
-	}
-	
-	// Update totalDurationSeconds if provided (use frontend duration)
-	if (updates.totalDurationSeconds !== undefined) {
-		session.totalDurationSeconds = updates.totalDurationSeconds;
-	}
-	
-	// Update keystrokeCount and averageBpm if provided
-	if (updates.keystrokeCount !== undefined) {
-		session.keystrokeCount = updates.keystrokeCount;
-	}
-	if (updates.averageBpm !== undefined) {
-		session.averageBpm = updates.averageBpm;
-	}
-	
-	if (updates.rhythmData) {
+			// If session is being completed, set endTime
+			if (updates.state === 'completed') {
+				// Use provided endTime if available, otherwise use server time
+				session.endTime = updates.endTime || new Date();
+			}
+		}
+
+		if (updates.endTime && updates.state !== 'completed') {
+			// Only allow manual endTime setting if not completing the session
+			session.endTime = updates.endTime;
+		}
+
+		// Update totalDurationSeconds if provided (use frontend duration)
+		if (updates.totalDurationSeconds !== undefined) {
+			session.totalDurationSeconds = updates.totalDurationSeconds;
+		}
+
+		// Update keystrokeCount and averageBpm if provided
+		if (updates.keystrokeCount !== undefined) {
+			session.keystrokeCount = updates.keystrokeCount;
+		}
+		if (updates.averageBpm !== undefined) {
+			session.averageBpm = updates.averageBpm;
+		}
+
+		if (updates.rhythmData) {
 			// Merge rhythm data
 			if (updates.rhythmData.averageKeysPerMinute !== undefined) {
 				session.rhythmData.averageKeysPerMinute = updates.rhythmData.averageKeysPerMinute;
@@ -183,7 +180,7 @@ export async function updateSession(
 				sessionId: session._id.toString(),
 				updates: Object.keys(updates),
 			},
-			'session_updated',
+			'session_updated'
 		);
 
 		return session;
@@ -193,7 +190,7 @@ export async function updateSession(
 				error: error instanceof Error ? error.message : String(error),
 				sessionId,
 			},
-			'session_update_failed',
+			'session_update_failed'
 		);
 		throw error;
 	}
@@ -219,7 +216,7 @@ export async function deleteSession(sessionId: string): Promise<boolean> {
 				error: error instanceof Error ? error.message : String(error),
 				sessionId,
 			},
-			'session_deletion_failed',
+			'session_deletion_failed'
 		);
 		throw error;
 	}

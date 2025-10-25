@@ -1,4 +1,4 @@
-import mongoose, { Schema, type Document } from 'mongoose';
+import mongoose, { type Document, Schema } from 'mongoose';
 import type { WeeklySummary } from '../types/index.js';
 
 /**
@@ -64,7 +64,7 @@ const weeklySummarySchema = new Schema<WeeklySummaryDocument>(
 	{
 		timestamps: true,
 		collection: 'weekly_summaries',
-	},
+	}
 );
 
 // Compound index for unique weekly summaries per user
@@ -74,14 +74,15 @@ weeklySummarySchema.index({ createdAt: 1 }, { expireAfterSeconds: 15552000 }); /
 
 // Ensure JSON output excludes internal fields
 weeklySummarySchema.set('toJSON', {
-	transform: (_doc, ret: any) => {
-		delete ret._id;
-		delete ret.__v;
-		return ret;
+	transform: (_doc, ret: unknown) => {
+		const result = ret as Record<string, unknown>;
+		delete result._id;
+		delete result.__v;
+		return result;
 	},
 });
 
 export const WeeklySummaryModel = mongoose.model<WeeklySummaryDocument>(
 	'WeeklySummary',
-	weeklySummarySchema,
+	weeklySummarySchema
 );

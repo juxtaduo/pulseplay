@@ -4,7 +4,7 @@
  * @module models/AISongRecommendation
  */
 
-import { Schema, model, Document } from 'mongoose';
+import { type Document, model, Schema } from 'mongoose';
 
 /**
  * AISongRecommendation document interface
@@ -65,5 +65,5 @@ aiSongRecommendationSchema.index({ sessionId: 1 }); // Foreign key lookup
 
 export const AISongRecommendation = model<IAISongRecommendation>(
 	'AISongRecommendation',
-	aiSongRecommendationSchema,
+	aiSongRecommendationSchema
 );

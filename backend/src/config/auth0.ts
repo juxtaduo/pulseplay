@@ -1,3 +1,4 @@
+import type { Request } from 'express';
 import { auth } from 'express-oauth2-jwt-bearer';
 import { logger } from './logger.js';
 
@@ -22,7 +23,9 @@ export const checkJwt = auth({
  * @returns Auth0 user ID (e.g., "auth0|123456")
  * @throws {Error} If token is invalid or missing
  */
-export function getUserIdFromToken(req: any): string {
+export function getUserIdFromToken(
+	req: Request & { auth?: { payload?: { sub?: string } } }
+): string {
 	if (!req.auth || !req.auth.payload || !req.auth.payload.sub) {
 		logger.error('auth_token_missing_sub');
 		throw new Error('Invalid authentication token: missing sub claim');
@@ -38,6 +41,6 @@ export const optionalAuth = auth({
 	audience: process.env.AUTH0_AUDIENCE,
 	issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
 	tokenSigningAlg: 'RS256',
-	// @ts-ignore
+	// @ts-expect-error
 	credentialsRequired: false,
 });

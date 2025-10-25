@@ -1,4 +1,4 @@
-import mongoose, { Schema, type Document } from 'mongoose';
+import mongoose, { type Document, Schema } from 'mongoose';
 import type { SongInsight } from '../types/index.js';
 
 /**
@@ -46,7 +46,7 @@ const songInsightSchema = new Schema<SongInsightDocument>(
 	{
 		timestamps: false,
 		collection: 'song_insights',
-	},
+	}
 );
 
 // Indexes
@@ -55,7 +55,7 @@ songInsightSchema.index({ generatedAt: 1 }, { expireAfterSeconds: 7776000 }); //
 
 // Ensure JSON output excludes internal fields
 songInsightSchema.set('toJSON', {
-	transform: (_doc, ret: any) => {
+	transform: (_doc, ret: Record<string, unknown>) => {
 		ret.sessionId = ret.sessionId.toString();
 		delete ret._id;
 		delete ret.__v;
@@ -65,5 +65,5 @@ songInsightSchema.set('toJSON', {
 
 export const SongInsightModel = mongoose.model<SongInsightDocument>(
 	'SongInsight',
-	songInsightSchema,
+	songInsightSchema
 );
