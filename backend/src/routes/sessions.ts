@@ -1,15 +1,15 @@
 import express, { type Request, type Response } from 'express';
 import { checkJwt, getUserIdFromToken } from '../config/auth0.js';
+import { logger } from '../config/logger.js';
 import {
 	createSession,
+	deleteSession,
 	getSessionById,
 	getSessionsByUser,
 	updateSession,
-	deleteSession,
 } from '../services/sessionService.js';
+import type { SessionState, Song } from '../types/index.js';
 import { hashSHA256 } from '../utils/crypto.js';
-import { logger } from '../config/logger.js';
-import type { Song, SessionState } from '../types/index.js';
 
 const router = express.Router();
 
@@ -34,16 +34,13 @@ router.post('/', checkJwt, async (req: Request, res: Response) => {
 
 		const session = await createSession({ userIdHash, song });
 
-		logger.info(
-			{ sessionId: session._id.toString(), song },
-			'session_created_via_api',
-		);
+		logger.info({ sessionId: session._id.toString(), song }, 'session_created_via_api');
 
 		return res.status(201).json({ session: session.toJSON() });
 	} catch (error) {
 		logger.error(
 			{ error: error instanceof Error ? error.message : String(error) },
-			'session_creation_api_error',
+			'session_creation_api_error'
 		);
 		return res.status(500).json({
 			error: 'Session creation failed',
@@ -71,7 +68,7 @@ router.get('/', checkJwt, async (req: Request, res: Response) => {
 	} catch (error) {
 		logger.error(
 			{ error: error instanceof Error ? error.message : String(error) },
-			'sessions_list_api_error',
+			'sessions_list_api_error'
 		);
 		return res.status(500).json({
 			error: 'Sessions retrieval failed',
@@ -83,7 +80,7 @@ router.get('/', checkJwt, async (req: Request, res: Response) => {
 /**
  * GET /api/sessions/history
  * Get paginated session history for authenticated user (T132)
- * 
+ *
  * @query {number} page - Page number (default: 1)
  * @query {number} limit - Items per page (default: 20, max: 100)
  * @query {string} song - Filter by song (optional)
@@ -97,8 +94,8 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 		const userIdHash = hashSHA256(userId);
 
 		// Parse query parameters
-		const page = Math.max(1, parseInt(req.query.page as string) || 1);
-		const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
+		const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+		const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
 		const song = req.query.song as Song | undefined;
 		const sortBy = (req.query.sortBy as string) || 'createdAt';
 		const order = (req.query.order as string) === 'asc' ? 1 : -1;
@@ -120,11 +117,9 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 
 		// Get sessions with pagination
 		const sessions = await getSessionsByUser(userIdHash);
-		
+
 		// Filter by song if specified
-		const filteredSessions = song 
-			? sessions.filter(s => s.song === song)
-			: sessions;
+		const filteredSessions = song ? sessions.filter((s) => s.song === song) : sessions;
 
 		// Sort sessions
 		const sortedSessions = [...filteredSessions].sort((a, b) => {
@@ -142,29 +137,32 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 		const totalPages = Math.ceil(total / limit);
 
 		// Calculate duration for sessions that don't have it stored
-		const sessionsWithDuration = paginatedSessions.map(session => {
+		const sessionsWithDuration = paginatedSessions.map((session) => {
 			const sessionJson = session.toJSON();
-			
+
 			// If totalDurationSeconds is already set, use it (now comes from frontend for completed sessions)
 			if (sessionJson.totalDurationSeconds) {
 				return sessionJson;
 			}
-			
+
 			// For active/paused sessions without stored duration, calculate from startTime to now
 			const now = new Date();
 			const durationMs = now.getTime() - session.startTime.getTime();
 			sessionJson.totalDurationSeconds = Math.round(durationMs / 1000);
-			
+
 			return sessionJson;
 		});
 
-		logger.info({
-			userIdHash,
-			page,
-			limit,
-			song: song || 'all',
-			total,
-		}, 'session_history_retrieved');
+		logger.info(
+			{
+				userIdHash,
+				page,
+				limit,
+				song: song || 'all',
+				total,
+			},
+			'session_history_retrieved'
+		);
 
 		return res.status(200).json({
 			sessions: sessionsWithDuration,
@@ -176,9 +174,12 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 			},
 		});
 	} catch (error) {
-		logger.error({
-			error: error instanceof Error ? error.message : String(error),
-		}, 'session_history_api_error');
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+			},
+			'session_history_api_error'
+		);
 		return res.status(500).json({
 			error: 'Failed to retrieve session history',
 			message: 'An error occurred while fetching your session history',
@@ -190,7 +191,7 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
  * GET /api/sessions/export
  * Export all user sessions as JSON (T133)
  * Returns all session data with no PII (userIdHash is SHA-256)
- * 
+ *
  * @returns {sessions: Session[], exportedAt: string, totalSessions: number}
  */
 router.get('/export', checkJwt, async (req: Request, res: Response) => {
@@ -205,23 +206,32 @@ router.get('/export', checkJwt, async (req: Request, res: Response) => {
 		const exportData = {
 			exportedAt: new Date().toISOString(),
 			totalSessions: sessions.length,
-			sessions: sessions.map(s => s.toJSON()),
+			sessions: sessions.map((s) => s.toJSON()),
 		};
 
-		logger.info({
-			userIdHash,
-			totalSessions: sessions.length,
-		}, 'session_data_exported');
+		logger.info(
+			{
+				userIdHash,
+				totalSessions: sessions.length,
+			},
+			'session_data_exported'
+		);
 
 		// Set headers for file download
 		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Disposition', `attachment; filename="pulseplay-sessions-${Date.now()}.json"`);
+		res.setHeader(
+			'Content-Disposition',
+			`attachment; filename="pulseplay-sessions-${Date.now()}.json"`
+		);
 
 		return res.status(200).json(exportData);
 	} catch (error) {
-		logger.error({
-			error: error instanceof Error ? error.message : String(error),
-		}, 'session_export_api_error');
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+			},
+			'session_export_api_error'
+		);
 		return res.status(500).json({
 			error: 'Failed to export session data',
 			message: 'An error occurred while exporting your sessions',
@@ -232,7 +242,7 @@ router.get('/export', checkJwt, async (req: Request, res: Response) => {
 /**
  * DELETE /api/sessions/all
  * Delete all user sessions (right to be forgotten) (T134)
- * 
+ *
  * @returns {deletedCount: number, message: string}
  */
 router.delete('/all', checkJwt, async (req: Request, res: Response) => {
@@ -242,7 +252,7 @@ router.delete('/all', checkJwt, async (req: Request, res: Response) => {
 
 		// Get all sessions to count before deletion
 		const sessions = await getSessionsByUser(userIdHash);
-		const sessionIds = sessions.map(s => s._id.toString());
+		const sessionIds = sessions.map((s) => s._id.toString());
 
 		// Delete all sessions for this user
 		let deletedCount = 0;
@@ -251,19 +261,25 @@ router.delete('/all', checkJwt, async (req: Request, res: Response) => {
 			if (deleted) deletedCount++;
 		}
 
-		logger.info({
-			userIdHash,
-			deletedCount,
-		}, 'all_sessions_deleted');
+		logger.info(
+			{
+				userIdHash,
+				deletedCount,
+			},
+			'all_sessions_deleted'
+		);
 
 		return res.status(200).json({
 			deletedCount,
 			message: `Successfully deleted ${deletedCount} session(s)`,
 		});
 	} catch (error) {
-		logger.error({
-			error: error instanceof Error ? error.message : String(error),
-		}, 'delete_all_sessions_api_error');
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : String(error),
+			},
+			'delete_all_sessions_api_error'
+		);
 		return res.status(500).json({
 			error: 'Failed to delete sessions',
 			message: 'An error occurred while deleting your sessions',
@@ -294,7 +310,7 @@ router.get('/:id', checkJwt, async (req: Request, res: Response) => {
 		if (session.userIdHash !== userIdHash) {
 			logger.warn(
 				{ sessionId: id, requestedBy: userIdHash },
-				'unauthorized_session_access_attempt',
+				'unauthorized_session_access_attempt'
 			);
 			return res.status(403).json({
 				error: 'Forbidden',
@@ -309,7 +325,7 @@ router.get('/:id', checkJwt, async (req: Request, res: Response) => {
 				error: error instanceof Error ? error.message : String(error),
 				sessionId: req.params.id,
 			},
-			'session_retrieval_api_error',
+			'session_retrieval_api_error'
 		);
 		return res.status(500).json({
 			error: 'Session retrieval failed',
@@ -340,7 +356,7 @@ router.put('/:id', checkJwt, async (req: Request, res: Response) => {
 		if (existingSession.userIdHash !== userIdHash) {
 			logger.warn(
 				{ sessionId: id, requestedBy: userIdHash },
-				'unauthorized_session_update_attempt',
+				'unauthorized_session_update_attempt'
 			);
 			return res.status(403).json({
 				error: 'Forbidden',
@@ -349,7 +365,8 @@ router.put('/:id', checkJwt, async (req: Request, res: Response) => {
 		}
 
 		// Extract update fields
-		const { state, endTime, rhythmData, keystrokeCount, averageBpm, totalDurationSeconds } = req.body;
+		const { state, endTime, rhythmData, keystrokeCount, averageBpm, totalDurationSeconds } =
+			req.body;
 
 		// Validate state if provided
 		if (state) {
@@ -387,7 +404,7 @@ router.put('/:id', checkJwt, async (req: Request, res: Response) => {
 				error: error instanceof Error ? error.message : String(error),
 				sessionId: req.params.id,
 			},
-			'session_update_api_error',
+			'session_update_api_error'
 		);
 		return res.status(500).json({
 			error: 'Session update failed',
@@ -418,7 +435,7 @@ router.delete('/:id', checkJwt, async (req: Request, res: Response) => {
 		if (existingSession.userIdHash !== userIdHash) {
 			logger.warn(
 				{ sessionId: id, requestedBy: userIdHash },
-				'unauthorized_session_deletion_attempt',
+				'unauthorized_session_deletion_attempt'
 			);
 			return res.status(403).json({
 				error: 'Forbidden',
@@ -444,7 +461,7 @@ router.delete('/:id', checkJwt, async (req: Request, res: Response) => {
 				error: error instanceof Error ? error.message : String(error),
 				sessionId: req.params.id,
 			},
-			'session_deletion_api_error',
+			'session_deletion_api_error'
 		);
 		return res.status(500).json({
 			error: 'Session deletion failed',

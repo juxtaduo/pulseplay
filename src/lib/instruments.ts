@@ -101,10 +101,7 @@ export const INSTRUMENTS: Record<InstrumentType, InstrumentConfig> = {
  * @param keysPerMinute - Current typing speed
  * @returns Frequency in Hz
  */
-export function getFrequencyForTempo(
-	instrument: InstrumentConfig,
-	keysPerMinute: number
-): number {
+export function getFrequencyForTempo(instrument: InstrumentConfig, keysPerMinute: number): number {
 	const [minFreq, maxFreq] = instrument.frequencyRange;
 
 	// Map tempo ranges to frequency ranges per research.md:
@@ -122,7 +119,7 @@ export function getFrequencyForTempo(
 		normalizedTempo = (keysPerMinute - 40) / 40 / 3;
 	} else if (keysPerMinute < 120) {
 		// Medium: 0.33-0.66 range
-		normalizedTempo = 0.33 + ((keysPerMinute - 80) / 40 / 3);
+		normalizedTempo = 0.33 + (keysPerMinute - 80) / 40 / 3;
 	} else {
 		// Fast: 0.66-1.0 range
 		normalizedTempo = 0.66 + Math.min((keysPerMinute - 120) / 80 / 3, 0.34);

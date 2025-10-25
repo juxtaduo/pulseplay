@@ -37,7 +37,8 @@
 				"useTemplate": "error"
 			},
 			"suspicious": {
-				"noExplicitAny": "warn"
+				"noExplicitAny": "off",
+				"noUnknownAtRules": "off"
 			}
 		}
 	},

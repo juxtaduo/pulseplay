@@ -1,4 +1,4 @@
-import mongoose, { Schema, type Document } from 'mongoose';
+import mongoose, { type Document, Schema } from 'mongoose';
 import type { UserPreferences } from '../types/index.js';
 
 /**
@@ -57,7 +57,7 @@ const userPreferencesSchema = new Schema<UserPreferencesDocument>(
 	{
 		timestamps: true,
 		collection: 'user_preferences',
-	},
+	}
 );
 
 // TTL index: Remove preferences after 180 days of inactivity
@@ -74,5 +74,5 @@ userPreferencesSchema.set('toJSON', {
 
 export const UserPreferencesModel = mongoose.model<UserPreferencesDocument>(
 	'UserPreferences',
-	userPreferencesSchema,
+	userPreferencesSchema
 );

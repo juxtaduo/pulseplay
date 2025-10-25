@@ -3,7 +3,7 @@
  * @module models
  */
 
-export { FocusSessionModel, type FocusSessionDocument } from './FocusSession.js';
-export { UserPreferencesModel, type UserPreferencesDocument } from './UserPreferences.js';
-export { SongInsightModel, type SongInsightDocument } from './SongInsight.js';
-export { WeeklySummaryModel, type WeeklySummaryDocument } from './WeeklySummary.js';
+export { type FocusSessionDocument, FocusSessionModel } from './FocusSession.js';
+export { type SongInsightDocument, SongInsightModel } from './SongInsight.js';
+export { type UserPreferencesDocument, UserPreferencesModel } from './UserPreferences.js';
+export { type WeeklySummaryDocument, WeeklySummaryModel } from './WeeklySummary.js';
