@@ -282,9 +282,9 @@ Respond ONLY with valid JSON: {"song": "thousand-years|kiss-the-rain|river-flows
 
 		// Graceful fallback (Constitution principle II: fail-safe)
 		return {
-			song: 'deep-focus',
+			song: 'thousand-years',
 			rationale:
-				'AI insights temporarily unavailable. Try deep focus mode for balanced concentration.',
+				'AI insights temporarily unavailable. Try Thousand Years for balanced concentration.',
 			confidence: 0.5,
 		};
 	}
