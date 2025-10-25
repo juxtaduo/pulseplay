@@ -65,7 +65,7 @@ export const AuthButton = () => {
 	if (isAuthenticated && user) {
 		return (
 			<div className="flex items-center gap-3">
-				<div className="flex items-center gap-2 bg-white/90 dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 rounded-full px-4 py-2 shadow-sm border border-slate-200/60 dark:border-slate-600/60">
+				<div className="flex items-center gap-2 bg-white/90 dark:bg-gradient-to-r dark:from-[rgb(48_53_91)] dark:to-[rgb(61_65_102)] rounded-full px-4 py-2 shadow-sm border border-slate-200/60 dark:border-slate-600/60">
 					<User size={18} className="text-slate-600 dark:text-slate-400" />
 					<span className="text-sm text-slate-700 dark:text-slate-300">
 						{user.name || user.email?.split('@')[0] || 'User'}
@@ -73,7 +73,7 @@ export const AuthButton = () => {
 				</div>
 				<button
 					onClick={handleLogout}
-					className="p-2 bg-white/90 dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/60 hover:bg-slate-100 dark:hover:from-slate-700 dark:hover:to-slate-600 rounded-full transition-all text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200/60 dark:border-slate-600/60"
+					className="p-2 bg-white/90 dark:bg-gradient-to-r dark:from-[rgb(48_53_91)] dark:to-[rgb(61_65_102)] hover:bg-slate-100 dark:hover:from-[rgb(48_53_91)] dark:hover:to-[rgb(61_65_102)] rounded-full transition-all text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200/60 dark:border-slate-600/60"
 					title="Sign Out"
 					aria-label="Sign out"
 				>
