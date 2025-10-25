@@ -76,7 +76,7 @@ pulseplay/
 │   │   ├── AudioTest.tsx         # Audio testing interface
 │   │   ├── AuthButton.tsx        # Auth0 authentication UI
 │   │   ├── ControlPanel.tsx      # Audio control interface
-│   │   ├── MoodInsights.tsx      # AI mood analysis display
+│   │   ├── SongInsights.tsx      # AI song analysis display
 │   │   ├── RhythmVisualizer.tsx  # Real-time rhythm visualization
 │   │   └── SessionStats.tsx      # Session metrics dashboard
 │   │
@@ -337,11 +337,11 @@ interface ControlPanelProps {
 
 ---
 
-### MoodInsights.tsx
-**AI-generated insights panel** with Gemini integration
+### SongInsights.tsx
+**AI-generated song recommendations panel** with Gemini integration
 
 **Features**:
-- Fetches mood analysis from backend API
+- Fetches song analysis from backend API
 - Loading states with skeleton UI
 - Conditional rendering (requires 10+ keystrokes)
 - 5-second debounce to prevent API spam
@@ -932,7 +932,7 @@ pulseplay/
 │   ├── components/          # React UI components
 │   │   ├── AuthButton.tsx        # Authentication UI
 │   │   ├── ControlPanel.tsx      # Audio controls
-│   │   ├── MoodInsights.tsx      # AI-generated insights
+│   │   ├── SongInsights.tsx      # AI-generated insights
 │   │   ├── RhythmVisualizer.tsx  # Visual feedback
 │   │   └── SessionStats.tsx      # Session metrics
 │   │
@@ -1142,11 +1142,11 @@ interface ControlPanelProps {
 
 ---
 
-### MoodInsights.tsx
-**AI-generated insights display** component
+### SongInsights.tsx
+**AI-generated song recommendations display** component
 
 **Features**:
-- Fetches mood analysis from Edge Function
+- Fetches song analysis from Edge Function
 - Loading state with spinner
 - Conditional rendering (requires 10+ keystrokes)
 - 5-second debounce before fetching

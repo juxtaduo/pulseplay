@@ -172,7 +172,7 @@
 - [X] T113 [US5] Implement session pattern analyzer in backend/src/services/sessionAnalyzer.ts (steady vs erratic, fast vs slow classification)
 - [X] T114 [US5] Add prompt logging to Gemini service (log prompts/responses to pino for observability)
 - [X] T115 [US5] Implement graceful fallback for Gemini API failures (return generic productivity tip)
-- [X] T116 [US5] Create MoodInsights component in src/components/MoodInsights.tsx (display AI recommendation after session)
+- [X] T116 [US5] Create SongInsights component in src/components/SongInsights.tsx (display AI recommendation after session)
 - [X] T117 [US5] Add 10-minute session duration check (only show AI insights for sessions ≥10 minutes)
 - [X] T118 [US5] Implement weekly focus pattern summary (aggregate 5+ sessions, generate summary via Gemini)
 

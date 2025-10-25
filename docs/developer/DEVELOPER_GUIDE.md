@@ -92,7 +92,7 @@ pulseplay/
 │   │   ├── Auth0ProviderWrapper.tsx    # Auth0 integration
 │   │   ├── AuthButton.tsx             # Login/logout UI
 │   │   ├── ControlPanel.tsx           # Audio controls
-│   │   ├── MoodInsights.tsx           # AI insights display
+│   │   ├── SongInsights.tsx           # AI song insights display
 │   │   ├── RhythmVisualizer.tsx       # Real-time waveform
 │   │   └── SessionStats.tsx           # Session metrics
 │   │
@@ -194,7 +194,7 @@ User Interaction
     │       └─→ rhythmData state
     │           ├─→ RhythmVisualizer (display)
     │           ├─→ useAudioEngine (modulation)
-    │           ├─→ MoodInsights (AI analysis via Gemini)
+    │           ├─→ SongInsights (AI song analysis via Gemini)
     │           └─→ useSessionPersistence (save to MongoDB)
     │               └─→ Express API → MongoDB Atlas
     │

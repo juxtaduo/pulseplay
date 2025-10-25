@@ -39,7 +39,7 @@ pulseplay/
 │   │   ├── Auth0ProviderWrapper.tsx
 │   │   ├── AuthButton.tsx
 │   │   ├── ControlPanel.tsx
-│   │   ├── MoodInsights.tsx
+│   │   ├── SongInsights.tsx
 │   │   ├── RhythmVisualizer.tsx
 │   │   └── SessionStats.tsx
 │   ├── lib/

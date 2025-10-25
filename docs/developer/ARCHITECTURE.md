@@ -393,7 +393,7 @@ User Click "Stop" (≥10 min session) ──┐
                    { state: "completed", endTime }
                                        │
                                        ▼
-                        Show MoodInsights component
+                        Show SongInsights component
                                        │
                                        ▼
            POST /api/ai/mood-recommendation { sessionId }

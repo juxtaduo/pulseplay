@@ -50,7 +50,7 @@ src/                    # Frontend (React + TypeScript)
 │   ├── AudioTest.tsx       # Audio testing interface
 │   ├── AuthButton.tsx      # Authentication UI
 │   ├── ControlPanel.tsx    # Audio controls
-│   ├── MoodInsights.tsx    # AI-generated insights
+│   ├── SongInsights.tsx    # AI-generated song insights
 │   ├── RhythmVisualizer.tsx # Visual feedback
 │   └── SessionStats.tsx    # Session metrics
 ├── hooks/              # Custom React hooks

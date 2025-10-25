@@ -9,7 +9,7 @@ Build an AI-powered web application that generates adaptive focus music in real-
 
 **Primary Technical Approach**:
 - **Frontend**: React hooks manage Web Audio API audio nodes (OscillatorNode, GainNode, BiquadFilterNode), Canvas requestAnimationFrame loop for 60fps waveform, keyboard/mouse event listeners for rhythm detection
-- **Backend**: Express REST API handles session CRUD, WebSocket server broadcasts real-time rhythm metrics, Gemini API integration generates mood insights, MongoDB Mongoose models persist anonymized session data
+- **Backend**: Express REST API handles session CRUD, WebSocket server broadcasts real-time rhythm metrics, Gemini API integration generates song insights, MongoDB Mongoose models persist anonymized session data
 - **AI Integration**: Gemini API (gemini-2.5-flash) analyzes session rhythm patterns (steady/erratic, fast/slow) to generate personalized mood recommendations with transparent prompt logging
 - **Performance**: <200ms latency for keystroke-to-sound (Web Audio API scheduler), 60fps Canvas animation (requestAnimationFrame), <100ms audio-visual sync
 
@@ -30,7 +30,7 @@ Build an AI-powered web application that generates adaptive focus music in real-
 - 60fps Canvas waveform visualization (p95)
 - <100ms audio-visual synchronization latency
 - <50ms keystroke detection to waveform pulse
-- <3s Gemini API response time for mood insights
+- <3s Gemini API response time for song insights
 - <5s real-time session stats update lag
 
 **Constraints**:
@@ -110,7 +110,7 @@ specs/001-adaptive-focus-music/
 **Current Structure** (from workspace context):
 ```
 src/                      # Frontend (React + Vite)
-├── components/           # Existing: AuthButton, ControlPanel, MoodInsights, RhythmVisualizer, SessionStats
+├── components/           # Existing: AuthButton, ControlPanel, SongInsights, RhythmVisualizer, SessionStats
 ├── hooks/                # Existing: useAudioEngine, useRhythmDetection, useSessionPersistence
 ├── services/             # Existing: moodService
 └── lib/                  # Existing: supabase (to be replaced with Auth0)
@@ -126,7 +126,7 @@ src/
 ├── components/
 │   ├── AuthButton.tsx              # [UPDATE] Auth0 integration
 │   ├── ControlPanel.tsx            # [UPDATE] Instrument selection, volume control
-│   ├── MoodInsights.tsx            # [UPDATE] Display Gemini API insights
+│   ├── SongInsights.tsx            # [UPDATE] Display Gemini API song insights
 │   ├── RhythmVisualizer.tsx        # [UPDATE] Canvas waveform visualization
 │   ├── SessionStats.tsx            # [UPDATE] Real-time session metrics
 │   └── AccessibilityToggle.tsx     # [NEW] WCAG 2.1 AA accessibility mode
