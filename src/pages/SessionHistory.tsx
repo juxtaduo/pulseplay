@@ -300,86 +300,73 @@ export const SessionHistory = () => {
 
 				{/* Controls */}
 				<div className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 mb-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm relative z-[10000]">
-					<div className="flex flex-col gap-4">
-						{/* Top row: Filter and Export Data */}
-						<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-							{/* Mood Filter (T136) */}
-							<div className="flex items-center gap-3">
-								<Filter size={20} className="text-slate-600 dark:text-slate-400" />
-								<div className="relative z-[10000]" ref={dropdownRef}>
-									<button
-										type="button"
-										onClick={() => {
-											if (!isDropdownOpen && dropdownRef.current) {
-												const rect = dropdownRef.current.getBoundingClientRect();
-												setDropdownPosition({
-													top: rect.height,
-													left: 0,
-													width: rect.width,
-												});
-											}
-											setIsDropdownOpen(!isDropdownOpen);
+					<div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+						{/* Mood Filter (T136) */}
+						<div className="flex items-center gap-3">
+							<Filter size={20} className="text-slate-600 dark:text-slate-400" />
+							<div className="relative z-[10000]" ref={dropdownRef}>
+								<button
+									type="button"
+									onClick={() => {
+										if (!isDropdownOpen && dropdownRef.current) {
+											const rect = dropdownRef.current.getBoundingClientRect();
+											setDropdownPosition({
+												top: rect.height,
+												left: 0,
+												width: rect.width,
+											});
+										}
+										setIsDropdownOpen(!isDropdownOpen);
+									}}
+									className="bg-slate-100 dark:bg-[#485466] text-slate-800 dark:text-white rounded-lg px-4 py-2 border border-slate-200/60 dark:border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 shadow-sm flex items-center gap-2 min-w-[180px] justify-between"
+								>
+									<span>
+										{MOOD_OPTIONS.find((option) => option.value === selectedSong)?.label ||
+											'All Songs'}
+									</span>
+									<ChevronDown
+										size={16}
+										className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+									/>
+								</button>
+
+								{/* Dropdown Menu */}
+								{isDropdownOpen && (
+									<div
+										className="absolute bg-white dark:bg-[#485466] border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-[10001] isolate"
+										style={{
+											top: dropdownPosition.top,
+											left: dropdownPosition.left,
+											width: dropdownPosition.width,
 										}}
-										className="bg-slate-100 dark:bg-[#485466] text-slate-800 dark:text-white rounded-lg px-4 py-2 border border-slate-200/60 dark:border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 shadow-sm flex items-center gap-2 min-w-[180px] justify-between"
 									>
-										<span>
-											{MOOD_OPTIONS.find((option) => option.value === selectedSong)?.label ||
-												'All Songs'}
-										</span>
-										<ChevronDown
-											size={16}
-											className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-										/>
-									</button>
-
-									{/* Dropdown Menu */}
-									{isDropdownOpen && (
-										<div
-											className="absolute bg-white dark:bg-[#485466] border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-[10001] isolate"
-											style={{
-												top: dropdownPosition.top,
-												left: dropdownPosition.left,
-												width: dropdownPosition.width,
-											}}
-										>
-											{MOOD_OPTIONS.map((option) => (
-												<button
-													type="button"
-													key={option.value}
-													onClick={() => {
-														setSelectedSong(option.value as Mood | 'all');
-														setCurrentPage(1);
-														setIsDropdownOpen(false);
-													}}
-													className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg transition-colors ${
-														selectedSong === option.value
-															? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-															: 'text-slate-800 dark:text-slate-200'
-													}`}
-												>
-													{option.label}
-												</button>
-											))}
-										</div>
-									)}
-								</div>
+										{MOOD_OPTIONS.map((option) => (
+											<button
+												type="button"
+												key={option.value}
+												onClick={() => {
+													setSelectedSong(option.value as Mood | 'all');
+													setCurrentPage(1);
+													setIsDropdownOpen(false);
+												}}
+												className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+													selectedSong === option.value
+														? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+														: 'text-slate-800 dark:text-slate-200'
+												}`}
+											>
+												{option.label}
+											</button>
+										))}
+									</div>
+								)}
 							</div>
-
-							{/* Export Button (T137) - positioned to the right */}
-							<button
-								type="button"
-								onClick={handleExport}
-								className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
-							>
-								<Download size={18} />
-								<span>Export</span>
-							</button>
 						</div>
 
-						{/* Bottom row: Selection controls */}
-						{!loading && sessions.length > 0 && (
-							<div className="flex gap-3">
-								{/* Select All Checkbox */}
+						{/* Actions */}
+						<div className="flex gap-3">
+							{/* Select All Checkbox - only show if there are sessions */}
+							{!loading && sessions.length > 0 && (
 								<label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
 									<input
 										type="checkbox"
@@ -389,20 +376,29 @@ export const SessionHistory = () => {
 									/>
 									<span>Select All</span>
 								</label>
+							)}
 
-								{/* Delete Selected Button - only show if sessions are selected */}
-								{selectedSessions.size > 0 && (
-									<button
-										type="button"
-										onClick={handleDeleteSelected}
-										className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
-									>
-										<Trash2 size={18} />
-										<span>Delete Selected ({selectedSessions.size})</span>
-									</button>
-								)}
-							</div>
-						)}
+							{/* Delete Selected Button - always visible */}
+							<button
+								type="button"
+								onClick={handleDeleteSelected}
+								disabled={selectedSessions.size === 0}
+								className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-all shadow-sm"
+							>
+								<Trash2 size={18} />
+								<span>Delete ({selectedSessions.size})</span>
+							</button>
+
+							{/* Export Button (T137) */}
+							<button
+								type="button"
+								onClick={handleExport}
+								className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
+							>
+								<Download size={18} />
+								<span>Export</span>
+							</button>
+						</div>
 					</div>
 				</div>
 
