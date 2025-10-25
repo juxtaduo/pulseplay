@@ -87,7 +87,7 @@ focusSessionSchema.virtual('sessionId').get(function (this: FocusSessionDocument
 // Ensure virtuals are included in JSON output
 focusSessionSchema.set('toJSON', {
 	virtuals: true,
-	transform: (_doc, ret: Record<string, unknown>) => {
+	transform: (_doc, ret: Record<string, any>) => {
 		delete ret._id;
 		delete ret.__v;
 		return ret;

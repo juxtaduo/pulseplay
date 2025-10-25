@@ -55,7 +55,7 @@ songInsightSchema.index({ generatedAt: 1 }, { expireAfterSeconds: 7776000 }); //
 
 // Ensure JSON output excludes internal fields
 songInsightSchema.set('toJSON', {
-	transform: (_doc, ret: Record<string, unknown>) => {
+	transform: (_doc, ret: Record<string, any>) => {
 		ret.sessionId = ret.sessionId.toString();
 		delete ret._id;
 		delete ret.__v;
