@@ -218,24 +218,24 @@ export async function generateSongRecommendation(sessionData: {
 		// Few-shot prompt with structured JSON output
 		const prompt = `You are a focus productivity coach analyzing typing rhythm patterns. Based on the session data below, suggest a song for the next focus session and explain why.
 
-Song options: deep-focus, creative-flow, calm-reading, energized-coding
+Song options: thousand-years, kiss-the-rain, river-flows, gurenge
 
 Examples:
 Input: 1200 sec (20 min), 85 BPM, steady
-Output: {"song": "energized-coding", "rationale": "Your steady BPM (85) indicates strong focus momentum. Energized coding mode will maintain this flow state.", "confidence": 0.85}
+Output: {"song": "thousand-years", "rationale": "Your steady BPM (85) indicates strong focus momentum. Thousand Years will maintain this flow state.", "confidence": 0.85}
 
 Input: 900 sec (15 min), 35 BPM, erratic
-Output: {"song": "calm-reading", "rationale": "Your moderate BPM (35) with erratic pattern suggests deep contemplation. Calm reading mode will support sustained concentration.", "confidence": 0.78}
+Output: {"song": "kiss-the-rain", "rationale": "Your moderate BPM (35) with erratic pattern suggests deep contemplation. Kiss the Rain will support sustained concentration.", "confidence": 0.78}
 
 Input: 720 sec (12 min), 65 BPM, steady
-Output: {"song": "creative-flow", "rationale": "Your consistent BPM (65) suggests balanced productivity. Creative flow mode will nurture sustained inspiration.", "confidence": 0.82}
+Output: {"song": "river-flows", "rationale": "Your consistent BPM (65) suggests balanced productivity. River Flows will nurture sustained inspiration.", "confidence": 0.82}
 
 Now analyze this session:
 - Duration: ${sessionData.duration} seconds (${durationMinutes} minutes)
 - Average BPM: ${sessionData.averageBpm} BPM
 - Rhythm Pattern: ${sessionData.rhythmPattern}
 
-Respond ONLY with valid JSON: {"song": "deep-focus|creative-flow|calm-reading|energized-coding", "rationale": "string", "confidence": 0.0-1.0}`;
+Respond ONLY with valid JSON: {"song": "thousand-years|kiss-the-rain|river-flows|gurenge", "rationale": "string", "confidence": 0.0-1.0}`;
 
 		const startTime = Date.now();
 		const result = await model.generateContent(prompt);
