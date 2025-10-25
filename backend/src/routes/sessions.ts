@@ -189,9 +189,10 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 
 /**
  * GET /api/sessions/export
- * Export all user sessions as JSON (T133)
- * Returns all session data with no PII (userIdHash is SHA-256)
+ * Export user sessions as JSON (T133)
+ * Returns session data with no PII (userIdHash is SHA-256)
  *
+ * @query {string} sessionIds - Comma-separated list of session IDs to export (optional)
  * @returns {sessions: Session[], exportedAt: string, totalSessions: number}
  */
 router.get('/export', checkJwt, async (req: Request, res: Response) => {
@@ -200,19 +201,30 @@ router.get('/export', checkJwt, async (req: Request, res: Response) => {
 		const userIdHash = hashSHA256(userId);
 
 		// Get all sessions for user
-		const sessions = await getSessionsByUser(userIdHash);
+		const allSessions = await getSessionsByUser(userIdHash);
+
+		// Filter by sessionIds if provided
+		let sessionsToExport = allSessions;
+		const sessionIdsParam = req.query.sessionIds as string;
+		if (sessionIdsParam) {
+			const requestedIds = sessionIdsParam.split(',').map(id => id.trim());
+			sessionsToExport = allSessions.filter(session => 
+				requestedIds.includes(session._id.toString())
+			);
+		}
 
 		// Export format with metadata
 		const exportData = {
 			exportedAt: new Date().toISOString(),
-			totalSessions: sessions.length,
-			sessions: sessions.map((s) => s.toJSON()),
+			totalSessions: sessionsToExport.length,
+			sessions: sessionsToExport.map((s) => s.toJSON()),
 		};
 
 		logger.info(
 			{
 				userIdHash,
-				totalSessions: sessions.length,
+				totalSessions: sessionsToExport.length,
+				filtered: !!sessionIdsParam,
 			},
 			'session_data_exported'
 		);

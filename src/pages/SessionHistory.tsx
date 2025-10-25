@@ -59,6 +59,8 @@ export const SessionHistory = () => {
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 	const dropdownRef = useRef<HTMLDivElement>(null);
+	const [selectedSessions, setSelectedSessions] = useState<Set<string>>(new Set());
+	const [selectAll, setSelectAll] = useState(false);
 
 	const MOOD_OPTIONS: { value: Mood | 'all'; label: string }[] = [
 		{ value: 'all', label: 'All Songs' },
@@ -142,6 +144,16 @@ export const SessionHistory = () => {
 		fetchSessions();
 	}, [fetchSessions]);
 
+	// Update select all state when sessions or selection changes
+	useEffect(() => {
+		if (sessions.length > 0) {
+			const allSelected = sessions.every((session) => selectedSessions.has(session.sessionId));
+			setSelectAll(allSelected);
+		} else {
+			setSelectAll(false);
+		}
+	}, [sessions, selectedSessions]);
+
 	// Export session data (T137)
 	const handleExport = async () => {
 		if (!isAuthenticated) {
@@ -151,7 +163,12 @@ export const SessionHistory = () => {
 
 		try {
 			const token = await getAccessTokenSilently();
-			const response = await fetch(`${API_BASE_URL}/api/sessions/export`, {
+			
+			// If sessions are selected, export only selected ones
+			const selectedIds = selectedSessions.size > 0 ? Array.from(selectedSessions) : null;
+			const queryParams = selectedIds ? `?sessionIds=${selectedIds.join(',')}` : '';
+			
+			const response = await fetch(`${API_BASE_URL}/api/sessions/export${queryParams}`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -176,39 +193,78 @@ export const SessionHistory = () => {
 		}
 	};
 
-	// Delete all sessions
-	const handleDeleteAll = async () => {
+	// Handle individual session selection
+	const handleSessionSelect = (sessionId: string, checked: boolean) => {
+		setSelectedSessions((prev) => {
+			const newSet = new Set(prev);
+			if (checked) {
+				newSet.add(sessionId);
+			} else {
+				newSet.delete(sessionId);
+			}
+			return newSet;
+		});
+	};
+
+	// Handle select all checkbox
+	const handleSelectAll = (checked: boolean) => {
+		if (checked) {
+			setSelectedSessions(new Set(sessions.map((s) => s.sessionId)));
+		} else {
+			setSelectedSessions(new Set());
+		}
+		setSelectAll(checked);
+	};
+
+	// Delete selected sessions
+	const handleDeleteSelected = async () => {
 		if (!isAuthenticated) {
 			setError('Please log in to delete sessions');
 			return;
 		}
 
-		if (!confirm('Are you sure you want to delete ALL sessions? This cannot be undone.')) {
+		if (selectedSessions.size === 0) {
+			setError('Please select sessions to delete');
+			return;
+		}
+
+		if (
+			!confirm(
+				`Are you sure you want to delete ${selectedSessions.size} selected session(s)? This cannot be undone.`
+			)
+		) {
 			return;
 		}
 
 		try {
 			const token = await getAccessTokenSilently();
-			const response = await fetch(`${API_BASE_URL}/api/sessions/all`, {
-				method: 'DELETE',
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
+			const deletePromises = Array.from(selectedSessions).map((sessionId) =>
+				fetch(`${API_BASE_URL}/api/sessions/${sessionId}`, {
+					method: 'DELETE',
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				})
+			);
 
-			if (!response.ok) {
-				throw new Error('Failed to delete sessions');
+			const results = await Promise.all(deletePromises);
+			const failedDeletes = results.filter((r) => !r.ok).length;
+
+			if (failedDeletes > 0) {
+				alert(
+					`Deleted ${selectedSessions.size - failedDeletes} session(s). ${failedDeletes} failed.`
+				);
+			} else {
+				alert(`Successfully deleted ${selectedSessions.size} session(s)`);
 			}
 
-			const result = await response.json();
-			alert(`Successfully deleted ${result.deletedCount} session(s)`);
-
-			// Refresh the list
-			setCurrentPage(1);
+			// Clear selection and refresh the list
+			setSelectedSessions(new Set());
+			setSelectAll(false);
 			fetchSessions();
 		} catch (err) {
-			console.error('[SessionHistory] Delete error:', err);
-			setError('Failed to delete sessions. Please try again.');
+			console.error('[SessionHistory] Delete selected error:', err);
+			setError('Failed to delete selected sessions. Please try again.');
 		}
 	};
 
@@ -314,6 +370,36 @@ export const SessionHistory = () => {
 
 						{/* Actions */}
 						<div className="flex gap-3">
+							{/* Select All Checkbox - always appear when not loading */}
+							{!loading && (
+								<div className="flex flex-col gap-1">
+									<label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+										<input
+											type="checkbox"
+											checked={selectAll}
+											onChange={(e) => handleSelectAll(e.target.checked)}
+											disabled={!isAuthenticated || sessions.length === 0}
+											className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+										/>
+										<span>Select All</span>
+									</label>
+									<span className="text-xs text-slate-500 dark:text-slate-400 ml-6">
+										Select ({selectedSessions.size})
+									</span>
+								</div>
+							)}
+
+							{/* Delete Selected Button - always visible */}
+							<button
+								type="button"
+								onClick={handleDeleteSelected}
+								disabled={selectedSessions.size === 0}
+								className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:from-red-500 disabled:to-red-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-all shadow-sm"
+							>
+								<Trash2 size={18} />
+								<span>Delete</span>
+							</button>
+
 							{/* Export Button (T137) */}
 							<button
 								type="button"
@@ -321,17 +407,12 @@ export const SessionHistory = () => {
 								className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
 							>
 								<Download size={18} />
-								<span>Export Data</span>
-							</button>
-
-							{/* Delete All Button */}
-							<button
-								type="button"
-								onClick={handleDeleteAll}
-								className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
-							>
-								<Trash2 size={18} />
-								<span>Delete All</span>
+								<span>
+									{selectedSessions.size > 0 
+										? `Export Selected (${selectedSessions.size})` 
+										: 'Export'
+									}
+								</span>
 							</button>
 						</div>
 					</div>
@@ -393,9 +474,21 @@ export const SessionHistory = () => {
 								key={session.sessionId}
 								className="bg-white/80 dark:bg-slate-800/80 rounded-xl p-6 hover:bg-white/90 dark:hover:bg-slate-750 transition-all border border-slate-200/60 dark:border-slate-700/60 shadow-lg backdrop-blur-sm hover:shadow-xl"
 							>
-								<div className="flex flex-col md:flex-row gap-4 justify-between">
+								<div className="flex flex-row gap-4 items-center">
+									{/* Checkbox - only show for authenticated users */}
+									{isAuthenticated && (
+										<div className="flex items-center flex-shrink-0">
+											<input
+												type="checkbox"
+												checked={selectedSessions.has(session.sessionId)}
+												onChange={(e) => handleSessionSelect(session.sessionId, e.target.checked)}
+												className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+											/>
+										</div>
+									)}
+
 									{/* Session Info */}
-									<div className="flex-1">
+									<div className="flex-1 min-w-0">
 										<div className="flex items-center gap-3 mb-3">
 											<span
 												className={`px-3 py-1 rounded-full text-xs font-semibold border shadow-sm ${getSongColor(

@@ -39,8 +39,22 @@ export const RhythmVisualizer = ({ rhythmData, isPlaying }: RhythmVisualizerProp
 			}
 
 			const normalizedScore = rhythmData.rhythmScore / 100;
-			const baseRadius = 60;
-			const maxRadius = 120;
+
+			// Different base radii for each intensity level to ensure proper size hierarchy
+			let baseRadius: number;
+			let maxRadius: number;
+
+			if (rhythmData.intensity === 'high') {
+				baseRadius = 80; // Largest base size
+				maxRadius = 120;
+			} else if (rhythmData.intensity === 'medium') {
+				baseRadius = 65; // Medium base size (between green and red)
+				maxRadius = 105;
+			} else {
+				baseRadius = 50; // Smallest base size
+				maxRadius = 90;
+			}
+
 			const radius = baseRadius + (maxRadius - baseRadius) * normalizedScore;
 
 			const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
@@ -65,7 +79,7 @@ export const RhythmVisualizer = ({ rhythmData, isPlaying }: RhythmVisualizerProp
 			ctx.fill();
 
 			for (let i = 0; i < 3; i++) {
-				const waveRadius = radius + 20 + i * 15;
+				const waveRadius = Math.min(radius + 20 + i * 15, centerX - 10); // Limit to stay within canvas
 				const opacity = 0.3 - i * 0.1;
 				ctx.strokeStyle =
 					rhythmData.intensity === 'high'
