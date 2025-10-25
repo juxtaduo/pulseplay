@@ -383,8 +383,8 @@ export const SessionHistory = () => {
 										/>
 										<span>Select All</span>
 									</label>
-									<span className="text-xs text-slate-500 dark:text-slate-400 ml-6">
-										Select ({selectedSessions.size})
+									<span className="text-xs text-slate-500 dark:text-slate-400" style={{ marginLeft: '20px' }}>
+										Selected ({selectedSessions.size})
 									</span>
 								</div>
 							)}
