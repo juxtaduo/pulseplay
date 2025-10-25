@@ -222,13 +222,16 @@ Song options: thousand-years, kiss-the-rain, river-flows, gurenge
 
 Examples:
 Input: 1200 sec (20 min), 85 BPM, steady
-Output: {"song": "thousand-years", "rationale": "Your steady BPM (85) indicates strong focus momentum. Thousand Years will maintain this flow state.", "confidence": 0.85}
+Output: {"song": "thousand-years", "rationale": "Your steady BPM (85) indicates strong focus momentum. A Thousand Years will maintain this flow state.", "confidence": 0.85}
 
 Input: 900 sec (15 min), 35 BPM, erratic
 Output: {"song": "kiss-the-rain", "rationale": "Your moderate BPM (35) with erratic pattern suggests deep contemplation. Kiss the Rain will support sustained concentration.", "confidence": 0.78}
 
 Input: 720 sec (12 min), 65 BPM, steady
-Output: {"song": "river-flows", "rationale": "Your consistent BPM (65) suggests balanced productivity. River Flows will nurture sustained inspiration.", "confidence": 0.82}
+Output: {"song": "river-flows", "rationale": "Your consistent BPM (65) suggests balanced productivity. River Flows in You will nurture sustained inspiration.", "confidence": 0.82}
+
+Input: 600 sec (10 min), 95 BPM, steady
+Output: {"song": "gurenge", "rationale": "Your energetic BPM (95) indicates high productivity. Gurenge will match and enhance your focused energy.", "confidence": 0.88}
 
 Now analyze this session:
 - Duration: ${sessionData.duration} seconds (${durationMinutes} minutes)

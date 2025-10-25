@@ -143,18 +143,11 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 			rhythmPattern: analysis.rhythmPattern,
 		});
 
-		// Map Gemini mood recommendations to actual song names
-		const songMapping: Record<
-			string,
-			'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'
-		> = {
-			'deep-focus': 'thousand-years',
-			'creative-flow': 'river-flows',
-			'calm-reading': 'kiss-the-rain',
-			'energized-coding': 'gurenge',
-		};
-
-		const mappedSong = songMapping[recommendation.song] || 'thousand-years';
+		// Validate that Gemini returned a valid song identifier
+		const validSongs = ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
+		const suggestedSong = validSongs.includes(recommendation.song)
+			? recommendation.song
+			: 'thousand-years'; // Fallback to default
 
 		// Generate unique recommendation ID
 		const recommendationId = `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -163,7 +156,7 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 		const aiRecommendation = new AISongRecommendation({
 			recommendationId,
 			sessionId,
-			suggestedSong: mappedSong,
+			suggestedSong,
 			rationale: recommendation.rationale,
 			confidence: recommendation.confidence,
 			geminiModel: 'gemini-2.5-flash',
@@ -190,9 +183,18 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 			'ai_song_recommendation_error'
 		);
 
+		// Check if this is a Gemini API rate limit error
+		const isRateLimitError =
+			error instanceof Error &&
+			(error.message.includes('403') ||
+				error.message.includes('rate limit') ||
+				error.message.includes('quota exceeded') ||
+				error.message.includes("Method doesn't allow unregistered callers"));
+
 		return res.status(500).json({
 			error: 'Failed to generate song recommendation',
 			message: error instanceof Error ? error.message : 'Unknown error',
+			isRateLimit: isRateLimitError,
 		});
 	}
 });
@@ -308,18 +310,11 @@ router.post('/song-recommendation-guest', async (req: Request, res: Response) =>
 			rhythmPattern: analysis.rhythmPattern,
 		});
 
-		// Map Gemini mood recommendations to actual song names
-		const songMapping: Record<
-			string,
-			'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'
-		> = {
-			'deep-focus': 'thousand-years',
-			'creative-flow': 'river-flows',
-			'calm-reading': 'kiss-the-rain',
-			'energized-coding': 'gurenge',
-		};
-
-		const mappedSong = songMapping[recommendation.song] || 'thousand-years';
+		// Validate that Gemini returned a valid song identifier
+		const validSongs = ['thousand-years', 'kiss-the-rain', 'river-flows', 'gurenge'];
+		const suggestedSong = validSongs.includes(recommendation.song)
+			? recommendation.song
+			: 'thousand-years'; // Fallback to default
 
 		// Generate unique recommendation ID (for consistency with authenticated endpoint)
 		const recommendationId = `guest_rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -328,7 +323,7 @@ router.post('/song-recommendation-guest', async (req: Request, res: Response) =>
 		const aiRecommendation = {
 			recommendationId,
 			sessionId: null, // No session ID for guest users
-			suggestedSong: mappedSong,
+			suggestedSong,
 			rationale: recommendation.rationale,
 			confidence: recommendation.confidence,
 			geminiModel: 'gemini-2.5-flash',
@@ -357,9 +352,18 @@ router.post('/song-recommendation-guest', async (req: Request, res: Response) =>
 			'guest_ai_song_recommendation_error'
 		);
 
+		// Check if this is a Gemini API rate limit error
+		const isRateLimitError =
+			error instanceof Error &&
+			(error.message.includes('403') ||
+				error.message.includes('rate limit') ||
+				error.message.includes('quota exceeded') ||
+				error.message.includes("Method doesn't allow unregistered callers"));
+
 		return res.status(500).json({
 			error: 'Failed to generate song recommendation',
 			message: error instanceof Error ? error.message : 'Unknown error',
+			isRateLimit: isRateLimitError,
 		});
 	}
 });

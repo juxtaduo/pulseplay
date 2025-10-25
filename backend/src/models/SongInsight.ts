@@ -55,6 +55,7 @@ songInsightSchema.index({ generatedAt: 1 }, { expireAfterSeconds: 7776000 }); //
 
 // Ensure JSON output excludes internal fields
 songInsightSchema.set('toJSON', {
+	// biome-ignore lint/suspicious/noExplicitAny: Mongoose transform requires any type
 	transform: (_doc, ret: Record<string, any>) => {
 		ret.sessionId = ret.sessionId.toString();
 		delete ret._id;
