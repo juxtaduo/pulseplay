@@ -372,7 +372,7 @@ export const SessionHistory = () => {
 						<div className="flex gap-3">
 							{/* Select All Checkbox - always appear when not loading */}
 							{!loading && (
-								<div className="flex flex-col items-center gap-1">
+								<div className="flex flex-col gap-1">
 									<label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
 										<input
 											type="checkbox"
@@ -383,7 +383,7 @@ export const SessionHistory = () => {
 										/>
 										<span>Select All</span>
 									</label>
-									<span className="text-xs text-slate-500 dark:text-slate-400">
+									<span className="text-xs text-slate-500 dark:text-slate-400 ml-6">
 										Select ({selectedSessions.size})
 									</span>
 								</div>
