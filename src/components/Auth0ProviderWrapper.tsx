@@ -1,5 +1,5 @@
 import { Auth0Provider } from '@auth0/auth0-react';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 /**
  * Auth0 configuration wrapper for React app
@@ -23,7 +23,9 @@ export function Auth0ProviderWrapper({ children }: Auth0ProviderWrapperProps) {
 	const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 
 	if (!domain || !clientId) {
-		throw new Error('Auth0 configuration missing: VITE_AUTH0_DOMAIN and VITE_AUTH0_CLIENT_ID required');
+		throw new Error(
+			'Auth0 configuration missing: VITE_AUTH0_DOMAIN and VITE_AUTH0_CLIENT_ID required'
+		);
 	}
 
 	return (
