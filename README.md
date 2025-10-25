@@ -17,7 +17,7 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 
 - 🎹 **Real-time Audio Synthesis** - Pure Web Audio API synthesis (no pre-recorded samples)
 - 🎯 **Rhythm Detection** - Tracks keyboard and mouse activity to calculate BPM and tempo
-- 🧠 **AI Mood Recommendations** - Intelligent insights via Gemini API based on your focus patterns
+- 🧠 **AI Song Recommendations** - Intelligent insights via Gemini API based on your focus patterns
 - 🎨 **Live Waveform Visualization** - 60fps Canvas animation synced with your typing
 - 🎼 **Piano Song Moods** - A Thousand Years (Christina Perri), Kiss The Rain (Yiruma), River Flows In You (Yiruma), Gurenge (LiSA)
 - 🎹 **MIDI-Based Melodies** - Real piano pieces that adapt to your typing rhythm

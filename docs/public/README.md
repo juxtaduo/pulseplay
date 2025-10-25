@@ -17,7 +17,7 @@ An AI-powered focus music generator that creates adaptive, real-time ambient sou
 
 - 🎹 **Real-time Audio Synthesis** - Pure Web Audio API synthesis (no pre-recorded samples)
 - 🎯 **Rhythm Detection** - Tracks keyboard and mouse activity to calculate BPM and tempo
-- 🧠 **AI Mood Recommendations** - Intelligent insights via Gemini API based on your focus patterns
+- 🧠 **AI Song Recommendations** - Intelligent insights via Gemini API based on your focus patterns
 - 🎨 **Live Waveform Visualization** - 60fps Canvas animation synced with your typing
 - 🎹 **MIDI-Based Piano Songs** - Real piano pieces that adapt to your typing rhythm
 - 🎵 **Adaptive Instruments** - Piano, Flute, Xylophone, and Kalimba that respond to your rhythm
@@ -85,7 +85,7 @@ Set environment variables in your deployment platform's dashboard.
 - **Node.js + Express** - REST API server
 - **MongoDB Atlas** - Cloud database
 - **Auth0** - Authentication and authorization
-- **Google Gemini AI** - Mood recommendations
+- **Google Gemini AI** - Song recommendations
 
 ### Audio
 - **Web Audio API** - Native browser audio synthesis
@@ -105,7 +105,7 @@ pulseplay/
 │   │   ├── Auth0ProviderWrapper.tsx
 │   │   ├── AuthButton.tsx
 │   │   ├── ControlPanel.tsx      # Main audio controls
-│   │   ├── MoodInsights.tsx      # AI-generated insights
+│   │   ├── SongInsights.tsx      # AI-generated insights
 │   │   ├── RhythmVisualizer.tsx  # Real-time waveform
 │   │   └── SessionStats.tsx      # Session metrics
 │   ├── hooks/                    # Custom React hooks
@@ -372,7 +372,7 @@ This project is open source and available under the MIT License.
 - **MongoDB Atlas** - Cloud database
 - **Mongoose** - ODM for MongoDB
 - **Auth0** - Authentication & authorization
-- **Google Gemini AI** - Mood analysis
+- **Google Gemini AI** - Song analysis
 - **Web Audio API** - Native browser audio synthesis
 - **@tonejs/midi** - MIDI file parsing
 - **TailwindCSS** - Utility-first styling
@@ -394,7 +394,7 @@ This project is open source and available under the MIT License.
 - [x] Real-time audio synthesis with Web Audio API
 - [x] MIDI-based piano songs (4 songs implemented)
 - [x] Rhythm detection from typing patterns
-- [x] AI mood analysis with Gemini
+- [x] AI song analysis with Gemini
 - [x] Auth0 OAuth2 authentication
 - [x] MongoDB Atlas integration
 - [x] Docker containerization

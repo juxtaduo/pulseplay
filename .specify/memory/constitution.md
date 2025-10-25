@@ -102,7 +102,7 @@ PulsePlay integrates AI not as a gimmick but as a creative partner. Gemini API a
 - **Fail-safe**: AI failures MUST degrade gracefully (fallback to rule-based synthesis)
 
 **Gemini API Usage:**
-- **Mood insights**: Generate contextual feedback based on session metrics (rhythm patterns, duration, intensity)
+- **Song insights**: Generate contextual feedback based on session metrics (rhythm patterns, duration, intensity)
 - **Prompt engineering**: Use few-shot examples, clear instructions, structured outputs (JSON when possible)
 - **Rate limiting**: Respect API limits, implement exponential backoff, cache responses where appropriate
 - **Error handling**: Catch API errors, log failures, never block core audio functionality
@@ -181,7 +181,7 @@ PulsePlay is built for the open source community. Every line of code, every desi
 - **JSDoc required**: Every function, hook, component MUST have JSDoc with @param, @returns, @example
   ```typescript
   /**
-   * Generates AI-powered mood insights using Gemini API.
+   * Generates AI-powered song insights using Gemini API.
    * @param sessionMetrics - Aggregated session data (duration, keystrokes, rhythm)
    * @param userContext - User's selected mood (focus, calm, energy)
    * @returns Promise resolving to AI-generated insight text
@@ -208,7 +208,7 @@ PulsePlay is built for the open source community. Every line of code, every desi
 **Contribution Workflow (Transparent & Welcoming):**
 1. **Issue first**: Discuss features/bugs in GitHub issues before coding
 2. **Fork & branch**: Fork repo, create descriptive branch (`feature/gemini-insights`, `fix/canvas-flicker`)
-3. **Commit conventions**: Conventional Commits format (`feat(ai): add Gemini API mood insights`)
+3. **Commit conventions**: Conventional Commits format (`feat(ai): add Gemini API song insights`)
 4. **Pull request**: Clear description, link to issue, screenshots/videos for UI changes
 5. **Code review**: Maintainers review within 48 hours, provide constructive feedback
 6. **Merge & celebrate**: Merge to main, add contributor to `CONTRIBUTORS.md`, release notes credit
@@ -376,7 +376,7 @@ PulsePlay embraces simplicity, modularity, and measurable quality. Avoid over-en
   - Collections: `users`, `focusSessions`, `aiInsights`, `userPreferences`
 
 **AI Services:**
-- **Gemini API (Google AI)**: Primary AI service for mood insights, contextual feedback
+- **Gemini API (Google AI)**: Primary AI service for song insights, contextual feedback
   - Model: `gemini-2.5-flash` (fast responses) or `gemini-1.5-pro` (complex reasoning)
   - Use cases: Mood generation, tempo suggestions, focus session summaries
   - Rate limits: Respect API quotas, implement exponential backoff (1s, 2s, 4s, 8s)

@@ -279,7 +279,7 @@ pulseplay/
 │   │   ├── ControlPanel.tsx      # Session controls, volume, instruments
 │   │   ├── RhythmVisualizer.tsx  # Canvas waveform visualization
 │   │   ├── SessionStats.tsx      # Real-time session metrics
-│   │   └── MoodInsights.tsx      # Gemini AI insights display
+│   │   └── SongInsights.tsx      # Gemini AI song insights display
 │   ├── hooks/                    # React hooks
 │   │   ├── useAudioEngine.ts     # Web Audio API synthesis
 │   │   ├── useRhythmDetection.ts # Keyboard/mouse event listeners
@@ -356,7 +356,7 @@ pulseplay/
 
 ### AI Integration
 - **`backend/src/services/geminiService.ts`**: Gemini API prompts, mood recommendations
-- **`src/components/MoodInsights.tsx`**: Display AI insights
+- **`src/components/SongInsights.tsx`**: Display AI song insights
 
 ### Real-Time Communication
 - **`backend/src/websocket/rhythmSocket.ts`**: WebSocket server for rhythm data

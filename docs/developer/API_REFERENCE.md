@@ -224,7 +224,7 @@ Delete a session.
 
 ## AI API
 
-Generate mood insights using Google Gemini AI.
+Generate song insights using Google Gemini AI.
 
 ### POST /api/ai/mood-analysis
 
@@ -922,11 +922,11 @@ interface ControlPanelProps {
 
 ---
 
-### MoodInsights
+### SongInsights
 
 **Props**:
 ```typescript
-interface MoodInsightsProps {
+interface SongInsightsProps {
   rhythmData: RhythmData;
   isPlaying: boolean;
 }
@@ -934,7 +934,7 @@ interface MoodInsightsProps {
 
 **Usage**:
 ```typescript
-<MoodInsights
+<SongInsights
   rhythmData={rhythmData}
   isPlaying={isPlaying}
 />
