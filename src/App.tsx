@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthButton } from './components/AuthButton';
-import { ThemeToggle } from './components/ThemeToggle';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ThemeToggle } from './components/ThemeToggle';
 import { ThemeProvider } from './context/ThemeContext';
+import gramophoneIcon from './icon/gramophone.svg';
 import { Home } from './pages/Home';
 import { SessionHistory } from './pages/SessionHistory';
 import {
+	type BrowserCapabilities,
 	checkBrowserCapabilities,
 	getUnsupportedFeatureMessages,
 	logBrowserCapabilities,
-	type BrowserCapabilities,
 } from './utils/browserCheck';
-import gramophoneIcon from './icon/gramophone.svg';
 
 function App() {
 	const [browserCheck, setBrowserCheck] = useState<BrowserCapabilities | null>(null);
@@ -33,94 +33,107 @@ function App() {
 
 	return (
 		<ThemeProvider>
-		<ErrorBoundary>
-		<Router>
-			<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900 transition-colors duration-200">
-				<header className="
+			<ErrorBoundary>
+				<Router>
+					<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900 transition-colors duration-200">
+						<header
+							className="
   bg-gradient-to-r from-white/95 via-rose-50/80 to-pink-50/70
   dark:!bg-none dark:!from-transparent dark:!via-transparent dark:!to-transparent
   dark:!bg-[#242643]
   backdrop-blur-md border-b border-slate-200/60 dark:border-slate-600/60
   shadow-sm transition-colors duration-200
-">
-					<div className="max-w-7xl mx-auto px-4 py-4 md:py-4 flex items-center justify-between">
-						<div className="flex items-center gap-3 md:gap-6">
-							<Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
-								<div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md">
-									<img src={gramophoneIcon} alt="PulsePlay" className="w-5 h-5 md:w-6 md:h-6" />
+"
+						>
+							<div className="max-w-7xl mx-auto px-4 py-4 md:py-4 flex items-center justify-between">
+								<div className="flex items-center gap-3 md:gap-6">
+									<Link
+										to="/"
+										className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity"
+									>
+										<div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md">
+											<img src={gramophoneIcon} alt="PulsePlay" className="w-5 h-5 md:w-6 md:h-6" />
+										</div>
+										<div>
+											<h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">
+												PulsePlay
+											</h1>
+											<p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">
+												Moves with rhythm
+											</p>
+										</div>
+									</Link>
 								</div>
-								<div>
-									<h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">PulsePlay</h1>
-									<p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">Moves with rhythm</p>
+								<div className="flex items-center gap-2 md:gap-3">
+									<ThemeToggle />
+									<AuthButton />
 								</div>
-							</Link>
-						</div>
-						<div className="flex items-center gap-2 md:gap-3">
-							<ThemeToggle />
-							<AuthButton />
-						</div>
-					</div>
-				</header>
+							</div>
+						</header>
 
-				{/* Browser Compatibility Warning */}
-				{showCompatWarning && browserCheck && !browserCheck.isSupported && (
-					<div className="max-w-7xl mx-auto px-4 py-4">
-						<div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-500/10 dark:to-amber-500/10 border border-yellow-200 dark:border-yellow-500/30 rounded-xl p-6 shadow-sm">
-							<div className="flex items-start gap-4">
-								<div className="flex-shrink-0">
-									<AlertTriangle size={24} className="text-yellow-600 dark:text-yellow-400" />
-								</div>
-								<div className="flex-1">
-									<h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-400 mb-2">
-										Browser Compatibility Warning
-									</h3>
-									<p className="text-slate-700 dark:text-slate-300 text-sm mb-3">
-										Your browser ({browserCheck.browserName} {browserCheck.browserVersion}) may not support all features of PulsePlay.
-									</p>
-									<ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-400 mb-4">
-										{getUnsupportedFeatureMessages(browserCheck).map((msg, i) => (
-											<li key={i}>{msg}</li>
-										))}
-									</ul>
-									<div className="flex gap-3">
-										<button
-											onClick={() => setShowCompatWarning(false)}
-											className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg text-sm font-medium transition-all shadow-sm"
-										>
-											Dismiss
-										</button>
-										<a
-											href="https://browsehappy.com/"
-											target="_blank"
-											rel="noopener noreferrer"
-											className="px-4 py-2 bg-gradient-to-r from-slate-200 to-slate-300 hover:from-slate-300 hover:to-slate-400 dark:from-slate-700 dark:to-slate-600 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-800 dark:text-white rounded-lg text-sm font-medium transition-all shadow-sm"
-										>
-											Update Browser
-										</a>
+						{/* Browser Compatibility Warning */}
+						{showCompatWarning && browserCheck && !browserCheck.isSupported && (
+							<div className="max-w-7xl mx-auto px-4 py-4">
+								<div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-500/10 dark:to-amber-500/10 border border-yellow-200 dark:border-yellow-500/30 rounded-xl p-6 shadow-sm">
+									<div className="flex items-start gap-4">
+										<div className="flex-shrink-0">
+											<AlertTriangle size={24} className="text-yellow-600 dark:text-yellow-400" />
+										</div>
+										<div className="flex-1">
+											<h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-400 mb-2">
+												Browser Compatibility Warning
+											</h3>
+											<p className="text-slate-700 dark:text-slate-300 text-sm mb-3">
+												Your browser ({browserCheck.browserName} {browserCheck.browserVersion}) may
+												not support all features of PulsePlay.
+											</p>
+											<ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-400 mb-4">
+												{getUnsupportedFeatureMessages(browserCheck).map((msg) => (
+													<li key={msg}>{msg}</li>
+												))}
+											</ul>
+											<div className="flex gap-3">
+												<button
+													type="button"
+													onClick={() => setShowCompatWarning(false)}
+													className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg text-sm font-medium transition-all shadow-sm"
+												>
+													Dismiss
+												</button>
+												<a
+													href="https://browsehappy.com/"
+													target="_blank"
+													rel="noopener noreferrer"
+													className="px-4 py-2 bg-gradient-to-r from-slate-200 to-slate-300 hover:from-slate-300 hover:to-slate-400 dark:from-slate-700 dark:to-slate-600 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-800 dark:text-white rounded-lg text-sm font-medium transition-all shadow-sm"
+												>
+													Update Browser
+												</a>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					</div>
-				)}
+						)}
 
-				<Routes>
-					<Route path="/" element={<Home />} />
-					<Route path="/history" element={<SessionHistory />} />
-				</Routes>
+						<Routes>
+							<Route path="/" element={<Home />} />
+							<Route path="/history" element={<SessionHistory />} />
+						</Routes>
 
-				<footer className="max-w-7xl mx-auto px-4 py-8 mt-12">
-					<div className="text-center">
-						<div className="inline-flex items-center gap-2 px-6 py-3 bg-white/90 dark:bg-[#242643] backdrop-blur-md rounded-full shadow-sm border border-slate-200/60 dark:border-slate-600/60">
-							<div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
-							<span className="text-slate-600 dark:text-slate-300 text-sm font-medium">Rhythm that follows you</span>
-							<div className="w-2 h-2 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full animate-pulse"></div>
-						</div>
+						<footer className="max-w-7xl mx-auto px-4 py-8 mt-12">
+							<div className="text-center">
+								<div className="inline-flex items-center gap-2 px-6 py-3 bg-white/90 dark:bg-[#242643] backdrop-blur-md rounded-full shadow-sm border border-slate-200/60 dark:border-slate-600/60">
+									<div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse"></div>
+									<span className="text-slate-600 dark:text-slate-300 text-sm font-medium">
+										Rhythm that follows you
+									</span>
+									<div className="w-2 h-2 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full animate-pulse"></div>
+								</div>
+							</div>
+						</footer>
 					</div>
-				</footer>
-			</div>
-		</Router>
-		</ErrorBoundary>
+				</Router>
+			</ErrorBoundary>
 		</ThemeProvider>
 	);
 }

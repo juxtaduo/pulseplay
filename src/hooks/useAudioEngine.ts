@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { getAudioEngine, type AudioEngine } from '../services/audioService';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { type AudioEngine, getAudioEngine } from '../services/audioService';
 import type { Mood } from '../types';
 
 /**
@@ -55,33 +55,36 @@ export function useAudioEngine(): UseAudioEngineReturn {
 	 * Start playing ambient music for selected mood
 	 * Handles AudioContext resume for user gesture requirements
 	 */
-	const startAudio = useCallback(async (mood: Mood) => {
-		if (!engineRef.current) {
-			setError('Audio engine not initialized');
-			console.error('[useAudioEngine] Engine not initialized');
-			return;
-		}
+	const startAudio = useCallback(
+		async (mood: Mood) => {
+			if (!engineRef.current) {
+				setError('Audio engine not initialized');
+				console.error('[useAudioEngine] Engine not initialized');
+				return;
+			}
 
-		try {
-			setError(null);
-			console.log('[useAudioEngine] Starting audio for mood:', mood);
-			console.log('[useAudioEngine] Current volume state:', volume);
-			
-			await engineRef.current.start(mood);
-			
-			// Ensure volume is set after starting
-			console.log('[useAudioEngine] Setting volume after start:', volume);
-			engineRef.current.setVolume(volume);
-			
-			setIsPlaying(true);
-			setCurrentMood(mood);
-			console.log('[useAudioEngine] ✅ Started audio for mood:', mood);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Failed to start audio';
-			setError(errorMessage);
-			console.error('[useAudioEngine] Start error:', err);
-		}
-	}, [volume]);
+			try {
+				setError(null);
+				console.log('[useAudioEngine] Starting audio for mood:', mood);
+				console.log('[useAudioEngine] Current volume state:', volume);
+
+				await engineRef.current.start(mood);
+
+				// Ensure volume is set after starting
+				console.log('[useAudioEngine] Setting volume after start:', volume);
+				engineRef.current.setVolume(volume);
+
+				setIsPlaying(true);
+				setCurrentMood(mood);
+				console.log('[useAudioEngine] ✅ Started audio for mood:', mood);
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Failed to start audio';
+				setError(errorMessage);
+				console.error('[useAudioEngine] Start error:', err);
+			}
+		},
+		[volume]
+	);
 
 	/**
 	 * Stop audio playback with 2-second exponential fadeout

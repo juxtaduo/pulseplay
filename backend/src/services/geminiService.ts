@@ -42,7 +42,11 @@ export async function generateSongInsight(
 		// Calculate session characteristics
 		const sessionMinutes = Math.floor(sessionMetrics.duration / 60);
 		const rhythmType =
-			sessionMetrics.averageTempo > 80 ? 'energetic' : sessionMetrics.averageTempo > 40 ? 'steady' : 'thoughtful';
+			sessionMetrics.averageTempo > 80
+				? 'energetic'
+				: sessionMetrics.averageTempo > 40
+					? 'steady'
+					: 'thoughtful';
 
 		// Few-shot prompt with structured output
 		const prompt = `You are an AI focus coach analyzing typing patterns to provide song recommendations.
@@ -65,10 +69,15 @@ Provide a 1-2 sentence song recommendation for the next session. Be specific and
 		const latency = Date.now() - startTime;
 
 		const response = result.response.text();
-		logger.info({ latency_ms: latency, response_length: response.length }, 'gemini_song_recommendation_request');
+		logger.info(
+			{ latency_ms: latency, response_length: response.length },
+			'gemini_song_recommendation_request'
+		);
 
 		// Parse Gemini response
-		const jsonMatch = response.match(/\{[\s\S]*"song"[\s\S]*"rationale"[\s\S]*"confidence"[\s\S]*\}/);
+		const jsonMatch = response.match(
+			/\{[\s\S]*"song"[\s\S]*"rationale"[\s\S]*"confidence"[\s\S]*\}/
+		);
 		if (!jsonMatch) {
 			throw new Error('Invalid Gemini response format');
 		}
@@ -89,7 +98,7 @@ Provide a 1-2 sentence song recommendation for the next session. Be specific and
 				error: error instanceof Error ? error.message : 'Unknown error',
 				session_metrics: sessionMetrics,
 			},
-			'gemini_api_error',
+			'gemini_api_error'
 		);
 
 		// Graceful fallback
@@ -167,16 +176,22 @@ Provide a 2-3 sentence summary highlighting patterns and suggesting improvements
 		const result = await model.generateContent(prompt);
 		const summary = result.response.text();
 
-		logger.info({
-			sessions_analyzed: sessions.length,
-			total_seconds: totalSeconds,
-		}, 'gemini_weekly_summary');
+		logger.info(
+			{
+				sessions_analyzed: sessions.length,
+				total_seconds: totalSeconds,
+			},
+			'gemini_weekly_summary'
+		);
 
 		return summary.trim();
 	} catch (error) {
-		logger.error({
-			error: error instanceof Error ? error.message : 'Unknown error',
-		}, 'gemini_weekly_summary_error');
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : 'Unknown error',
+			},
+			'gemini_weekly_summary_error'
+		);
 
 		return `You completed ${sessions.length} focus sessions this week, totaling ${Math.floor(
 			sessions.reduce((sum, s) => sum + s.duration, 0) / 60
@@ -242,27 +257,34 @@ Respond ONLY with valid JSON: {"song": "deep-focus|creative-flow|calm-reading|en
 		}
 
 		// Log prompt/response for transparency (Constitution principle II)
-		logger.info({
-			prompt_hash: hashString(prompt),
-			suggested_song: insight.song,
-			confidence: insight.confidence,
-			latency_ms: latency,
-			model: 'gemini-2.5-flash',
-			session_duration_sec: sessionData.duration,
-			rhythm_pattern: sessionData.rhythmPattern,
-		}, 'gemini_song_recommendation');
+		logger.info(
+			{
+				prompt_hash: hashString(prompt),
+				suggested_song: insight.song,
+				confidence: insight.confidence,
+				latency_ms: latency,
+				model: 'gemini-2.5-flash',
+				session_duration_sec: sessionData.duration,
+				rhythm_pattern: sessionData.rhythmPattern,
+			},
+			'gemini_song_recommendation'
+		);
 
 		return insight;
 	} catch (error) {
-		logger.error({
-			error: error instanceof Error ? error.message : 'Unknown error',
-			session_data: sessionData,
-		}, 'gemini_song_recommendation_error');
+		logger.error(
+			{
+				error: error instanceof Error ? error.message : 'Unknown error',
+				session_data: sessionData,
+			},
+			'gemini_song_recommendation_error'
+		);
 
 		// Graceful fallback (Constitution principle II: fail-safe)
 		return {
 			song: 'deep-focus',
-			rationale: 'AI insights temporarily unavailable. Try deep focus mode for balanced concentration.',
+			rationale:
+				'AI insights temporarily unavailable. Try deep focus mode for balanced concentration.',
 			confidence: 0.5,
 		};
 	}

@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import express from 'express';
 import cors from 'cors';
-import { logger } from './config/logger.js';
+import express from 'express';
 import { connectDatabase } from './config/database.js';
+import { logger } from './config/logger.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 /**
@@ -19,7 +19,7 @@ app.use(
 	cors({
 		origin: [FRONTEND_URL, 'https://pulseplay.lanun.xyz', 'http://pulseplay.lanun.xyz'],
 		credentials: true,
-	}),
+	})
 );
 app.use(express.json());
 
@@ -38,9 +38,10 @@ app.get('/api/health', (_req, res) => {
 	res.json({ status: 'ok', timestamp: new Date().toISOString(), service: 'pulseplay-backend' });
 });
 
+import aiRouter from './routes/ai.js';
 // API routes
 import sessionsRouter from './routes/sessions.js';
-import aiRouter from './routes/ai.js';
+
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/ai', aiRouter);
 
@@ -59,17 +60,18 @@ async function startServer() {
 		// Connect to MongoDB (optional for testing - requires real MongoDB Atlas URI)
 		const mongoUri = process.env.MONGODB_ATLAS_URI || '';
 		const isRealMongoUri =
-			mongoUri.includes('mongodb+srv://') || (mongoUri.includes('mongodb://') && !mongoUri.includes('localhost'));
+			mongoUri.includes('mongodb+srv://') ||
+			(mongoUri.includes('mongodb://') && !mongoUri.includes('localhost'));
 
 		if (isRealMongoUri && !mongoUri.includes('your')) {
 			await connectDatabase();
 		} else {
 			logger.warn(
 				{ mongodb: 'skipped', reason: 'No production MongoDB URI configured' },
-				'Skipping MongoDB connection. Using local/example URI or not configured.',
+				'Skipping MongoDB connection. Using local/example URI or not configured.'
 			);
 		}
-		
+
 		// Start Express server
 		const server = app.listen(PORT, () => {
 			logger.info({ port: PORT, env: process.env.NODE_ENV }, 'server_started');
@@ -84,7 +86,7 @@ async function startServer() {
 				stack: error instanceof Error ? error.stack : undefined,
 				env: process.env.NODE_ENV,
 			},
-			'server_startup_failed',
+			'server_startup_failed'
 		);
 		process.exit(1);
 	}
