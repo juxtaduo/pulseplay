@@ -24,22 +24,16 @@ export async function connectDatabase(): Promise<void> {
 			socketTimeoutMS: 45000,
 		});
 
-		logger.info(
-			{
-				database: mongoose.connection.name,
-				host: mongoose.connection.host,
-			},
-			'database_connected'
-		);
+		logger.info({
+			database: mongoose.connection.name,
+			host: mongoose.connection.host,
+		}, 'database_connected');
 
 		// Handle connection events
 		mongoose.connection.on('error', (error) => {
-			logger.error(
-				{
-					error: error.message,
-				},
-				'database_error'
-			);
+			logger.error({
+				error: error.message,
+			}, 'database_error');
 		});
 
 		mongoose.connection.on('disconnected', () => {
@@ -50,13 +44,10 @@ export async function connectDatabase(): Promise<void> {
 			logger.info('database_reconnected');
 		});
 	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : 'Unknown error',
-				mongo_uri: mongoUri.replace(/\/\/.*@/, '//<credentials>@'), // Sanitize URI
-			},
-			'database_connection_failed'
-		);
+		logger.error({
+			error: error instanceof Error ? error.message : 'Unknown error',
+			mongo_uri: mongoUri.replace(/\/\/.*@/, '//<credentials>@'), // Sanitize URI
+		}, 'database_connection_failed');
 		throw error;
 	}
 }
@@ -69,12 +60,9 @@ export async function disconnectDatabase(): Promise<void> {
 		await mongoose.disconnect();
 		logger.info('database_disconnected');
 	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : 'Unknown error',
-			},
-			'database_disconnect_error'
-		);
+		logger.error({
+			error: error instanceof Error ? error.message : 'Unknown error',
+		}, 'database_disconnect_error');
 	}
 }
 

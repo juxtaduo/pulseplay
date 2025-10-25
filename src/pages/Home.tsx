@@ -1,16 +1,18 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect, useRef, useState } from 'react';
-import { AudioTest } from '../components/AudioTest';
-import { ControlPanel } from '../components/ControlPanel';
+import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { History } from 'lucide-react';
 import { RhythmVisualizer } from '../components/RhythmVisualizer';
+import { ControlPanel } from '../components/ControlPanel';
 import { SessionStats } from '../components/SessionStats';
 import { SongInsights } from '../components/SongInsights';
-import { useAudioEngine } from '../hooks/useAudioEngine';
-import type { RhythmData } from '../hooks/useRhythmDetection';
+import { AudioTest } from '../components/AudioTest';
 import { useRhythmDetection } from '../hooks/useRhythmDetection';
+import { useAudioEngine } from '../hooks/useAudioEngine';
 import { useSessionPersistence } from '../hooks/useSessionPersistence';
-import type { InstrumentType } from '../lib/instruments';
+import { useAuth0 } from '@auth0/auth0-react';
 import type { Mood } from '../types';
+import type { InstrumentType } from '../lib/instruments';
+import type { RhythmData } from '../hooks/useRhythmDetection';
 
 export function Home() {
 	const [sessionDuration, setSessionDuration] = useState(0);
@@ -23,21 +25,11 @@ export function Home() {
 	const [isSessionStopped, setIsSessionStopped] = useState(false); // Track if session was stopped (for data preservation)
 
 	const { isAuthenticated } = useAuth0();
-	const {
-		isPlaying,
-		currentMood,
-		volume,
-		startAudio,
-		stopAudio,
-		pauseAudio,
-		resumeAudio,
-		setVolume,
-		error: audioError,
-	} = useAudioEngine();
+	const { isPlaying, currentMood, volume, startAudio, stopAudio, pauseAudio, resumeAudio, setVolume, error: audioError } =
+		useAudioEngine();
 
 	// Rhythm detection hook with instrument support (Phase 5 & 6)
-	const { rhythmData, resetRhythm } = useRhythmDetection(isPlaying && !isPaused, {
-		// Only detect rhythm when playing and not paused
+	const { rhythmData, resetRhythm } = useRhythmDetection(isPlaying && !isPaused, { // Only detect rhythm when playing and not paused
 		selectedInstruments,
 		enableInstrumentalSounds,
 		accessibilityMode: false, // TODO: Add accessibility toggle in UI
@@ -76,11 +68,7 @@ export function Home() {
 
 	// Periodically update session with rhythm data (every 30 seconds during active session)
 	useEffect(() => {
-		console.log('[Home] Rhythm update effect triggered:', {
-			isPlaying,
-			sessionId,
-			hasUpdateFn: !!updateSessionRhythm,
-		});
+		console.log('[Home] Rhythm update effect triggered:', { isPlaying, sessionId, hasUpdateFn: !!updateSessionRhythm });
 
 		let intervalId: NodeJS.Timeout;
 		let initialTimer: NodeJS.Timeout;
@@ -132,7 +120,7 @@ export function Home() {
 			await startAudio(mood);
 			// Start backend session
 			const newSessionId = await startSession(mood);
-			console.log('[Home] Session started, newSessionId:', newSessionId);
+			console.log('[Home] Session started, newSessionId:', newSessionId); 
 
 			if (!newSessionId) {
 				console.warn('[Home] No session ID returned from startSession');
@@ -147,35 +135,32 @@ export function Home() {
 		try {
 			// Capture the exact time when user clicks stop for accurate duration calculation
 			const stopTime = new Date();
-
+			
 			// Save current session info before stopping
 			const currentSessionId = sessionId;
 			const currentSessionDuration = sessionDuration;
 			const currentRhythmData = rhythmData;
-
+			
 			// Mark session as stopped for UI immediately
 			setIsSessionStopped(true);
-
+			
 			// Stop audio engine (with fadeout) but keep mood for UI display
 			stopAudio(false); // Don't clear mood when stopping
-
+			
 			// For authenticated users, try to stop backend session but don't fail UI if it fails
 			if (isAuthenticated && currentSessionId) {
 				try {
 					await stopSession(rhythmData, stopTime, currentSessionDuration);
 				} catch (stopError) {
-					console.warn(
-						'[Home] Failed to stop backend session, but continuing with UI completion:',
-						stopError
-					);
+					console.warn('[Home] Failed to stop backend session, but continuing with UI completion:', stopError);
 				}
 			}
-
+			
 			// Always set completed session data for UI consistency
 			setCompletedSessionDuration(currentSessionDuration);
 			setCompletedSessionId(currentSessionId);
 			setCompletedRhythmData(currentRhythmData);
-
+			
 			// Reset paused state
 			setIsPaused(false);
 			// Note: Keep rhythm data, song selections, and instrument selections for display and AI insights
@@ -207,17 +192,17 @@ export function Home() {
 		// Reset all session stats to 0
 		setSessionDuration(0);
 		resetRhythm();
-
+		
 		// Reset song and instrument selections
 		setSelectedInstruments([]);
 		setEnableInstrumentalSounds(false);
-
+		
 		// Clear current mood when resetting
 		stopAudio(true); // This will clear the mood
-
+		
 		// Reset paused state
 		setIsPaused(false);
-
+		
 		// Clear completed session data to allow fresh start
 		setCompletedSessionDuration(null);
 		setCompletedSessionId(null);
@@ -252,7 +237,7 @@ export function Home() {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900">
-			<main className="max-w-7xl mx-auto px-4 py-8">
+			<main className="max-w-7xl mx-auto px-4 py-8 relative z-10">
 				{displayError && (
 					<div className="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg p-4">
 						<p className="text-red-800 dark:text-red-400 text-sm">{displayError}</p>
@@ -261,7 +246,7 @@ export function Home() {
 
 				{/* Audio Diagnostic Test - Shows if you can't hear sound */}
 				{!isPlaying && (
-					<div className="mb-8">
+					<div className="mb-8 flex items-center justify-between">
 						<AudioTest />
 						
 						{/* Desktop navigation - only Session History */}
@@ -320,27 +305,18 @@ export function Home() {
 					/>
 				</div>
 
-				<SessionStats
-					rhythmData={rhythmData}
-					sessionDuration={sessionDuration}
-					isActive={isPlaying}
-					isPaused={isPaused}
-					isCompleted={isSessionStopped}
-				/>
+				<SessionStats rhythmData={rhythmData} sessionDuration={sessionDuration} isActive={isPlaying} isPaused={isPaused} isCompleted={isSessionStopped} />
 
 				{/* AI Song Insights (Phase 7: T116, T117) - Show warning for sessions <30 seconds, insights for ≥30 seconds */}
-				{!isPlaying &&
-					(completedSessionDuration || 0) > 0 &&
-					((isAuthenticated && completedSessionId) ||
-						(!isAuthenticated && completedRhythmData)) && (
-						<div className="mt-8">
-							<SongInsights
-								sessionId={completedSessionId}
-								sessionDuration={completedSessionDuration || 0}
-								rhythmData={completedRhythmData || undefined}
-							/>
-						</div>
-					)}
+				{!isPlaying && (completedSessionDuration || 0) > 0 && ((isAuthenticated && completedSessionId) || (!isAuthenticated && completedRhythmData)) && (
+					<div className="mt-8">
+						<SongInsights 
+							sessionId={completedSessionId} 
+							sessionDuration={completedSessionDuration || 0}
+							rhythmData={completedRhythmData || undefined}
+						/>
+					</div>
+				)}
 
 				{/* Session ID display removed for cleaner UI */}
 			</main>

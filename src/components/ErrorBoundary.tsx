@@ -1,5 +1,5 @@
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 /**
  * Error Boundary Component
@@ -81,8 +81,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
 						{/* Error Message */}
 						<p className="text-slate-700 dark:text-slate-300 text-center mb-6">
-							We encountered an unexpected error. Don't worry—your session data is safe. You can
-							refresh the page to try again.
+							We encountered an unexpected error. Don't worry—your session data is safe. You
+							can refresh the page to try again.
 						</p>
 
 						{/* Error Details (Development Only) */}
@@ -99,7 +99,6 @@ export class ErrorBoundary extends Component<Props, State> {
 						{/* Actions */}
 						<div className="flex flex-col gap-3">
 							<button
-								type="button"
 								onClick={this.handleReset}
 								className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-slate-900 dark:text-white px-6 py-3 rounded-lg transition-colors font-semibold"
 							>

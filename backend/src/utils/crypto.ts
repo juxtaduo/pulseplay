@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import crypto from 'crypto';
 
 /**
  * Cryptographic utilities for data anonymization

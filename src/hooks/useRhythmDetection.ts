@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { getVelocityForRhythm, INSTRUMENTS, type InstrumentType } from '../lib/instruments';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getAudioEngine } from '../services/audioService';
+import {
+	INSTRUMENTS,
+	getVelocityForRhythm,
+	type InstrumentType,
+} from '../lib/instruments';
 
 export interface RhythmData {
 	rhythmScore: number;
@@ -23,11 +27,14 @@ export interface UseRhythmDetectionOptions {
 	preserveData?: boolean; // Preserve rhythm data when session becomes inactive
 }
 
-export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectionOptions = {}) => {
+export const useRhythmDetection = (
+	isActive: boolean,
+	options: UseRhythmDetectionOptions = {}
+) => {
 	const {
 		selectedInstruments = [],
 		enableInstrumentalSounds = false,
-		accessibilityMode: _accessibilityMode = false,
+		accessibilityMode = false,
 		throttleRapidTyping = true,
 		preserveData = false,
 	} = options;
@@ -55,7 +62,7 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 	const lastMouseMoveTime = useRef<number>(0); // Throttle mouse move events
 	const lastScrollTime = useRef<number>(0); // Throttle scroll events
 	const bpmHistory = useRef<number[]>([]); // Track BPM values over time for averaging
-
+	
 	// Cumulative counters for total session activity (not limited by array sizes)
 	const totalKeystrokes = useRef<number>(0);
 	const totalClicks = useRef<number>(0);
@@ -63,18 +70,18 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 	const totalScrolls = useRef<number>(0);
 
 	const calculateRhythm = useCallback(() => {
-		const now = Date.now();
-
-		// Combine all interaction types for more comprehensive rhythm score
-		const allInteractions = [
-			...keystrokeTimestamps.current,
-			...clickTimestamps.current,
-			...mouseMovements.current,
-		].sort((a, b) => a - b); // Sort chronologically
-
-		const recentInteractions = allInteractions.filter(
-			(ts) => now - ts < 5000 // Last 5 seconds
-		);
+    const now = Date.now();
+    
+    // Combine all interaction types for more comprehensive rhythm score
+    const allInteractions = [
+      ...keystrokeTimestamps.current,
+      ...clickTimestamps.current,
+      ...mouseMovements.current,
+    ].sort((a, b) => a - b); // Sort chronologically
+    
+    const recentInteractions = allInteractions.filter(
+      (ts) => now - ts < 5000 // Last 5 seconds
+    );
 
 		if (recentInteractions.length < 2) {
 			// For minimal activity, still calculate a reasonable BPM if there are any interactions
@@ -92,20 +99,19 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 					// Very short session with activity, use default
 					estimatedBpm = 60; // Reasonable default for minimal activity
 				}
-
+				
 				// Add to BPM history for averaging
 				bpmHistory.current.push(estimatedBpm);
 				if (bpmHistory.current.length > 50) {
 					bpmHistory.current.shift();
 				}
 			}
-
+			
 			// Calculate average from history
-			const historicalAverageBpm =
-				bpmHistory.current.length > 0
-					? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
-					: estimatedBpm;
-
+			const historicalAverageBpm = bpmHistory.current.length > 0 
+				? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
+				: estimatedBpm;
+			
 			setRhythmData((prev) => ({
 				...prev,
 				rhythmScore: 0,
@@ -123,7 +129,7 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		}
 
 		const averageInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-
+		
 		// More achievable rhythm score for normal human typing/interaction
 		// Reduced intervals by 50% to make scores more achievable
 		// Average typing: 100-200ms intervals (5-10 actions/sec)
@@ -136,16 +142,14 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		if (bpmHistory.current.length > 50) {
 			bpmHistory.current.shift();
 		}
-
+		
 		// Calculate average BPM from history
-		const averageBpm =
-			bpmHistory.current.length > 0
-				? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
-				: bpm; // If no history, use current BPM as average
+		const averageBpm = bpmHistory.current.length > 0 
+			? Math.round(bpmHistory.current.reduce((a, b) => a + b, 0) / bpmHistory.current.length)
+			: bpm; // If no history, use current BPM as average
 
 		// Ensure averageBpm is never 0 for sessions with activity
-		const finalAverageBpm =
-			averageBpm > 0 ? averageBpm : keystrokeTimestamps.current.length > 0 ? Math.max(bpm, 60) : 0;
+		const finalAverageBpm = averageBpm > 0 ? averageBpm : (keystrokeTimestamps.current.length > 0 ? Math.max(bpm, 60) : 0);
 
 		// Calculate keys per minute (keyboard only)
 		const timeWindowMs = 60000; // 1 minute
@@ -159,8 +163,7 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		// Medium: 40-70 (normal, steady - 150-250ms intervals)
 		// High: 70+ (fast, energetic - 100-150ms intervals)
 		let intensity: 'low' | 'medium' | 'high' = 'low';
-		if (rhythmScore >= 70)
-			intensity = 'high'; // Fast, energetic typing
+		if (rhythmScore >= 70) intensity = 'high';      // Fast, energetic typing
 		else if (rhythmScore >= 40) intensity = 'medium'; // Normal, steady pace
 		// else: <40 = slow, thoughtful
 
@@ -176,8 +179,7 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 			averageInterval: Math.round(averageInterval),
 			keysPerMinute,
 		});
-	}, []);
-	const handleKeyDown = useCallback(() => {
+	}, []);	const handleKeyDown = useCallback(() => {
 		if (!isActive) return;
 
 		const now = Date.now();
@@ -191,11 +193,8 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 
 		// Trigger instrumental sound on keystroke (T072)
 		if (enableInstrumentalSounds && selectedInstruments.length > 0) {
-			console.log(
-				'[useRhythmDetection] Instrumental sounds enabled, instruments:',
-				selectedInstruments
-			);
-
+			console.log('[useRhythmDetection] Instrumental sounds enabled, instruments:', selectedInstruments);
+			
 			// Throttle rapid typing if enabled (T075)
 			const timeSinceLastKeystroke = now - lastKeystrokeTime.current;
 			const shouldPlaySound = !throttleRapidTyping || timeSinceLastKeystroke > 50; // Min 50ms between notes
@@ -219,13 +218,11 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 					const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
 					rhythmScore = Math.min(100, 1000 / Math.max(avgInterval, 50));
 				}
-				const velocity = getVelocityForRhythm(rhythmScore);
+			const velocity = getVelocityForRhythm(rhythmScore);
 
-				// Play the instrumental note (frequency now from pentatonic scale)
-				console.log(
-					`[useRhythmDetection] Playing instrument: ${selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]}, vel=${velocity}`
-				);
-				audioEngineRef.current.playInstrumentNote(instrument, velocity);
+			// Play the instrumental note (frequency now from pentatonic scale)
+			console.log(`[useRhythmDetection] Playing instrument: ${selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]}, vel=${velocity}`);
+			audioEngineRef.current.playInstrumentNote(instrument, velocity);
 			} else {
 				console.log('[useRhythmDetection] Skipped note (throttled)');
 			}
@@ -247,6 +244,7 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		calculateRhythm,
 		enableInstrumentalSounds,
 		selectedInstruments,
+		accessibilityMode,
 		throttleRapidTyping,
 	]);
 
@@ -254,70 +252,65 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		if (!isActive) return;
 
 		const now = Date.now();
-
+		
 		// Throttle mouse move events to avoid excessive note playing (300ms minimum between moves)
 		if (now - lastMouseMoveTime.current < 200) {
 			return;
 		}
-
+		
 		mouseMovements.current.push(now);
 		totalMouseMoves.current++; // Increment cumulative counter
 
 		if (mouseMovements.current.length > 30) {
 			mouseMovements.current.shift();
 		}
-
+		
 		lastMouseMoveTime.current = now;
 		lastKeystrokeTime.current = now; // Update for inactivity detection
 
 		// Play note on mouse move if instrumental sounds enabled
 		if (enableInstrumentalSounds && selectedInstruments.length > 0) {
 			// Use a lighter instrument or lower velocity for mouse moves
-			const instrument =
-				INSTRUMENTS[selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]];
+			const instrument = INSTRUMENTS[selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]];
 			const velocity = 0.3; // Subtle volume for mouse moves
-
+			
 			audioEngineRef.current.playInstrumentNote(instrument, velocity);
-
+			
 			// Advance to next instrument for round-robin
 			instrumentIndexRef.current = (instrumentIndexRef.current + 1) % selectedInstruments.length;
 		}
 	}, [isActive, enableInstrumentalSounds, selectedInstruments]);
 
-	const handleMouseScroll = useCallback(
-		(event: WheelEvent) => {
-			if (!isActive) return;
+	const handleMouseScroll = useCallback((event: WheelEvent) => {
+		if (!isActive) return;
 
-			const now = Date.now();
+		const now = Date.now();
+		
+		// Throttle scroll events (200ms minimum between scrolls)
+		if (now - lastScrollTime.current < 200) {
+			return;
+		}
+		
+		// Record scroll event timestamp
+		scrollTimestamps.current.push(now);
+		totalScrolls.current++; // Increment cumulative counter
+		if (scrollTimestamps.current.length > 50) {
+			scrollTimestamps.current.shift();
+		}
+		
+		lastScrollTime.current = now;
+		lastKeystrokeTime.current = now;
 
-			// Throttle scroll events (200ms minimum between scrolls)
-			if (now - lastScrollTime.current < 200) {
-				return;
-			}
-
-			// Record scroll event timestamp
-			scrollTimestamps.current.push(now);
-			totalScrolls.current++; // Increment cumulative counter
-			if (scrollTimestamps.current.length > 50) {
-				scrollTimestamps.current.shift();
-			}
-
-			lastScrollTime.current = now;
-			lastKeystrokeTime.current = now;
-
-			// Play note on scroll if instrumental sounds enabled
-			if (enableInstrumentalSounds && selectedInstruments.length > 0) {
-				const instrument =
-					INSTRUMENTS[selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]];
-				const velocity = Math.abs(event.deltaY) > 50 ? 0.5 : 0.35; // Louder for fast scrolls
-
-				audioEngineRef.current.playInstrumentNote(instrument, velocity);
-
-				instrumentIndexRef.current = (instrumentIndexRef.current + 1) % selectedInstruments.length;
-			}
-		},
-		[isActive, enableInstrumentalSounds, selectedInstruments]
-	);
+		// Play note on scroll if instrumental sounds enabled
+		if (enableInstrumentalSounds && selectedInstruments.length > 0) {
+			const instrument = INSTRUMENTS[selectedInstruments[instrumentIndexRef.current % selectedInstruments.length]];
+			const velocity = Math.abs(event.deltaY) > 50 ? 0.5 : 0.35; // Louder for fast scrolls
+			
+			audioEngineRef.current.playInstrumentNote(instrument, velocity);
+			
+			instrumentIndexRef.current = (instrumentIndexRef.current + 1) % selectedInstruments.length;
+		}
+	}, [isActive, enableInstrumentalSounds, selectedInstruments]);
 
 	const handleMouseClick = useCallback(() => {
 		if (!isActive) return;
@@ -329,13 +322,13 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 
 		// Play bass-range sound for mouse clicks (T074) if enabled
 		if (enableInstrumentalSounds && selectedInstruments.length > 0) {
-			const bassInstrument = INSTRUMENTS.bass;
+			const bassInstrument = INSTRUMENTS['bass'];
 			// Lower volume for mouse clicks (subtle)
 			const velocity = 0.4;
 
 			audioEngineRef.current.playInstrumentNote(bassInstrument, velocity, 0.8);
 		}
-	}, [isActive, enableInstrumentalSounds, selectedInstruments]);
+	}, [isActive, enableInstrumentalSounds, selectedInstruments, accessibilityMode]);
 
 	useEffect(() => {
 		if (!isActive) {
@@ -386,9 +379,7 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 				if (timeSinceLastKeystroke > 5000) {
 					// More than 5 seconds inactive - instrumental sounds automatically stop
 					// (ambient music continues, per FR-016)
-					console.log(
-						'[useRhythmDetection] 5-second inactivity detected, instrumental sounds paused'
-					);
+					console.log('[useRhythmDetection] 5-second inactivity detected, instrumental sounds paused');
 				}
 			}, 1000);
 		}
@@ -409,7 +400,6 @@ export const useRhythmDetection = (isActive: boolean, options: UseRhythmDetectio
 		handleMouseScroll,
 		calculateRhythm,
 		enableInstrumentalSounds,
-		preserveData,
 	]);
 
 	const resetRhythm = useCallback(() => {

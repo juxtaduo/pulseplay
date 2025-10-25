@@ -87,21 +87,18 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 		if (intervals.length > 0) {
 			const mean = intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
 			const variance =
-				intervals.reduce((sum, val) => sum + (val - mean) ** 2, 0) / intervals.length;
+				intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / intervals.length;
 			const stdDev = Math.sqrt(variance);
 			const cv = mean > 0 ? stdDev / mean : 0;
 
 			// Threshold: CV > 0.6 indicates erratic rhythm
 			rhythmPattern = cv > 0.6 ? 'erratic' : 'steady';
 
-			logger.debug(
-				{
-					cv,
-					rhythm_pattern: rhythmPattern,
-					interval_count: intervals.length,
-				},
-				'rhythm_pattern_analysis'
-			);
+			logger.debug({
+				cv,
+				rhythm_pattern: rhythmPattern,
+				interval_count: intervals.length,
+			}, 'rhythm_pattern_analysis');
 		}
 	} else {
 		// Fallback: Use keystroke consistency
@@ -115,15 +112,12 @@ export function analyzeSessionPattern(sessionData: SessionAnalysisInput): Sessio
 			rhythmPattern = 'erratic';
 		}
 
-		logger.debug(
-			{
-				consistency,
-				rhythm_pattern: rhythmPattern,
-				expected_keystrokes: expectedKeystrokes,
-				actual_keystrokes: actualKeystrokes,
-			},
-			'rhythm_pattern_fallback'
-		);
+		logger.debug({
+			consistency,
+			rhythm_pattern: rhythmPattern,
+			expected_keystrokes: expectedKeystrokes,
+			actual_keystrokes: actualKeystrokes,
+		}, 'rhythm_pattern_fallback');
 	}
 
 	return {
@@ -145,7 +139,7 @@ export /**
  */
 function mapRhythmToSong(
 	rhythmType: RhythmType,
-	variance: number
+	variance: number,
 ): 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge' {
 	// Map rhythm patterns to song suggestions
 	if (rhythmType === 'steady' && variance < 0.2) {

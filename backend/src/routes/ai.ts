@@ -3,11 +3,11 @@
  * @module routes/ai
  */
 
-import { type Request, type Response, Router } from 'express';
-import { checkJwt } from '../config/auth0.js';
+import { Router, type Request, type Response } from 'express';
 import { logger } from '../config/logger.js';
-import { AISongRecommendation } from '../models/AISongRecommendation.js';
+import { checkJwt } from '../config/auth0.js';
 import { FocusSessionModel } from '../models/FocusSession.js';
+import { AISongRecommendation } from '../models/AISongRecommendation.js';
 import { generateSongRecommendation, generateWeeklySummary } from '../services/geminiService.js';
 import { analyzeSessionPattern } from '../services/sessionAnalyzer.js';
 
@@ -16,7 +16,7 @@ const router = Router();
 /**
  * POST /api/ai/song-recommendation
  * Generate AI-driven song recommendation based on completed session
- *
+ * 
  * @route POST /api/ai/song-recommendation
  * @body {sessionId: string} - ID of completed session
  * @returns {AISongRecommendation} - AI-generated song recommendation
@@ -47,16 +47,13 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 			// Update the session with the calculated duration
 			session.totalDurationSeconds = sessionDuration;
 			await session.save();
-			logger.info(
-				{ sessionId, calculatedDuration: sessionDuration },
-				'session_duration_recalculated'
-			);
+			logger.info({ sessionId, calculatedDuration: sessionDuration }, 'session_duration_recalculated');
 		} else if (!sessionDuration && !session.endTime) {
 			// Session has no endTime - check if it's been running long enough to be considered completed
 			const now = new Date();
 			const runningDurationMs = now.getTime() - session.startTime.getTime();
 			const runningDuration = Math.round(runningDurationMs / 1000);
-
+			
 			if (runningDuration >= 30) {
 				// Session has been running for 30+ seconds, treat as completed
 				session.endTime = now;
@@ -64,21 +61,15 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 				session.totalDurationSeconds = runningDuration;
 				await session.save();
 				sessionDuration = runningDuration;
-				logger.info(
-					{ sessionId, autoCompleted: true, duration: runningDuration },
-					'session_auto_completed_for_ai'
-				);
+				logger.info({ sessionId, autoCompleted: true, duration: runningDuration }, 'session_auto_completed_for_ai');
 			} else {
 				// Session too short
-				logger.warn(
-					{
-						sessionId,
-						sessionState: session.state,
-						runningDuration,
-						startTime: session.startTime,
-					},
-					'ai_session_too_short_no_endtime'
-				);
+				logger.warn({
+					sessionId,
+					sessionState: session.state,
+					runningDuration,
+					startTime: session.startTime
+				}, 'ai_session_too_short_no_endtime');
 				return res.status(400).json({
 					error: 'Session too short for AI insights',
 					message: 'AI recommendations require sessions of at least 30 seconds',
@@ -86,30 +77,23 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 			}
 		}
 
-		logger.info(
-			{
-				sessionId,
-				sessionState: session.state,
-				sessionDuration,
-				hasEndTime: !!session.endTime,
-				startTime: session.startTime,
-				endTime: session.endTime,
-			},
-			'ai_session_check'
-		);
+		logger.info({
+			sessionId,
+			sessionState: session.state,
+			sessionDuration,
+			hasEndTime: !!session.endTime,
+			startTime: session.startTime,
+			endTime: session.endTime
+		}, 'ai_session_check');
 
-		if (!sessionDuration || sessionDuration < 30) {
-			// 30 seconds minimum
-			logger.warn(
-				{
-					sessionId,
-					sessionDuration,
-					sessionState: session.state,
-					startTime: session.startTime,
-					endTime: session.endTime,
-				},
-				'ai_session_too_short'
-			);
+		if (!sessionDuration || sessionDuration < 30) { // 30 seconds minimum
+			logger.warn({
+				sessionId,
+				sessionDuration,
+				sessionState: session.state,
+				startTime: session.startTime,
+				endTime: session.endTime
+			}, 'ai_session_too_short');
 			return res.status(400).json({
 				error: 'Session too short for AI insights',
 				message: 'AI recommendations require sessions of at least 30 seconds',
@@ -126,10 +110,8 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 
 		// Analyze session pattern (T113)
 		const averageBpm = session.averageBpm || 0; // Include average BPM
-		const totalKeystrokes = Math.round(
-			(session.rhythmData.averageKeysPerMinute || 0) * (sessionDuration / 60)
-		); // Estimate from average tempo
-
+		const totalKeystrokes = Math.round((session.rhythmData.averageKeysPerMinute || 0) * (sessionDuration / 60)); // Estimate from average tempo
+		
 		const analysis = analyzeSessionPattern({
 			duration: sessionDuration, // Already in seconds
 			totalKeystrokes,
@@ -144,10 +126,7 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 		});
 
 		// Map Gemini mood recommendations to actual song names
-		const songMapping: Record<
-			string,
-			'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'
-		> = {
+		const songMapping: Record<string, 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'> = {
 			'deep-focus': 'thousand-years',
 			'creative-flow': 'river-flows',
 			'calm-reading': 'kiss-the-rain',
@@ -171,24 +150,18 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 
 		await aiRecommendation.save();
 
-		logger.info(
-			{
-				session_id: sessionId,
-				suggested_song: recommendation.song,
-				confidence: recommendation.confidence,
-			},
-			'ai_song_recommendation_created'
-		);
+		logger.info({
+			session_id: sessionId,
+			suggested_song: recommendation.song,
+			confidence: recommendation.confidence,
+		}, 'ai_song_recommendation_created');
 
 		return res.status(201).json(aiRecommendation);
 	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : 'Unknown error',
-				stack: error instanceof Error ? error.stack : undefined,
-			},
-			'ai_song_recommendation_error'
-		);
+		logger.error({
+			error: error instanceof Error ? error.message : 'Unknown error',
+			stack: error instanceof Error ? error.stack : undefined,
+		}, 'ai_song_recommendation_error');
 
 		return res.status(500).json({
 			error: 'Failed to generate song recommendation',
@@ -200,7 +173,7 @@ router.post('/song-recommendation', checkJwt, async (req: Request, res: Response
 /**
  * GET /api/ai/weekly-summary
  * Generate weekly focus pattern summary from recent sessions
- *
+ * 
  * @route GET /api/ai/weekly-summary
  * @query {userId?: string} - User ID (optional, defaults to authenticated user)
  * @returns {summary: string} - AI-generated weekly summary
@@ -239,12 +212,9 @@ router.get('/weekly-summary', checkJwt, async (_req: Request, res: Response) => 
 		// Generate weekly summary via Gemini
 		const summary = await generateWeeklySummary(sessionData);
 
-		logger.info(
-			{
-				sessions_analyzed: sessions.length,
-			},
-			'weekly_summary_generated'
-		);
+		logger.info({
+			sessions_analyzed: sessions.length,
+		}, 'weekly_summary_generated');
 
 		return res.status(200).json({
 			summary,
@@ -253,13 +223,10 @@ router.get('/weekly-summary', checkJwt, async (_req: Request, res: Response) => 
 			periodEnd: new Date().toISOString(),
 		});
 	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : 'Unknown error',
-				stack: error instanceof Error ? error.stack : undefined,
-			},
-			'weekly_summary_error'
-		);
+		logger.error({
+			error: error instanceof Error ? error.message : 'Unknown error',
+			stack: error instanceof Error ? error.stack : undefined,
+		}, 'weekly_summary_error');
 
 		return res.status(500).json({
 			error: 'Failed to generate weekly summary',
@@ -271,7 +238,7 @@ router.get('/weekly-summary', checkJwt, async (_req: Request, res: Response) => 
 /**
  * POST /api/ai/song-recommendation-guest
  * Generate AI-driven song recommendation for unauthenticated users
- *
+ * 
  * @route POST /api/ai/song-recommendation-guest
  * @body {rhythmData: object, keystrokeCount: number, averageBpm: number, sessionDuration: number}
  * @returns {AISongRecommendation} - AI-generated song recommendation (not saved to DB)
@@ -285,8 +252,7 @@ router.post('/song-recommendation-guest', async (req: Request, res: Response) =>
 			return res.status(400).json({ error: 'Missing required data' });
 		}
 
-		if (sessionDuration < 30) {
-			// 30 seconds minimum
+		if (sessionDuration < 30) { // 30 seconds minimum
 			logger.warn({ sessionDuration }, 'guest_ai_session_too_short');
 			return res.status(400).json({
 				error: 'Session too short for AI insights',
@@ -309,10 +275,7 @@ router.post('/song-recommendation-guest', async (req: Request, res: Response) =>
 		});
 
 		// Map Gemini mood recommendations to actual song names
-		const songMapping: Record<
-			string,
-			'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'
-		> = {
+		const songMapping: Record<string, 'thousand-years' | 'kiss-the-rain' | 'river-flows' | 'gurenge'> = {
 			'deep-focus': 'thousand-years',
 			'creative-flow': 'river-flows',
 			'calm-reading': 'kiss-the-rain',
@@ -335,27 +298,21 @@ router.post('/song-recommendation-guest', async (req: Request, res: Response) =>
 			generatedAt: new Date().toISOString(),
 		};
 
-		logger.info(
-			{
-				isGuest: true,
-				sessionDuration,
-				keystrokeCount,
-				averageBpm,
-				suggested_song: recommendation.song,
-				confidence: recommendation.confidence,
-			},
-			'guest_ai_song_recommendation_created'
-		);
+		logger.info({
+			isGuest: true,
+			sessionDuration,
+			keystrokeCount,
+			averageBpm,
+			suggested_song: recommendation.song,
+			confidence: recommendation.confidence,
+		}, 'guest_ai_song_recommendation_created');
 
 		return res.status(201).json(aiRecommendation);
 	} catch (error) {
-		logger.error(
-			{
-				error: error instanceof Error ? error.message : 'Unknown error',
-				stack: error instanceof Error ? error.stack : undefined,
-			},
-			'guest_ai_song_recommendation_error'
-		);
+		logger.error({
+			error: error instanceof Error ? error.message : 'Unknown error',
+			stack: error instanceof Error ? error.stack : undefined,
+		}, 'guest_ai_song_recommendation_error');
 
 		return res.status(500).json({
 			error: 'Failed to generate song recommendation',

@@ -1,6 +1,6 @@
-import { Auth0Provider } from '@auth0/auth0-react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Auth0Provider } from '@auth0/auth0-react';
 import App from './App.tsx';
 import './index.css';
 
@@ -9,24 +9,19 @@ const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
 const auth0Audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 
 // Check if we have proper Auth0 config and if we're on HTTPS (required by Auth0)
-const hasAuth0Config =
-	auth0Domain &&
-	auth0ClientId &&
-	auth0Domain !== 'dev-example.auth0.com' &&
+const hasAuth0Config = auth0Domain && auth0ClientId && 
+	auth0Domain !== 'dev-example.auth0.com' && 
 	auth0ClientId !== 'example_client_id';
 
-const isSecureOrigin =
-	window.location.protocol === 'https:' ||
-	window.location.hostname === 'localhost' ||
+const isSecureOrigin = window.location.protocol === 'https:' || 
+	window.location.hostname === 'localhost' || 
 	window.location.hostname === '127.0.0.1' ||
 	window.location.hostname === '192.168.1.237'; // Allow Docker VM IP
 
 const shouldUseAuth0 = hasAuth0Config && isSecureOrigin;
 
 if (!hasAuth0Config) {
-	console.warn(
-		'Auth0 disabled: Missing or placeholder configuration. App will run without authentication.'
-	);
+	console.warn('Auth0 disabled: Missing or placeholder configuration. App will run without authentication.');
 }
 
 if (!isSecureOrigin && hasAuth0Config) {
@@ -49,17 +44,12 @@ const AppWithConditionalAuth = () => {
 			</Auth0Provider>
 		);
 	}
-
+	
 	// Run without Auth0 when config is missing or on insecure origin
 	return <App />;
 };
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-	throw new Error('Root element not found');
-}
-
-createRoot(rootElement).render(
+createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<AppWithConditionalAuth />
 	</StrictMode>

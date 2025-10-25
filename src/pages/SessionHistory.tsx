@@ -1,18 +1,10 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import {
-	Activity,
-	Calendar,
-	ChevronDown,
-	Clock,
-	Download,
-	Filter,
-	Trash2,
-	TrendingUp,
-} from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import type { Mood } from '../types';
+import { Link } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+import { Download, Trash2, Filter, Clock, Activity, TrendingUp, Calendar, ChevronDown, Music } from 'lucide-react';
 import { formatDuration, formatRelativeTime } from '../utils/timeFormatter';
+import type { Mood } from '../types';
 
 /**
  * SessionHistory page displays past focus sessions with filtering and export (T135, T136, T137)
@@ -67,7 +59,43 @@ export const SessionHistory = () => {
 		{ value: 'gurenge', label: 'Gurenge' },
 	];
 
-	const fetchSessions = useCallback(async () => {
+	// Fetch session history (T135)
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+				setIsDropdownOpen(false);
+			}
+		};
+
+		if (isDropdownOpen) {
+			document.addEventListener('mousedown', handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [isDropdownOpen]);
+
+	// Close dropdown when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+				setIsDropdownOpen(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+
+	// Fetch sessions when component mounts or filters change
+	useEffect(() => {
+		fetchSessions();
+	}, [selectedSong, currentPage, isAuthenticated]);
+
+	const fetchSessions = async () => {
 		setLoading(true);
 		setError(null);
 
@@ -103,43 +131,7 @@ export const SessionHistory = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, [isAuthenticated, selectedSong, currentPage, getAccessTokenSilently]);
-
-	// Fetch session history (T135)
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-				setIsDropdownOpen(false);
-			}
-		};
-
-		if (isDropdownOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [isDropdownOpen]);
-
-	// Close dropdown when clicking outside
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-				setIsDropdownOpen(false);
-			}
-		};
-
-		document.addEventListener('mousedown', handleClickOutside);
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, []);
-
-	// Fetch sessions when component mounts or filters change
-	useEffect(() => {
-		fetchSessions();
-	}, [fetchSessions]);
+	};
 
 	// Export session data (T137)
 	const handleExport = async () => {
@@ -201,7 +193,7 @@ export const SessionHistory = () => {
 
 			const result = await response.json();
 			alert(`Successfully deleted ${result.deletedCount} session(s)`);
-
+			
 			// Refresh the list
 			setCurrentPage(1);
 			fetchSessions();
@@ -212,27 +204,36 @@ export const SessionHistory = () => {
 	};
 
 	const getSongColor = (song?: Mood) => {
-		if (!song) return 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
+		if (!song) return 'bg-slate-500/20 text-slate-700 dark:text-slate-400 border-slate-500/30';
 		const colors: Record<Mood, string> = {
-			'thousand-years': 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-			'kiss-the-rain': 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
-			'river-flows': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-			gurenge: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+			'thousand-years': 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/30',
+			'kiss-the-rain': 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
+			'river-flows': 'bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/30',
+			'gurenge': 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30',
 		};
-		return colors[song] || 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30';
+		return colors[song] || 'bg-slate-500/20 text-slate-700 dark:text-slate-400 border-slate-500/30';
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900 py-8 px-4">
-			<div className="max-w-6xl mx-auto">
+		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-blue-900">
+			<main className="max-w-7xl mx-auto px-4 py-8 relative z-10">
 				{/* Header */}
 				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">
-						Session History
-					</h1>
+					<h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">Session History</h1>
 					<p className="text-slate-600 dark:text-slate-400">
 						View and manage your past focus sessions ({totalSessions} total)
 					</p>
+				</div>
+
+				{/* Session Navigation - positioned to the right */}
+				<div className="mb-6 flex justify-end">
+					<Link
+						to="/"
+						className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 hover:from-rose-200 hover:via-pink-200 hover:to-purple-200 dark:from-rose-900/30 dark:via-pink-900/30 dark:to-purple-900/30 dark:hover:from-rose-800/70 dark:hover:via-pink-800/70 dark:hover:to-purple-800/70 transition-all text-slate-800 dark:text-white text-sm font-medium shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60 dark:shadow-lg dark:shadow-rose-900/40 dark:hover:shadow-xl dark:hover:shadow-rose-800/50 border border-rose-200/60 hover:border-rose-300/80 dark:border-rose-700/20 dark:hover:border-rose-600/80 dark:ring-2 dark:ring-rose-700/30 dark:hover:ring-rose-600/50"
+					>
+						<Music size={16} />
+						<span className="text-slate-800 dark:text-white">Session</span>
+					</Link>
 				</div>
 
 				{/* Controls */}
@@ -243,14 +244,13 @@ export const SessionHistory = () => {
 							<Filter size={20} className="text-slate-600 dark:text-slate-400" />
 							<div className="relative z-[1001]" ref={dropdownRef}>
 								<button
-									type="button"
 									onClick={() => {
 										if (!isDropdownOpen && dropdownRef.current) {
 											const rect = dropdownRef.current.getBoundingClientRect();
 											setDropdownPosition({
 												top: rect.bottom + window.scrollY,
 												left: rect.left + window.scrollX,
-												width: rect.width,
+												width: rect.width
 											});
 										}
 										setIsDropdownOpen(!isDropdownOpen);
@@ -258,13 +258,9 @@ export const SessionHistory = () => {
 									className="bg-slate-100 dark:bg-[#485466] text-slate-800 dark:text-white rounded-lg px-4 py-2 border border-slate-200/60 dark:border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 shadow-sm flex items-center gap-2 min-w-[180px] justify-between"
 								>
 									<span>
-										{MOOD_OPTIONS.find((option) => option.value === selectedSong)?.label ||
-											'All Songs'}
+										{MOOD_OPTIONS.find(option => option.value === selectedSong)?.label || 'All Songs'}
 									</span>
-									<ChevronDown
-										size={16}
-										className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-									/>
+									<ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
 								</button>
 							</div>
 						</div>
@@ -273,7 +269,6 @@ export const SessionHistory = () => {
 						<div className="flex gap-3">
 							{/* Export Button (T137) */}
 							<button
-								type="button"
 								onClick={handleExport}
 								className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
 							>
@@ -283,7 +278,6 @@ export const SessionHistory = () => {
 
 							{/* Delete All Button */}
 							<button
-								type="button"
 								onClick={handleDeleteAll}
 								className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm"
 							>
@@ -295,37 +289,35 @@ export const SessionHistory = () => {
 				</div>
 
 				{/* Dropdown Portal */}
-				{isDropdownOpen &&
-					createPortal(
-						<div
-							className="fixed bg-white dark:bg-[#485466] border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-[9999] isolate"
-							style={{
-								top: dropdownPosition.top,
-								left: dropdownPosition.left,
-								width: dropdownPosition.width,
-							}}
-						>
-							{MOOD_OPTIONS.map((option) => (
-								<button
-									type="button"
-									key={option.value}
-									onClick={() => {
-										setSelectedSong(option.value as Mood | 'all');
-										setCurrentPage(1);
-										setIsDropdownOpen(false);
-									}}
-									className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg transition-colors ${
-										selectedSong === option.value
-											? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-											: 'text-slate-800 dark:text-slate-200'
-									}`}
-								>
-									{option.label}
-								</button>
-							))}
-						</div>,
-						document.body
-					)}
+				{isDropdownOpen && createPortal(
+					<div 
+						className="fixed bg-white dark:bg-[#485466] border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-[9999] isolate"
+						style={{
+							top: dropdownPosition.top,
+							left: dropdownPosition.left,
+							width: dropdownPosition.width
+						}}
+					>
+						{MOOD_OPTIONS.map((option) => (
+							<button
+								key={option.value}
+								onClick={() => {
+									setSelectedSong(option.value as Mood | 'all');
+									setCurrentPage(1);
+									setIsDropdownOpen(false);
+								}}
+								className={`w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+									selectedSong === option.value 
+										? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' 
+										: 'text-slate-800 dark:text-slate-200'
+								}`}
+							>
+								{option.label}
+							</button>
+						))}
+					</div>,
+					document.body
+				)}
 
 				{/* Error Message */}
 				{error && (
@@ -333,28 +325,13 @@ export const SessionHistory = () => {
 						<div className="flex items-start gap-4">
 							<div className="flex-shrink-0">
 								<div className="p-2 bg-gradient-to-r from-red-500 to-rose-500 rounded-lg shadow-md">
-									<svg
-										className="w-6 h-6 text-white"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-										role="img"
-										aria-label="Warning icon"
-									>
-										<title>Warning</title>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={2}
-											d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-										/>
+									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
 									</svg>
 								</div>
 							</div>
 							<div className="flex-1">
-								<h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
-									Authentication Required
-								</h3>
+								<h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Authentication Required</h3>
 								<p className="text-red-700 dark:text-red-300 text-sm leading-relaxed">{error}</p>
 							</div>
 						</div>
@@ -456,7 +433,6 @@ export const SessionHistory = () => {
 				{!loading && totalPages > 1 && (
 					<div className="mt-6 flex items-center justify-center gap-4">
 						<button
-							type="button"
 							onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
 							disabled={currentPage === 1}
 							className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/60 dark:to-slate-600/60 text-slate-800 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all shadow-sm disabled:shadow-none"
@@ -469,7 +445,6 @@ export const SessionHistory = () => {
 						</span>
 
 						<button
-							type="button"
 							onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
 							disabled={currentPage === totalPages}
 							className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700/60 dark:to-slate-600/60 text-slate-800 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all shadow-sm disabled:shadow-none"
@@ -478,7 +453,7 @@ export const SessionHistory = () => {
 						</button>
 					</div>
 				)}
-			</div>
+			</main>
 		</div>
 	);
 };
