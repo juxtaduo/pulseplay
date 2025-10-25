@@ -16,10 +16,7 @@ export const apiLimiter = rateLimit({
 	standardHeaders: true,
 	legacyHeaders: false,
 	handler: (req, res) => {
-		logger.warn(
-			{ ip: req.ip, path: req.path },
-			'rate_limit_exceeded',
-		);
+		logger.warn({ ip: req.ip, path: req.path }, 'rate_limit_exceeded');
 		res.status(429).json({
 			error: 'Too Many Requests',
 			message: 'Too many requests from this IP, please try again after 15 minutes',
@@ -37,10 +34,7 @@ export const aiLimiter = rateLimit({
 	standardHeaders: true,
 	legacyHeaders: false,
 	handler: (req, res) => {
-		logger.warn(
-			{ ip: req.ip, path: req.path },
-			'ai_rate_limit_exceeded',
-		);
+		logger.warn({ ip: req.ip, path: req.path }, 'ai_rate_limit_exceeded');
 		res.status(429).json({
 			error: 'Too Many Requests',
 			message: 'Too many AI requests from this IP, please try again after 1 hour',

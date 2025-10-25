@@ -38,6 +38,6 @@ export const optionalAuth = auth({
 	audience: process.env.AUTH0_AUDIENCE,
 	issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
 	tokenSigningAlg: 'RS256',
-	// @ts-ignore
+	// @ts-expect-error
 	credentialsRequired: false,
 });

@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Song } from '../types';
 import type { RhythmData as FrontendRhythmData } from './useRhythmDetection';
 
@@ -21,7 +21,11 @@ interface SessionState {
 export interface UseSessionPersistenceReturn {
 	sessionId: string | null;
 	startSession: (song: Song) => Promise<string | null>;
-	stopSession: (finalRhythmData?: FrontendRhythmData, endTime?: Date, sessionDuration?: number) => Promise<void>;
+	stopSession: (
+		finalRhythmData?: FrontendRhythmData,
+		endTime?: Date,
+		sessionDuration?: number
+	) => Promise<void>;
 	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
 	error: string | null;
 }
@@ -99,14 +103,17 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 				hasSessionId: !!state.sessionId,
 				sessionId: state.sessionId,
 				isAuthenticated,
-				frontendRhythmData
+				frontendRhythmData,
 			});
 
 			if (!state.sessionId || !isAuthenticated) {
-				console.warn('[useSessionPersistence] Cannot update rhythm: no active session or not authenticated', {
-					sessionId: state.sessionId,
-					isAuthenticated
-				});
+				console.warn(
+					'[useSessionPersistence] Cannot update rhythm: no active session or not authenticated',
+					{
+						sessionId: state.sessionId,
+						isAuthenticated,
+					}
+				);
 				return;
 			}
 
@@ -116,17 +123,18 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 				const token = await getAccessTokenSilently();
 
 				// Transform frontend rhythm data to backend format
-				const rhythmType = frontendRhythmData.intensity === 'high' 
-					? 'energetic' 
-					: frontendRhythmData.intensity === 'medium' 
-					? 'steady' 
-					: 'thoughtful';
+				const rhythmType =
+					frontendRhythmData.intensity === 'high'
+						? 'energetic'
+						: frontendRhythmData.intensity === 'medium'
+							? 'steady'
+							: 'thoughtful';
 
 				const backendRhythmData = {
 					averageKeysPerMinute: frontendRhythmData.keysPerMinute,
 					rhythmType,
 					peakIntensity: frontendRhythmData.rhythmScore / 100, // Convert score to 0-1 range
-					samples: [] // We'll keep this empty for now, could add historical data later
+					samples: [], // We'll keep this empty for now, could add historical data later
 				};
 
 				const requestBody = {
@@ -137,7 +145,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 
 				console.log('[useSessionPersistence] Making PUT request:', {
 					url: `${API_BASE_URL}/api/sessions/${state.sessionId}`,
-					body: requestBody
+					body: requestBody,
 				});
 
 				abortControllerRef.current = new AbortController();
@@ -154,7 +162,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 
 				console.log('[useSessionPersistence] PUT response received:', {
 					status: response.status,
-					ok: response.ok
+					ok: response.ok,
 				});
 
 				if (!response.ok) {
@@ -165,7 +173,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 				console.log('[useSessionPersistence] Session rhythm updated successfully:', {
 					keysPerMinute: frontendRhythmData.keysPerMinute,
 					rhythmType,
-					keystrokeCount: frontendRhythmData.keystrokeCount
+					keystrokeCount: frontendRhythmData.keystrokeCount,
 				});
 			} catch (err) {
 				if (err instanceof Error && err.name === 'AbortError') {
@@ -183,84 +191,90 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	/**
 	 * Stop the current focus session
 	 */
-	const stopSession = useCallback(async (finalRhythmData?: FrontendRhythmData, endTime?: Date, sessionDuration?: number) => {
-		if (!state.sessionId || !isAuthenticated) {
-			console.warn('[useSessionPersistence] Cannot stop session: no active session or not authenticated');
-			return;
-		}
-
-		try {
-			setState((prev) => ({ ...prev, error: null }));
-			const token = await getAccessTokenSilently();
-
-			abortControllerRef.current = new AbortController();
-
-			const requestBody: any = {
-				state: 'completed',
-				// endTime can be provided by frontend for accuracy, otherwise set by backend
-			};
-
-			// Include endTime if provided
-			if (endTime) {
-				requestBody.endTime = endTime.toISOString();
-			}
-
-			// Include sessionDuration if provided (use frontend duration instead of calculating)
-			if (sessionDuration !== undefined) {
-				requestBody.totalDurationSeconds = sessionDuration;
-			}
-
-			// Include final rhythm data if provided (for average BPM)
-			if (finalRhythmData) {
-				const rhythmType = finalRhythmData.intensity === 'high' 
-					? 'energetic' 
-					: finalRhythmData.intensity === 'medium' 
-					? 'steady' 
-					: 'thoughtful';
-
-				requestBody.rhythmData = {
-					averageKeysPerMinute: finalRhythmData.keysPerMinute,
-					rhythmType,
-					peakIntensity: finalRhythmData.rhythmScore / 100, // Convert score to 0-1 range
-					samples: [] // We'll keep this empty for now, could add historical data later
-				};
-				requestBody.keystrokeCount = finalRhythmData.keystrokeCount;
-				requestBody.averageBpm = finalRhythmData.averageBpm; // Include average BPM
-			}
-
-			const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify(requestBody),
-				signal: abortControllerRef.current.signal,
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-				throw new Error(errorData.error || `HTTP ${response.status}`);
-			}
-
-			const data = await response.json();
-			console.log('[useSessionPersistence] Session stopped:', data.session._id);
-
-			setState({
-				sessionId: null,
-				startTime: null,
-				error: null,
-			});
-		} catch (err) {
-			if (err instanceof Error && err.name === 'AbortError') {
-				// Request was cancelled, ignore
+	const stopSession = useCallback(
+		async (finalRhythmData?: FrontendRhythmData, endTime?: Date, sessionDuration?: number) => {
+			if (!state.sessionId || !isAuthenticated) {
+				console.warn(
+					'[useSessionPersistence] Cannot stop session: no active session or not authenticated'
+				);
 				return;
 			}
-			const errorMessage = err instanceof Error ? err.message : 'Failed to stop session';
-			setState((prev) => ({ ...prev, error: errorMessage }));
-			console.error('[useSessionPersistence] Stop session error:', err);
-		}
-	}, [state.sessionId, isAuthenticated, getAccessTokenSilently]);
+
+			try {
+				setState((prev) => ({ ...prev, error: null }));
+				const token = await getAccessTokenSilently();
+
+				abortControllerRef.current = new AbortController();
+
+				const requestBody: any = {
+					state: 'completed',
+					// endTime can be provided by frontend for accuracy, otherwise set by backend
+				};
+
+				// Include endTime if provided
+				if (endTime) {
+					requestBody.endTime = endTime.toISOString();
+				}
+
+				// Include sessionDuration if provided (use frontend duration instead of calculating)
+				if (sessionDuration !== undefined) {
+					requestBody.totalDurationSeconds = sessionDuration;
+				}
+
+				// Include final rhythm data if provided (for average BPM)
+				if (finalRhythmData) {
+					const rhythmType =
+						finalRhythmData.intensity === 'high'
+							? 'energetic'
+							: finalRhythmData.intensity === 'medium'
+								? 'steady'
+								: 'thoughtful';
+
+					requestBody.rhythmData = {
+						averageKeysPerMinute: finalRhythmData.keysPerMinute,
+						rhythmType,
+						peakIntensity: finalRhythmData.rhythmScore / 100, // Convert score to 0-1 range
+						samples: [], // We'll keep this empty for now, could add historical data later
+					};
+					requestBody.keystrokeCount = finalRhythmData.keystrokeCount;
+					requestBody.averageBpm = finalRhythmData.averageBpm; // Include average BPM
+				}
+
+				const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify(requestBody),
+					signal: abortControllerRef.current.signal,
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+					throw new Error(errorData.error || `HTTP ${response.status}`);
+				}
+
+				const data = await response.json();
+				console.log('[useSessionPersistence] Session stopped:', data.session._id);
+
+				setState({
+					sessionId: null,
+					startTime: null,
+					error: null,
+				});
+			} catch (err) {
+				if (err instanceof Error && err.name === 'AbortError') {
+					// Request was cancelled, ignore
+					return;
+				}
+				const errorMessage = err instanceof Error ? err.message : 'Failed to stop session';
+				setState((prev) => ({ ...prev, error: errorMessage }));
+				console.error('[useSessionPersistence] Stop session error:', err);
+			}
+		},
+		[state.sessionId, isAuthenticated, getAccessTokenSilently]
+	);
 
 	// Cleanup: Stop session on unmount
 	useEffect(() => {

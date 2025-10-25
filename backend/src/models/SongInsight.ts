@@ -1,4 +1,4 @@
-import mongoose, { Schema, type Document } from 'mongoose';
+import mongoose, { type Document, Schema } from 'mongoose';
 import type { SongInsight } from '../types/index.js';
 
 /**
@@ -46,7 +46,7 @@ const songInsightSchema = new Schema<SongInsightDocument>(
 	{
 		timestamps: false,
 		collection: 'song_insights',
-	},
+	}
 );
 
 // Indexes
@@ -65,5 +65,5 @@ songInsightSchema.set('toJSON', {
 
 export const SongInsightModel = mongoose.model<SongInsightDocument>(
 	'SongInsight',
-	songInsightSchema,
+	songInsightSchema
 );

@@ -1,4 +1,4 @@
-import mongoose, { Schema, type Document } from 'mongoose';
+import mongoose, { type Document, Schema } from 'mongoose';
 import type { FocusSession } from '../types/index.js';
 
 /**
@@ -17,7 +17,7 @@ const rhythmSampleSchema = new Schema(
 		keysPerMinute: { type: Number, required: true, min: 0 },
 		intensity: { type: Number, required: true, min: 0, max: 1 },
 	},
-	{ _id: false },
+	{ _id: false }
 );
 
 const rhythmDataSchema = new Schema(
@@ -32,7 +32,7 @@ const rhythmDataSchema = new Schema(
 		peakIntensity: { type: Number, required: true, default: 0, min: 0, max: 1 },
 		samples: { type: [rhythmSampleSchema], default: [] },
 	},
-	{ _id: false },
+	{ _id: false }
 );
 
 /**
@@ -71,7 +71,7 @@ const focusSessionSchema = new Schema<FocusSessionDocument>(
 	{
 		timestamps: true,
 		collection: 'focus_sessions',
-	},
+	}
 );
 
 // Indexes for efficient queries
@@ -108,5 +108,5 @@ focusSessionSchema.pre('save', function (next) {
 
 export const FocusSessionModel = mongoose.model<FocusSessionDocument>(
 	'FocusSession',
-	focusSessionSchema,
+	focusSessionSchema
 );
