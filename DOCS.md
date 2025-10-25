@@ -60,6 +60,16 @@ Database setup and configuration guides:
 
 ---
 
+## ▲ Vercel Deployment
+
+Complete serverless deployment guides for Vercel:
+
+- **[Vercel Deployment Guide](docs/vercel/VERCEL_DEPLOYMENT.md)** - Complete Vercel serverless deployment
+- **[Vercel Quick Reference](docs/vercel/VERCEL_QUICK_REFERENCE.md)** - Quick Vercel commands and setup
+- **[Vercel vs Others](docs/vercel/VERCEL_VS_OTHERS.md)** - Compare Vercel with other deployment methods
+
+---
+
 ## 📦 Historical Documentation
 
 Archived documentation from earlier development phases:
@@ -124,6 +134,11 @@ pulseplay/
     ├── mongodb/                 # MongoDB Atlas docs
     │   ├── MONGODB_ATLAS_SETUP.md
     │   └── MONGODB_ATLAS_QUICK_START.md
+    │
+    ├── vercel/                  # Vercel deployment docs
+    │   ├── VERCEL_DEPLOYMENT.md
+    │   ├── VERCEL_QUICK_REFERENCE.md
+    │   └── VERCEL_VS_OTHERS.md
     │
     └── archive/                 # Historical documentation
         └── README.md

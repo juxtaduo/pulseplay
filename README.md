@@ -141,6 +141,12 @@ Visit `http://localhost:5173` (manual) or `http://localhost:3000` (Docker) in yo
 - **[Background Audio Guide](docs/developer/BACKGROUND_AUDIO.md)** - How audio works when tab is inactive
 - **[Contributing](docs/public/CONTRIBUTING.md)** - How to contribute to the project
 
+### Vercel Deployment
+
+- **[Vercel Deployment Guide](docs/vercel/VERCEL_DEPLOYMENT.md)** - Complete Vercel serverless deployment
+- **[Vercel Quick Reference](docs/vercel/VERCEL_QUICK_REFERENCE.md)** - Quick Vercel commands and setup
+- **[Vercel vs Others](docs/vercel/VERCEL_VS_OTHERS.md)** - Compare Vercel with other deployment methods
+
 ### Docker Deployment
 
 - **[Docker README](docs/docker/DOCKER_README.md)** - Complete Docker deployment guide
@@ -306,6 +312,7 @@ pulseplay/
 │   ├── developer/        # Developer technical docs
 │   ├── docker/           # Docker deployment guides
 │   ├── mongodb/          # MongoDB Atlas setup guides
+│   ├── vercel/           # Vercel deployment guides
 │   └── archive/          # Historical documentation
 ├── specs/                # Project specifications
 ├── scripts/              # Utility scripts
@@ -362,7 +369,48 @@ npm run typecheck
 
 ## 🚀 Deployment
 
-### Docker Deployment (Recommended)
+### Vercel Deployment (Recommended for Serverless)
+
+PulsePlay can be deployed as a full-stack serverless application using Vercel with MongoDB Atlas.
+
+#### Quick Start
+
+```bash
+# Clone and setup
+git clone https://github.com/juxtaduo/pulseplay.git
+cd pulseplay
+
+# Install Vercel CLI
+npm i -g vercel
+vercel login
+
+# Deploy
+vercel --prod
+```
+
+#### Environment Setup
+
+Configure environment variables in Vercel dashboard or CLI:
+- MongoDB Atlas connection string
+- Auth0 credentials
+- Google Gemini API key
+
+#### Available Commands
+
+```bash
+# Development
+vercel --dev          # Local development server
+vercel env add        # Add environment variables
+
+# Production
+vercel --prod         # Deploy to production
+vercel logs           # View function logs
+vercel analytics      # View analytics
+```
+
+See the [Vercel Deployment Guide](docs/vercel/VERCEL_DEPLOYMENT.md) for complete setup instructions.
+
+### Docker Deployment
 
 PulsePlay is fully containerized and ready for production deployment with Docker.
 
@@ -427,7 +475,7 @@ See the [Docker README](docs/docker/DOCKER_README.md) for complete deployment in
 
 ### Traditional Deployment
 
-#### Vercel (Frontend Only)
+#### Vercel (Frontend Only - Alternative)
 
 ```bash
 npm install -g vercel
@@ -435,7 +483,7 @@ vercel login
 vercel --prod
 ```
 
-#### Netlify (Frontend Only)
+#### Netlify (Frontend Only - Alternative)
 
 ```bash
 npm install -g netlify-cli
@@ -443,7 +491,7 @@ netlify login
 netlify deploy --prod
 ```
 
-**Note:** Traditional hosting requires separate backend deployment. Docker deployment is recommended for full-stack deployment.
+**Note:** Traditional hosting requires separate backend deployment. Vercel serverless or Docker deployment is recommended for full-stack deployment.
 
 ---
 
