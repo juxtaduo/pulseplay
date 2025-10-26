@@ -149,7 +149,7 @@ export const ControlPanel = ({
 							aria-label="Stop and complete session"
 							title={isCompleted ? 'Session completed' : 'Stop session and get AI insights'}
 						>
-							<Square size={20} />
+							<Square size={24} />
 						</button>
 					)}
 					{/* Reset button - rightmost */}

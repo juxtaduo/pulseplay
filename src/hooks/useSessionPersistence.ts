@@ -447,7 +447,9 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 
 		const syncDuration = () => {
 			const now = new Date();
-			const durationSeconds = Math.round((now.getTime() - (state.startTime?.getTime() || 0)) / 1000);
+			const durationSeconds = Math.round(
+				(now.getTime() - (state.startTime?.getTime() || 0)) / 1000
+			);
 
 			console.log('[useSessionPersistence] Syncing session duration:', {
 				sessionId: state.sessionId,
