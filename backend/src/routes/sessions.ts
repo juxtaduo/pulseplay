@@ -203,53 +203,6 @@ router.get('/export', checkJwt, async (req: Request, res: Response) => {
 		// Get all sessions for user
 		const allSessions = await getSessionsByUser(userIdHash);
 
-		// Clean up old active sessions (auto-complete sessions that have been active too long)
-		const now = new Date();
-		const SESSION_TIMEOUT_MINUTES = 30; // 30 minutes
-		const timeoutMs = SESSION_TIMEOUT_MINUTES * 60 * 1000;
-
-		let cleanedUpCount = 0;
-		for (const session of allSessions) {
-			if (session.state === 'active') {
-				const sessionAgeMs = now.getTime() - session.startTime.getTime();
-				if (sessionAgeMs > timeoutMs) {
-					// Session has been active too long, mark as completed
-					try {
-						const durationSeconds = Math.round(sessionAgeMs / 1000);
-						await updateSession(session._id.toString(), {
-							state: 'completed',
-							totalDurationSeconds: durationSeconds,
-							endTime: now,
-						});
-						session.state = 'completed';
-						session.totalDurationSeconds = durationSeconds;
-						session.endTime = now;
-						cleanedUpCount++;
-						logger.info(
-							{
-								sessionId: session._id.toString(),
-								sessionAgeMinutes: Math.round(sessionAgeMs / (60 * 1000)),
-								durationSeconds,
-							},
-							'auto_completed_abandoned_session'
-						);
-					} catch (cleanupError) {
-						logger.error(
-							{
-								sessionId: session._id.toString(),
-								error: cleanupError instanceof Error ? cleanupError.message : String(cleanupError),
-							},
-							'failed_to_auto_complete_session'
-						);
-					}
-				}
-			}
-		}
-
-		if (cleanedUpCount > 0) {
-			logger.info({ userIdHash, cleanedUpCount }, 'auto_completed_abandoned_sessions');
-		}
-
 		// Filter by sessionIds if provided
 		let sessionsToExport = allSessions;
 		const sessionIdsParam = req.query.sessionIds as string;

@@ -16,6 +16,7 @@ interface SessionState {
 	sessionId: string | null;
 	startTime: Date | null;
 	error: string | null;
+	accessToken: string | null;
 }
 
 export interface UseSessionPersistenceReturn {
@@ -40,6 +41,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 		sessionId: null,
 		startTime: null,
 		error: null,
+		accessToken: null,
 	});
 	const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -81,6 +83,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 					sessionId,
 					startTime: new Date(data.session.startTime),
 					error: null,
+					accessToken: token,
 				});
 				console.log('[useSessionPersistence] Session started:', sessionId);
 				return sessionId;
@@ -345,6 +348,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 					sessionId: null,
 					startTime: null,
 					error: null,
+					accessToken: null,
 				});
 			} catch (err) {
 				if (err instanceof Error && err.name === 'AbortError') {
@@ -361,20 +365,74 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 
 	// Cleanup: Stop session on unmount
 	useEffect(() => {
+		const handleBeforeUnload = () => {
+			// When page is about to unload, if there's an active session, mark it as completed
+			if (state.sessionId && isAuthenticated && state.accessToken) {
+				console.log(
+					'[useSessionPersistence] Page unloading with active session, marking as completed:',
+					state.sessionId
+				);
+
+				// Use sendBeacon for reliable delivery during page unload
+				const data = JSON.stringify({ state: 'completed' });
+				const url = `${API_BASE_URL}/api/sessions/${state.sessionId}`;
+
+				// Try sendBeacon first (most reliable for page unload)
+				if (navigator.sendBeacon) {
+					const result = navigator.sendBeacon(url, data);
+					if (result) {
+						console.log('[useSessionPersistence] sendBeacon succeeded');
+					} else {
+						console.warn('[useSessionPersistence] sendBeacon failed, falling back to fetch');
+						// Fallback to synchronous XMLHttpRequest
+						try {
+							const xhr = new XMLHttpRequest();
+							xhr.open('PUT', url, false); // Synchronous
+							xhr.setRequestHeader('Content-Type', 'application/json');
+							xhr.setRequestHeader('Authorization', `Bearer ${state.accessToken}`);
+							xhr.send(data);
+							console.log('[useSessionPersistence] Synchronous XHR completed');
+						} catch (error) {
+							console.error('[useSessionPersistence] Both sendBeacon and XHR failed:', error);
+						}
+					}
+				} else {
+					// Fallback to synchronous XMLHttpRequest
+					try {
+						const xhr = new XMLHttpRequest();
+						xhr.open('PUT', url, false); // Synchronous
+						xhr.setRequestHeader('Content-Type', 'application/json');
+						xhr.setRequestHeader('Authorization', `Bearer ${state.accessToken}`);
+						xhr.send(data);
+						console.log('[useSessionPersistence] Synchronous XHR completed');
+					} catch (error) {
+						console.error('[useSessionPersistence] Synchronous XHR failed:', error);
+					}
+				}
+			}
+		};
+
+		// Listen for page unload events
+		window.addEventListener('beforeunload', handleBeforeUnload);
+		window.addEventListener('unload', handleBeforeUnload);
+
 		return () => {
-			// When component unmounts, if there's an active session, mark it as completed
+			// Cleanup event listeners
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+			window.removeEventListener('unload', handleBeforeUnload);
+
+			// Also try the async cleanup as backup (for non-page-unload scenarios)
 			if (state.sessionId && isAuthenticated) {
 				console.log(
 					'[useSessionPersistence] Component unmounting with active session, marking as completed:',
 					state.sessionId
 				);
-				// Note: We can't use async/await in cleanup function, so we fire and forget
 				updateSessionState('completed').catch((error) => {
 					console.warn('[useSessionPersistence] Failed to complete session on unmount:', error);
 				});
 			}
 		};
-	}, [state.sessionId, isAuthenticated, updateSessionState]);
+	}, [state.sessionId, isAuthenticated, state.accessToken, updateSessionState]);
 
 	return {
 		sessionId: state.sessionId,
