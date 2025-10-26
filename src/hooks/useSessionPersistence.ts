@@ -365,61 +365,76 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 
 	// Cleanup: Stop session on unmount
 	useEffect(() => {
-		const handleBeforeUnload = () => {
-			// When page is about to unload, if there's an active session, mark it as completed
+		let cleanupController: AbortController | null = null;
+
+		const performCleanup = async () => {
 			if (state.sessionId && isAuthenticated && state.accessToken) {
 				console.log(
-					'[useSessionPersistence] Page unloading with active session, marking as completed:',
+					'[useSessionPersistence] Performing session cleanup for active session:',
 					state.sessionId
 				);
 
-				// Use sendBeacon for reliable delivery during page unload
-				const data = JSON.stringify({ state: 'completed' });
-				const url = `${API_BASE_URL}/api/sessions/${state.sessionId}`;
+				try {
+					// Use fetch with keepalive for reliable delivery during page unload
+					const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${state.accessToken}`,
+						},
+						body: JSON.stringify({ state: 'completed' }),
+						keepalive: true, // This ensures the request completes even if page unloads
+					});
 
-				// Try sendBeacon first (most reliable for page unload)
-				if (navigator.sendBeacon) {
-					const result = navigator.sendBeacon(url, data);
-					if (result) {
-						console.log('[useSessionPersistence] sendBeacon succeeded');
+					if (response.ok) {
+						console.log('[useSessionPersistence] Session cleanup succeeded');
 					} else {
-						console.warn('[useSessionPersistence] sendBeacon failed, falling back to fetch');
-						// Fallback to synchronous XMLHttpRequest
-						try {
-							const xhr = new XMLHttpRequest();
-							xhr.open('PUT', url, false); // Synchronous
-							xhr.setRequestHeader('Content-Type', 'application/json');
-							xhr.setRequestHeader('Authorization', `Bearer ${state.accessToken}`);
-							xhr.send(data);
-							console.log('[useSessionPersistence] Synchronous XHR completed');
-						} catch (error) {
-							console.error('[useSessionPersistence] Both sendBeacon and XHR failed:', error);
-						}
+						console.warn('[useSessionPersistence] Session cleanup failed:', response.status);
 					}
-				} else {
-					// Fallback to synchronous XMLHttpRequest
-					try {
-						const xhr = new XMLHttpRequest();
-						xhr.open('PUT', url, false); // Synchronous
-						xhr.setRequestHeader('Content-Type', 'application/json');
-						xhr.setRequestHeader('Authorization', `Bearer ${state.accessToken}`);
-						xhr.send(data);
-						console.log('[useSessionPersistence] Synchronous XHR completed');
-					} catch (error) {
-						console.error('[useSessionPersistence] Synchronous XHR failed:', error);
-					}
+				} catch (error) {
+					console.error('[useSessionPersistence] Session cleanup error:', error);
 				}
+			}
+		};
+
+		const handleBeforeUnload = () => {
+			// Cancel any ongoing cleanup
+			if (cleanupController) {
+				cleanupController.abort();
+			}
+
+			// Start cleanup process
+			cleanupController = new AbortController();
+			performCleanup().catch((error) => {
+				console.error('[useSessionPersistence] Cleanup failed in beforeunload:', error);
+			});
+
+			// Note: We don't prevent the unload, we just ensure cleanup happens
+		};
+
+		const handleVisibilityChange = () => {
+			// When page becomes hidden (user switches tabs, minimizes, etc.)
+			if (document.visibilityState === 'hidden') {
+				console.log('[useSessionPersistence] Page hidden, starting cleanup');
+				performCleanup().catch((error) => {
+					console.error('[useSessionPersistence] Cleanup failed on visibility change:', error);
+				});
 			}
 		};
 
 		// Listen for page unload events
 		window.addEventListener('beforeunload', handleBeforeUnload);
-		window.addEventListener('unload', handleBeforeUnload);
+		document.addEventListener('visibilitychange', handleVisibilityChange);
 
 		return () => {
 			// Cleanup event listeners
 			window.removeEventListener('beforeunload', handleBeforeUnload);
-			window.removeEventListener('unload', handleBeforeUnload);
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+			// Cancel any ongoing cleanup
+			if (cleanupController) {
+				cleanupController.abort();
+			}
 
 			// Also try the async cleanup as backup (for non-page-unload scenarios)
 			if (state.sessionId && isAuthenticated) {
