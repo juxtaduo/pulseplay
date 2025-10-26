@@ -27,6 +27,7 @@ export interface UseSessionPersistenceReturn {
 		sessionDuration?: number
 	) => Promise<void>;
 	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
+	updateSessionState: (newState: 'active' | 'paused' | 'completed', durationSeconds?: number) => Promise<void>;
 	error: string | null;
 }
 
@@ -189,6 +190,73 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	);
 
 	/**
+	 * Update session state (active, paused, completed)
+	 */
+	const updateSessionState = useCallback(
+		async (newState: 'active' | 'paused' | 'completed', durationSeconds?: number) => {
+			if (!state.sessionId || !isAuthenticated) {
+				console.warn(
+					'[useSessionPersistence] Cannot update session state: no active session or not authenticated',
+					{
+						sessionId: state.sessionId,
+						isAuthenticated,
+					}
+				);
+				return;
+			}
+
+			try {
+				setState((prev) => ({ ...prev, error: null }));
+				const token = await getAccessTokenSilently();
+
+				abortControllerRef.current = new AbortController();
+
+				const requestBody: {
+					state: string;
+					totalDurationSeconds?: number;
+				} = {
+					state: newState,
+				};
+
+				// Include duration if provided
+				if (durationSeconds !== undefined) {
+					requestBody.totalDurationSeconds = durationSeconds;
+				}
+
+				const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify(requestBody),
+					signal: abortControllerRef.current.signal,
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+					throw new Error(errorData.error || `HTTP ${response.status}`);
+				}
+
+				console.log('[useSessionPersistence] Session state updated:', {
+					sessionId: state.sessionId,
+					newState,
+					durationSeconds,
+				});
+			} catch (err) {
+				if (err instanceof Error && err.name === 'AbortError') {
+					// Request was cancelled, ignore
+					return;
+				}
+				const errorMessage = err instanceof Error ? err.message : 'Failed to update session state';
+				setState((prev) => ({ ...prev, error: errorMessage }));
+				console.error('[useSessionPersistence] Update session state error:', err);
+			}
+		},
+		[state.sessionId, isAuthenticated, getAccessTokenSilently]
+	);
+
+	/**
 	 * Stop the current focus session
 	 */
 	const stopSession = useCallback(
@@ -291,17 +359,23 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	// Cleanup: Stop session on unmount
 	useEffect(() => {
 		return () => {
-			if (abortControllerRef.current) {
-				abortControllerRef.current.abort();
+			// When component unmounts, if there's an active session, mark it as completed
+			if (state.sessionId && isAuthenticated) {
+				console.log('[useSessionPersistence] Component unmounting with active session, marking as completed:', state.sessionId);
+				// Note: We can't use async/await in cleanup function, so we fire and forget
+				updateSessionState('completed').catch((error) => {
+					console.warn('[useSessionPersistence] Failed to complete session on unmount:', error);
+				});
 			}
 		};
-	}, []);
+	}, [state.sessionId, isAuthenticated, updateSessionState]);
 
 	return {
 		sessionId: state.sessionId,
 		startSession,
 		stopSession,
 		updateSessionRhythm,
+		updateSessionState,
 		error: state.error,
 	};
 }

@@ -48,7 +48,7 @@ export function Home() {
 	});
 
 	// Session persistence hook (backend API integration)
-	const { sessionId, startSession, stopSession, updateSessionRhythm } = useSessionPersistence();
+	const { sessionId, startSession, stopSession, updateSessionRhythm, updateSessionState } = useSessionPersistence();
 
 	// Ref to access current rhythm data in interval callbacks
 	const rhythmDataRef = useRef(rhythmData);
@@ -197,35 +197,86 @@ export function Home() {
 			// Pause the session - mute audio but keep oscillators/intervals running
 			setIsPaused(true);
 			pauseAudio();
+
+			// Update backend session state to paused and save current duration
+			if (isAuthenticated && sessionId) {
+				try {
+					await updateSessionState('paused', sessionDuration);
+				} catch (pauseError) {
+					console.warn(
+						'[Home] Failed to update backend session state to paused, but continuing with UI pause:',
+						pauseError
+					);
+				}
+			}
 		} else if (currentMood) {
 			// Resume the session - unmute audio without restarting sequences
 			setIsPaused(false);
 			resumeAudio();
+
+			// Update backend session state to active
+			if (isAuthenticated && sessionId) {
+				try {
+					await updateSessionState('active');
+				} catch (resumeError) {
+					console.warn(
+						'[Home] Failed to update backend session state to active, but continuing with UI resume:',
+						resumeError
+					);
+				}
+			}
 		}
 	};
 
 	// Handle resetting the session
-	const handleReset = () => {
-		// Reset all session stats to 0
-		setSessionDuration(0);
-		resetRhythm();
+	const handleReset = async () => {
+		try {
+			// If there's an active session, stop it properly in the backend
+			if (isAuthenticated && sessionId && (isPlaying || isPaused)) {
+				try {
+					await stopSession(rhythmData, new Date(), sessionDuration);
+				} catch (stopError) {
+					console.warn(
+						'[Home] Failed to stop backend session during reset, but continuing with UI reset:',
+						stopError
+					);
+				}
+			}
 
-		// Reset song and instrument selections
-		setSelectedInstruments([]);
-		setEnableInstrumentalSounds(false);
+			// Reset all session stats to 0
+			setSessionDuration(0);
+			resetRhythm();
 
-		// Clear current mood when resetting
-		stopAudio(true); // This will clear the mood
+			// Reset song and instrument selections
+			setSelectedInstruments([]);
+			setEnableInstrumentalSounds(false);
 
-		// Reset paused state
-		setIsPaused(false);
+			// Clear current mood when resetting
+			stopAudio(true); // This will clear the mood
 
-		// Clear completed session data to allow fresh start
-		setCompletedSessionDuration(null);
-		setCompletedSessionId(null);
-		setCompletedRhythmData(null); // Clear completed rhythm data
-		// Reset session stopped state
-		setIsSessionStopped(false);
+			// Reset paused state
+			setIsPaused(false);
+
+			// Clear completed session data to allow fresh start
+			setCompletedSessionDuration(null);
+			setCompletedSessionId(null);
+			setCompletedRhythmData(null); // Clear completed rhythm data
+			// Reset session stopped state
+			setIsSessionStopped(false);
+		} catch (err) {
+			console.error('[Home] Failed to reset session:', err);
+			// Even if reset fails, try to reset local state as fallback
+			setSessionDuration(0);
+			resetRhythm();
+			setSelectedInstruments([]);
+			setEnableInstrumentalSounds(false);
+			stopAudio(true);
+			setIsPaused(false);
+			setCompletedSessionDuration(null);
+			setCompletedSessionId(null);
+			setCompletedRhythmData(null);
+			setIsSessionStopped(false);
+		}
 	};
 
 	// Handle instrument selection toggle (Phase 6: T091)
