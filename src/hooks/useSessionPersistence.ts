@@ -16,6 +16,7 @@ interface SessionState {
 	sessionId: string | null;
 	startTime: Date | null;
 	error: string | null;
+	accessToken: string | null;
 }
 
 export interface UseSessionPersistenceReturn {
@@ -27,6 +28,10 @@ export interface UseSessionPersistenceReturn {
 		sessionDuration?: number
 	) => Promise<void>;
 	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
+	updateSessionState: (
+		newState: 'active' | 'paused' | 'completed',
+		durationSeconds?: number
+	) => Promise<void>;
 	error: string | null;
 }
 
@@ -36,6 +41,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 		sessionId: null,
 		startTime: null,
 		error: null,
+		accessToken: null,
 	});
 	const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -77,6 +83,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 					sessionId,
 					startTime: new Date(data.session.startTime),
 					error: null,
+					accessToken: token,
 				});
 				console.log('[useSessionPersistence] Session started:', sessionId);
 				return sessionId;
@@ -189,6 +196,73 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 	);
 
 	/**
+	 * Update session state (active, paused, completed)
+	 */
+	const updateSessionState = useCallback(
+		async (newState: 'active' | 'paused' | 'completed', durationSeconds?: number) => {
+			if (!state.sessionId || !isAuthenticated) {
+				console.warn(
+					'[useSessionPersistence] Cannot update session state: no active session or not authenticated',
+					{
+						sessionId: state.sessionId,
+						isAuthenticated,
+					}
+				);
+				return;
+			}
+
+			try {
+				setState((prev) => ({ ...prev, error: null }));
+				const token = await getAccessTokenSilently();
+
+				abortControllerRef.current = new AbortController();
+
+				const requestBody: {
+					state: string;
+					totalDurationSeconds?: number;
+				} = {
+					state: newState,
+				};
+
+				// Include duration if provided
+				if (durationSeconds !== undefined) {
+					requestBody.totalDurationSeconds = durationSeconds;
+				}
+
+				const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify(requestBody),
+					signal: abortControllerRef.current.signal,
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+					throw new Error(errorData.error || `HTTP ${response.status}`);
+				}
+
+				console.log('[useSessionPersistence] Session state updated:', {
+					sessionId: state.sessionId,
+					newState,
+					durationSeconds,
+				});
+			} catch (err) {
+				if (err instanceof Error && err.name === 'AbortError') {
+					// Request was cancelled, ignore
+					return;
+				}
+				const errorMessage = err instanceof Error ? err.message : 'Failed to update session state';
+				setState((prev) => ({ ...prev, error: errorMessage }));
+				console.error('[useSessionPersistence] Update session state error:', err);
+			}
+		},
+		[state.sessionId, isAuthenticated, getAccessTokenSilently]
+	);
+
+	/**
 	 * Stop the current focus session
 	 */
 	const stopSession = useCallback(
@@ -274,6 +348,7 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 					sessionId: null,
 					startTime: null,
 					error: null,
+					accessToken: null,
 				});
 			} catch (err) {
 				if (err instanceof Error && err.name === 'AbortError') {
@@ -290,18 +365,120 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 
 	// Cleanup: Stop session on unmount
 	useEffect(() => {
-		return () => {
-			if (abortControllerRef.current) {
-				abortControllerRef.current.abort();
+		let cleanupController: AbortController | null = null;
+
+		const performCleanup = async () => {
+			if (state.sessionId && isAuthenticated && state.accessToken) {
+				console.log(
+					'[useSessionPersistence] Performing session cleanup for active session:',
+					state.sessionId
+				);
+
+				try {
+					// Use fetch with keepalive for reliable delivery during page unload
+					const response = await fetch(`${API_BASE_URL}/api/sessions/${state.sessionId}`, {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${state.accessToken}`,
+						},
+						body: JSON.stringify({ state: 'completed' }),
+						keepalive: true, // This ensures the request completes even if page unloads
+					});
+
+					if (response.ok) {
+						console.log('[useSessionPersistence] Session cleanup succeeded');
+					} else {
+						console.warn('[useSessionPersistence] Session cleanup failed:', response.status);
+					}
+				} catch (error) {
+					console.error('[useSessionPersistence] Session cleanup error:', error);
+				}
 			}
 		};
-	}, []);
+
+		const handleBeforeUnload = () => {
+			// Cancel any ongoing cleanup
+			if (cleanupController) {
+				cleanupController.abort();
+			}
+
+			// Start cleanup process
+			cleanupController = new AbortController();
+			performCleanup().catch((error) => {
+				console.error('[useSessionPersistence] Cleanup failed in beforeunload:', error);
+			});
+
+			// Note: We don't prevent the unload, we just ensure cleanup happens
+		};
+
+		// Listen for page unload events
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			// Cleanup event listeners
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+
+			// Cancel any ongoing cleanup
+			if (cleanupController) {
+				cleanupController.abort();
+			}
+
+			// Also try the async cleanup as backup (for non-page-unload scenarios)
+			if (state.sessionId && isAuthenticated) {
+				console.log(
+					'[useSessionPersistence] Component unmounting with active session, marking as completed:',
+					state.sessionId
+				);
+				updateSessionState('completed').catch((error) => {
+					console.warn('[useSessionPersistence] Failed to complete session on unmount:', error);
+				});
+			}
+		};
+	}, [state.sessionId, isAuthenticated, state.accessToken, updateSessionState]);
+
+	// Periodic duration sync: Update session duration every 30 seconds during active sessions
+	useEffect(() => {
+		if (!state.sessionId || !isAuthenticated || !state.startTime) {
+			return; // No active session to sync
+		}
+
+		const DURATION_SYNC_INTERVAL = 30000; // 30 seconds
+
+		const syncDuration = () => {
+			const now = new Date();
+			const durationSeconds = Math.round(
+				(now.getTime() - (state.startTime?.getTime() || 0)) / 1000
+			);
+
+			console.log('[useSessionPersistence] Syncing session duration:', {
+				sessionId: state.sessionId,
+				durationSeconds,
+				lastSync: new Date().toISOString(),
+			});
+
+			// Update duration in backend (state remains 'active')
+			updateSessionState('active', durationSeconds).catch((error) => {
+				console.warn('[useSessionPersistence] Failed to sync duration:', error);
+				// Don't set error state for periodic sync failures to avoid UI disruption
+			});
+		};
+
+		// Sync immediately, then set up interval
+		syncDuration();
+		const intervalId = setInterval(syncDuration, DURATION_SYNC_INTERVAL);
+
+		return () => {
+			clearInterval(intervalId);
+		};
+	}, [state.sessionId, isAuthenticated, state.startTime, updateSessionState]);
 
 	return {
 		sessionId: state.sessionId,
 		startSession,
 		stopSession,
 		updateSessionRhythm,
+		updateSessionState,
 		error: state.error,
 	};
 }

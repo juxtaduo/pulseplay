@@ -116,10 +116,10 @@ router.get('/history', checkJwt, async (req: Request, res: Response) => {
 		}
 
 		// Get sessions with pagination
-		const sessions = await getSessionsByUser(userIdHash);
+		const allSessions = await getSessionsByUser(userIdHash);
 
 		// Filter by song if specified
-		const filteredSessions = song ? sessions.filter((s) => s.song === song) : sessions;
+		const filteredSessions = song ? allSessions.filter((s) => s.song === song) : allSessions;
 
 		// Sort sessions
 		const sortedSessions = [...filteredSessions].sort((a, b) => {
