@@ -48,7 +48,8 @@ export function Home() {
 	});
 
 	// Session persistence hook (backend API integration)
-	const { sessionId, startSession, stopSession, updateSessionRhythm, updateSessionState } = useSessionPersistence();
+	const { sessionId, startSession, stopSession, updateSessionRhythm, updateSessionState } =
+		useSessionPersistence();
 
 	// Ref to access current rhythm data in interval callbacks
 	const rhythmDataRef = useRef(rhythmData);

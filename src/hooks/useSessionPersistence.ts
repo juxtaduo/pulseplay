@@ -27,7 +27,10 @@ export interface UseSessionPersistenceReturn {
 		sessionDuration?: number
 	) => Promise<void>;
 	updateSessionRhythm: (rhythmData: FrontendRhythmData) => Promise<void>;
-	updateSessionState: (newState: 'active' | 'paused' | 'completed', durationSeconds?: number) => Promise<void>;
+	updateSessionState: (
+		newState: 'active' | 'paused' | 'completed',
+		durationSeconds?: number
+	) => Promise<void>;
 	error: string | null;
 }
 
@@ -361,7 +364,10 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 		return () => {
 			// When component unmounts, if there's an active session, mark it as completed
 			if (state.sessionId && isAuthenticated) {
-				console.log('[useSessionPersistence] Component unmounting with active session, marking as completed:', state.sessionId);
+				console.log(
+					'[useSessionPersistence] Component unmounting with active session, marking as completed:',
+					state.sessionId
+				);
 				// Note: We can't use async/await in cleanup function, so we fire and forget
 				updateSessionState('completed').catch((error) => {
 					console.warn('[useSessionPersistence] Failed to complete session on unmount:', error);
