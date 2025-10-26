@@ -412,24 +412,12 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 			// Note: We don't prevent the unload, we just ensure cleanup happens
 		};
 
-		const handleVisibilityChange = () => {
-			// When page becomes hidden (user switches tabs, minimizes, etc.)
-			if (document.visibilityState === 'hidden') {
-				console.log('[useSessionPersistence] Page hidden, starting cleanup');
-				performCleanup().catch((error) => {
-					console.error('[useSessionPersistence] Cleanup failed on visibility change:', error);
-				});
-			}
-		};
-
 		// Listen for page unload events
 		window.addEventListener('beforeunload', handleBeforeUnload);
-		document.addEventListener('visibilitychange', handleVisibilityChange);
 
 		return () => {
 			// Cleanup event listeners
 			window.removeEventListener('beforeunload', handleBeforeUnload);
-			document.removeEventListener('visibilitychange', handleVisibilityChange);
 
 			// Cancel any ongoing cleanup
 			if (cleanupController) {
@@ -448,6 +436,40 @@ export function useSessionPersistence(): UseSessionPersistenceReturn {
 			}
 		};
 	}, [state.sessionId, isAuthenticated, state.accessToken, updateSessionState]);
+
+	// Periodic duration sync: Update session duration every 30 seconds during active sessions
+	useEffect(() => {
+		if (!state.sessionId || !isAuthenticated || !state.startTime) {
+			return; // No active session to sync
+		}
+
+		const DURATION_SYNC_INTERVAL = 30000; // 30 seconds
+
+		const syncDuration = () => {
+			const now = new Date();
+			const durationSeconds = Math.round((now.getTime() - (state.startTime?.getTime() || 0)) / 1000);
+
+			console.log('[useSessionPersistence] Syncing session duration:', {
+				sessionId: state.sessionId,
+				durationSeconds,
+				lastSync: new Date().toISOString(),
+			});
+
+			// Update duration in backend (state remains 'active')
+			updateSessionState('active', durationSeconds).catch((error) => {
+				console.warn('[useSessionPersistence] Failed to sync duration:', error);
+				// Don't set error state for periodic sync failures to avoid UI disruption
+			});
+		};
+
+		// Sync immediately, then set up interval
+		syncDuration();
+		const intervalId = setInterval(syncDuration, DURATION_SYNC_INTERVAL);
+
+		return () => {
+			clearInterval(intervalId);
+		};
+	}, [state.sessionId, isAuthenticated, state.startTime, updateSessionState]);
 
 	return {
 		sessionId: state.sessionId,
